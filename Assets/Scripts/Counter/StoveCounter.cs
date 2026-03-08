@@ -61,10 +61,13 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
                     if (_fryingTimer > _fryingRecipeSO.fryingTimerMax)
                     {
                         GetKitchenObject().DestroySelf();
-                        KitchenObject.SpawnKitchenObject(_fryingRecipeSO.output, this);
+                        //KitchenObject.SpawnKitchenObject(_fryingRecipeSO.output, this);
+                        var go = Instantiate(_fryingRecipeSO.output.prefab);
+                        go.Init(_fryingRecipeSO.output);
+                        go.SetKitchenObjectParent(this);
                         _state = State.Fried;
                         _burningTimer = 0;
-                        _burningRecipeSO = GetBurningRecipeSOForInput(GetKitchenObject().GetKitchenObjectSO);
+                        _burningRecipeSO = GetBurningRecipeSOForInput(GetKitchenObject().GetDataObjectSo);
                     }
                     break;
                 case State.Fried:
@@ -78,7 +81,10 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
                     if (_burningTimer > _burningRecipeSO.burningTimerMax)
                     {
                         GetKitchenObject().DestroySelf();
-                        KitchenObject.SpawnKitchenObject(_burningRecipeSO.output, this);
+                        //KitchenObject.SpawnKitchenObject(_burningRecipeSO.output, this);
+                        var go = Instantiate(_burningRecipeSO.output.prefab);
+                        go.Init(_burningRecipeSO.output);
+                        go.SetKitchenObjectParent(this);
                         _state = State.Burned;
                         
                         OnProgressBarChanged?.Invoke(this, new IHasProgress.OnProgressBarChangedEventArgs()
@@ -126,7 +132,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
             {
                 if (player.GetKitchenObject() is PlateKitchenObject plateKitchenObject)
                 {
-                    if(plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO))
+                    if(plateKitchenObject.TryAddIngredient(GetKitchenObject().GetDataObjectSo))
                     {
                         GetKitchenObject().DestroySelf();
                         _state = State.Idle;
@@ -143,7 +149,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
         {
             if (player.HasKitchenObject())
             {
-                var fryingRecipeSO = GetPryingRecipeSOForInput(player.GetKitchenObject().GetKitchenObjectSO);
+                var fryingRecipeSO = GetPryingRecipeSOForInput(player.GetKitchenObject().GetDataObjectSo);
                 if(fryingRecipeSO)
                 {
                     SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);

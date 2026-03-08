@@ -17,14 +17,14 @@ public class ClearCounter : BaseCounter, IKitchenObjectParent
             {
                 if (player.GetKitchenObject() is PlateKitchenObject plateKitchenObject)
                 {
-                    if(plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO))
+                    if(plateKitchenObject.TryAddIngredient(GetKitchenObject().GetDataObjectSo))
                     {
                         GetKitchenObject().DestroySelf();
                     }
                 }
                 else if(GetKitchenObject() is PlateKitchenObject plateKitchenObject1)
                 {
-                    if(plateKitchenObject1.TryAddIngredient(player.GetKitchenObject().GetKitchenObjectSO))
+                    if(plateKitchenObject1.TryAddIngredient(player.GetKitchenObject().GetDataObjectSo))
                     {
                         player.GetKitchenObject().DestroySelf();
                         SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);

@@ -253,8 +253,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.5, y: 1.5, z: 1.5}
-  m_Center: {x: 0, y: 0.5, z: 0}
+  m_Size: {x: 1.7947024, y: 0.95309794, z: 1.5}
+  m_Center: {x: 0.008789003, y: 0.47282803, z: 0}
 --- !u!114 &7928788374509784080
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -267,6 +267,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11162beb4c6d08a4bb94b6d825072e5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectedVisualGO: {fileID: 4506106887750272554}
+  counterTopPoint: {fileID: 7855923016644956000}
   cuttingRecipeSOArray:
   - {fileID: 11400000, guid: bbd7dfa6b4962d347a5f94c21db84bd3, type: 2}
   - {fileID: 11400000, guid: 43ddf680bb7f54f44b4200d5a44d2bc0, type: 2}
@@ -402,6 +404,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
+    - target: {fileID: 4331558004386575118, guid: d72bee846803d074784ffb8f64e993ca,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 4589716710238282922, guid: d72bee846803d074784ffb8f64e993ca,
         type: 3}
       propertyPath: m_Name
@@ -473,6 +480,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d72bee846803d074784ffb8f64e993ca, type: 3}
+--- !u!1 &4506106887750272554 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4589716710238282922, guid: d72bee846803d074784ffb8f64e993ca,
+    type: 3}
+  m_PrefabInstance: {fileID: 88131701764956800}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4506106887750272555 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4589716710238282923, guid: d72bee846803d074784ffb8f64e993ca,

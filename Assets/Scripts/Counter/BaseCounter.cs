@@ -2,18 +2,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class BaseCounter : MonoBehaviour
 {
-    private GameObject _visualGameObject;
-
-    protected Transform CounterTopPoint;
+    [SerializeField] private GameObject selectedVisualGO;
+    [SerializeField] private Transform counterTopPoint;
+    
+    protected Transform CounterTopPoint => counterTopPoint;
     protected SoundManager SoundManagerScript;
     
     protected virtual void Awake()
     {
-        _visualGameObject = transform.Find("Selected").gameObject;
-        CounterTopPoint = transform.Find("CounterTopPoint").transform;
+        //visualGameObject = transform.Find("Selected").gameObject;
+        //CounterTopPoint = transform.Find("CounterTopPoint").transform;
     }
 
     protected virtual void Start()
@@ -30,12 +32,12 @@ public class BaseCounter : MonoBehaviour
     }
     private void Show()
     {
-        _visualGameObject.SetActive(true);
+        selectedVisualGO.SetActive(true);
     }
 
     private void Hide()
     {
-        _visualGameObject.SetActive(false);
+        selectedVisualGO.SetActive(false);
     }
 
     public virtual void Interact(Player player)

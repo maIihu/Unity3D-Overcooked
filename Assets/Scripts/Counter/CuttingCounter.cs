@@ -25,7 +25,7 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
 
         if (HasKitchenObject())
         {
-            if(!GetCuttingRecipeSOForInput(_kitchenObject.GetKitchenObjectSO))
+            if(!GetCuttingRecipeSOForInput(_kitchenObject.GetDataObjectSo))
             {
                 if(!player.HasKitchenObject())
                 {
@@ -35,7 +35,7 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
                 {
                     if (player.GetKitchenObject() is PlateKitchenObject plateKitchenObject)
                     {
-                        if(plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO))
+                        if(plateKitchenObject.TryAddIngredient(GetKitchenObject().GetDataObjectSo))
                         {
                             GetKitchenObject().DestroySelf();
                         }
@@ -45,7 +45,7 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
         }
         else
         {
-            if (player.HasKitchenObject() && GetCuttingRecipeSOForInput(player.GetKitchenObject().GetKitchenObjectSO))
+            if (player.HasKitchenObject() && GetCuttingRecipeSOForInput(player.GetKitchenObject().GetDataObjectSo))
             { // cut
                 player.GetKitchenObject().SetKitchenObjectParent(this);
                 SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);
@@ -61,7 +61,7 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
         base.InteractAlternate(player);
         if (HasKitchenObject())
         {
-            var cuttingRecipe = GetCuttingRecipeSOForInput(GetKitchenObject().GetKitchenObjectSO);
+            var cuttingRecipe = GetCuttingRecipeSOForInput(GetKitchenObject().GetDataObjectSo);
             if (cuttingRecipe)
             {
                 _cuttingProgress += Time.deltaTime;
@@ -72,7 +72,10 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
                 {
                     _ani.SetBool(ContainString.Cut, false);
                     GetKitchenObject().DestroySelf();
-                    KitchenObject.SpawnKitchenObject(cuttingRecipe.output, this);
+                    //KitchenObject.SpawnKitchenObject(cuttingRecipe.output, this);
+                    var go = Instantiate(cuttingRecipe.output.prefab);
+                    go.Init(cuttingRecipe.output);
+                    go.SetKitchenObjectParent(this);
                 }
             }
         }

@@ -41,7 +41,7 @@ public class PlatesCounter : BaseCounter, IKitchenObjectParent
             {
                 if(GetKitchenObject() is PlateKitchenObject plateKitchenObject1)
                 {
-                    if(plateKitchenObject1.TryAddIngredient(player.GetKitchenObject().GetKitchenObjectSO))
+                    if(plateKitchenObject1.TryAddIngredient(player.GetKitchenObject().GetDataObjectSo))
                     {
                         player.GetKitchenObject().DestroySelf();
                         SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);
@@ -61,7 +61,10 @@ public class PlatesCounter : BaseCounter, IKitchenObjectParent
 
     private void SpawnPlate()
     {
-        KitchenObject.SpawnKitchenObject(plateKitchenObjectSO, this);
+        //KitchenObject.SpawnKitchenObject(plateKitchenObjectSO, this);
+        var go = Instantiate(plateKitchenObjectSO.prefab);
+        go.Init(plateKitchenObjectSO);
+        go.SetKitchenObjectParent(this);
     }
     
     #region IKitchenObjectParent
