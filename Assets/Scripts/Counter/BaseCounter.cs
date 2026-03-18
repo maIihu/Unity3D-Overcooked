@@ -6,7 +6,6 @@ using UnityEngine.Serialization;
 
 public class BaseCounter : MonoBehaviour
 {
-    [SerializeField] private GameObject selectedVisualGO;
     [SerializeField] private Transform counterTopPoint;
     
     protected Transform CounterTopPoint => counterTopPoint;
@@ -20,24 +19,16 @@ public class BaseCounter : MonoBehaviour
 
     protected virtual void Start()
     {
-        Player.Instance.OnSelectedCounterChanged += PlayerChangeSelected;
         SoundManagerScript = SoundManager.Instance;
         Hide();
     }
     
-    private void PlayerChangeSelected(object sender, Player.OnSelectedCounterChangedEventArgs e)
-    {
-        if (e.SelectedCounter == this) Show();
-        else Hide();
-    }
     private void Show()
     {
-        selectedVisualGO.SetActive(true);
     }
 
     private void Hide()
     {
-        selectedVisualGO.SetActive(false);
     }
 
     public virtual void Interact(Player player)

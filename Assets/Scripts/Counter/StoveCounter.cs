@@ -22,17 +22,9 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
     private float _fryingTimer;
     private BurningRecipeSO _burningRecipeSO;
     private float _burningTimer;
-
-    private GameObject _sizzlingEffect;
-    private GameObject _burningEffect;
-    private AudioSource _audioSource;
-
     protected override void Awake()
     {
         base.Awake();
-        _sizzlingEffect = this.transform.Find("StoveCounter_Visual/SizzlingParticles").gameObject;
-        _burningEffect = this.transform.Find("StoveCounter_Visual/StoveOnVisual").gameObject;
-        _audioSource = this.GetComponentInChildren<AudioSource>();
     }
 
     protected override void Start()
@@ -101,16 +93,12 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
 
     private void ShowEffect()
     {
-        _sizzlingEffect.SetActive(true);
-        _burningEffect.SetActive(true);
-        _audioSource.Play();
+
     }
 
     private void HideEffect()
     {
-        _sizzlingEffect.SetActive(false);
-        _burningEffect.SetActive(false);
-        _audioSource.Stop();
+
     }
 
     public override void Interact(Player player)

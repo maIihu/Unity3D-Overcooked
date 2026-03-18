@@ -6,19 +6,12 @@ using UnityEngine;
 public class Player : MonoBehaviour, IKitchenObjectParent
 {
     public static Player Instance { get; private set; }
-
-    public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
-    public class OnSelectedCounterChangedEventArgs : EventArgs
-    {
-        public BaseCounter SelectedCounter;
-    }
     
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float rotateSpeed = 10f;
     
     private Vector2 _moveInput;
     private Vector3 _lastInteractDir;
-    private Animator _anim;
     private BaseCounter _selectedCounter;
     private Transform _handPoint;
     private KitchenObject _kitchenObject;
@@ -29,10 +22,6 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     
     private void Awake()
     {
-        if (Instance != null) Debug.Log("Have Player");
-        Instance = this;
-        _anim = GetComponentInChildren<Animator>();
-        _handPoint = transform.Find("HandPoint");
     }
 
     private void Update()
@@ -61,7 +50,6 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void UpdateAnimation()
     {
-        _anim.SetBool(ContainString.IsWalking, _moveInput != Vector2.zero);
     }
     private void Move()
     {
@@ -96,7 +84,6 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         {
             transform.forward = Vector3.Slerp(transform.forward, finalMove.normalized,
                 Time.deltaTime * rotateSpeed);
-            SoundManager.Instance.PlaySound(SoundManager.Instance.GetAudioClipRefesSO().footstep, transform.position);
         }
        
     }
@@ -146,9 +133,6 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     private void SetSelectedCounter(BaseCounter baseCounter)
     {
         _selectedCounter = baseCounter;
-        OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventArgs{
-            SelectedCounter = _selectedCounter
-        });
     }
 
     #endregion
