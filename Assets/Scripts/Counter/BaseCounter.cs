@@ -7,14 +7,14 @@ using UnityEngine.Serialization;
 public class BaseCounter : MonoBehaviour
 {
     [SerializeField] private Transform counterTopPoint;
+    [SerializeField] private GameObject selectedCounter;
     
     protected Transform CounterTopPoint => counterTopPoint;
     protected SoundManager SoundManagerScript;
     
     protected virtual void Awake()
     {
-        //visualGameObject = transform.Find("Selected").gameObject;
-        //CounterTopPoint = transform.Find("CounterTopPoint").transform;
+
     }
 
     protected virtual void Start()
@@ -23,12 +23,14 @@ public class BaseCounter : MonoBehaviour
         Hide();
     }
     
-    private void Show()
+    public void Show()
     {
+        selectedCounter.SetActive(true);
     }
 
-    private void Hide()
+    public void Hide()
     {
+        selectedCounter.SetActive(false);
     }
 
     public virtual void Interact(Player player)

@@ -107,7 +107,10 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         {
             if (hit.collider.TryGetComponent(out BaseCounter baseCounter))
             {
-                if (_selectedCounter != baseCounter) SetSelectedCounter(baseCounter);
+                if (_selectedCounter != baseCounter)
+                {
+                    SetSelectedCounter(baseCounter);
+                }
                 
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
@@ -132,7 +135,17 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     
     private void SetSelectedCounter(BaseCounter baseCounter)
     {
+        if (_selectedCounter != null)
+        {
+            _selectedCounter.Hide();
+        }
+
         _selectedCounter = baseCounter;
+
+        if (_selectedCounter != null)
+        {
+            _selectedCounter.Show();
+        }
     }
 
     #endregion

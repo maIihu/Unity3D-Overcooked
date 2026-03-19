@@ -28,7 +28,6 @@ public class DeliveryManagerSingleUI : MonoBehaviour
 
     public void SetRecipe(RecipeSO recipeSO)
     {
-        Debug.Log("Goi");
         foreach (Transform child in iconContainer)
             Destroy(child.gameObject);
         
