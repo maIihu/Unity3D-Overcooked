@@ -10,8 +10,6 @@ public class TrashCounter : BaseCounter
         if(player.HasKitchenObject())
         {
             player.GetKitchenObject().DestroySelf();
-            SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);
-            SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().trash, this.transform.position);
         }
     }
 }

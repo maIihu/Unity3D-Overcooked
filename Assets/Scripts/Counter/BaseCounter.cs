@@ -10,7 +10,6 @@ public class BaseCounter : MonoBehaviour
     [SerializeField] private GameObject selectedCounter;
     
     protected Transform CounterTopPoint => counterTopPoint;
-    protected SoundManager SoundManagerScript;
     
     protected virtual void Awake()
     {
@@ -19,7 +18,6 @@ public class BaseCounter : MonoBehaviour
 
     protected virtual void Start()
     {
-        SoundManagerScript = SoundManager.Instance;
         Hide();
     }
     

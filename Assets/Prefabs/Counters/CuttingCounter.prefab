@@ -269,10 +269,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 7855923016644956000}
   selectedCounter: {fileID: 2657872876056575645}
-  cuttingRecipeSOArray:
-  - {fileID: 11400000, guid: bbd7dfa6b4962d347a5f94c21db84bd3, type: 2}
-  - {fileID: 11400000, guid: 43ddf680bb7f54f44b4200d5a44d2bc0, type: 2}
-  - {fileID: 11400000, guid: 5c4dd27ab972f81459c40cbfe5376759, type: 2}
 --- !u!1 &7410051747416278960
 GameObject:
   m_ObjectHideFlags: 0

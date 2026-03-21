@@ -350,10 +350,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 7855923016644956000}
   selectedCounter: {fileID: 0}
-  fryingRecipeSOArray:
-  - {fileID: 11400000, guid: 35ca4d5534a5dc044b4b9ad1354fdc6d, type: 2}
-  burningRecipeSOArray:
-  - {fileID: 11400000, guid: d17ca50d858113242a62ae0ac5803056, type: 2}
 --- !u!1 &6617639097100346848
 GameObject:
   m_ObjectHideFlags: 0

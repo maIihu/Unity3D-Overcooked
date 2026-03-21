@@ -4,25 +4,26 @@ using UnityEngine;
 
 public class ContainerCounter : BaseCounter
 {
-    [SerializeField] private KitchenObjectSO kitchenObjectSO;
-    private Animator _ani;
-
+    [SerializeField] private Animation anim;
+    [SerializeField] private FoodType containerFoodType;
+    [SerializeField] private FoodObject[] foodObjects;
+    
     protected override void Awake()
     {
         base.Awake();
-        _ani = GetComponentInChildren<Animator>();
-
     }
     
     
     public override void Interact(Player player)
     {
-        if (!player.HasKitchenObject())
+        foreach (var food in foodObjects)
         {
-            _ani.SetTrigger(ContainString.OpenClose);
-            var go = Instantiate(kitchenObjectSO.prefab);
-            go.Init(kitchenObjectSO);
-            go.SetKitchenObjectParent(player);
+            if (food.FoodType == containerFoodType)
+            {
+                anim.Play("OpenClose");
+                var foodGO = Instantiate(food);
+                foodGO.SetKitchenObjectParent(player);
+            }
         }
     }
     

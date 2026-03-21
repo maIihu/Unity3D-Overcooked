@@ -12,12 +12,7 @@ public class DeliveryCounter : BaseCounter
         base.Interact(player);
         if (player.HasKitchenObject())
         {
-            if (player.GetKitchenObject() is PlateKitchenObject plateKitchenObject)
-            {
-                DeliveryManager.Instance.DeliverRecipe(plateKitchenObject);
-                player.GetKitchenObject().DestroySelf();
-                SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);
-            }
+            
         }
     }
 }

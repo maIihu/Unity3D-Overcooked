@@ -5,15 +5,13 @@ using UnityEngine;
 
 public class Player : MonoBehaviour, IKitchenObjectParent
 {
-    public static Player Instance { get; private set; }
-    
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float rotateSpeed = 10f;
+    [SerializeField] private Transform _handPoint;
     
     private Vector2 _moveInput;
     private Vector3 _lastInteractDir;
     private BaseCounter _selectedCounter;
-    private Transform _handPoint;
     private KitchenObject _kitchenObject;
 
     private CuttingCounter _currentCuttingCounter;
@@ -115,7 +113,6 @@ public class Player : MonoBehaviour, IKitchenObjectParent
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     baseCounter.Interact(this);
-                    SoundManager.Instance.PlaySound(SoundManager.Instance.GetAudioClipRefesSO().objectPickup, this.transform.position);
                 }
                 
                 if (_selectedCounter == baseCounter &&

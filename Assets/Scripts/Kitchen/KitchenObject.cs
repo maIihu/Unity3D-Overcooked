@@ -4,13 +4,10 @@ using UnityEngine;
 
 public class KitchenObject : MonoBehaviour
 {
-    private KitchenObjectSO data;
-    
     protected IKitchenObjectParent KitchenObjectParent;
 
-    public void Init(KitchenObjectSO kitchenObjectSO)
+    public void Init()
     {
-        data = kitchenObjectSO;
     }
 
     public void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent)
@@ -39,6 +36,5 @@ public class KitchenObject : MonoBehaviour
         Destroy(this.gameObject);
     }
     
-    public KitchenObjectSO GetDataObjectSo => data;
     
 }

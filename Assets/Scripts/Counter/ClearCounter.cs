@@ -15,21 +15,7 @@ public class ClearCounter : BaseCounter, IKitchenObjectParent
                 _kitchenObject.SetKitchenObjectParent(player);
             else
             {
-                if (player.GetKitchenObject() is PlateKitchenObject plateKitchenObject)
-                {
-                    if(plateKitchenObject.TryAddIngredient(GetKitchenObject().GetDataObjectSo))
-                    {
-                        GetKitchenObject().DestroySelf();
-                    }
-                }
-                else if(GetKitchenObject() is PlateKitchenObject plateKitchenObject1)
-                {
-                    if(plateKitchenObject1.TryAddIngredient(player.GetKitchenObject().GetDataObjectSo))
-                    {
-                        player.GetKitchenObject().DestroySelf();
-                        SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);
-                    }
-                }
+                
             }
         }
         else 
@@ -37,7 +23,6 @@ public class ClearCounter : BaseCounter, IKitchenObjectParent
             if(player.HasKitchenObject())
             {
                 player.GetKitchenObject().SetKitchenObjectParent(this);
-                SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);
             }
         }
     }

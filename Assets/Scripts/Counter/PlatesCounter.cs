@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class PlatesCounter : BaseCounter, IKitchenObjectParent
 {
-    [SerializeField] private KitchenObjectSO plateKitchenObjectSO;
-
     private KitchenObject _kitchenObject;
     
     private float _spawnPlateTimer;
@@ -35,36 +33,20 @@ public class PlatesCounter : BaseCounter, IKitchenObjectParent
         base.Interact(player);
         if (HasKitchenObject())
         { // player carrying kitchen obj
-            if(!player.HasKitchenObject())
-                _kitchenObject.SetKitchenObjectParent(player);
-            else
-            {
-                if(GetKitchenObject() is PlateKitchenObject plateKitchenObject1)
-                {
-                    if(plateKitchenObject1.TryAddIngredient(player.GetKitchenObject().GetDataObjectSo))
-                    {
-                        player.GetKitchenObject().DestroySelf();
-                        SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);
-                    }
-                }
-            }
+            
         }
         else 
         {
             if(player.HasKitchenObject())
             {
                 player.GetKitchenObject().SetKitchenObjectParent(this);
-                SoundManagerScript.PlaySound(SoundManagerScript.GetAudioClipRefesSO().objectDrop, this.transform.position);
             }
         }
     }
 
     private void SpawnPlate()
     {
-        //KitchenObject.SpawnKitchenObject(plateKitchenObjectSO, this);
-        var go = Instantiate(plateKitchenObjectSO.prefab);
-        go.Init(plateKitchenObjectSO);
-        go.SetKitchenObjectParent(this);
+
     }
     
     #region IKitchenObjectParent
