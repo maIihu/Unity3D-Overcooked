@@ -14,7 +14,7 @@ public class KitchenObject : MonoBehaviour
     {
         if (kitchenObjectParent.HasKitchenObject())
         {
-            Debug.Log("KitchenObject has been set");
+            //Debug.Log("KitchenObject has been set");
             return;
         }
         if (this.KitchenObjectParent != null) KitchenObjectParent.ClearKitchenObject();
@@ -23,6 +23,7 @@ public class KitchenObject : MonoBehaviour
         kitchenObjectParent.SetKitchenObject(this);
         transform.parent = kitchenObjectParent.GetKitchenObjectToTransform();
         transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
     }
 
     public IKitchenObjectParent GetKitchenObjectParent()

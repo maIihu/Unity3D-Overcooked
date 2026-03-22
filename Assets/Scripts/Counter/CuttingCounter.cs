@@ -7,27 +7,29 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
 {
     public event EventHandler<IHasProgress.OnProgressBarChangedEventArgs> OnProgressBarChanged;
     
-    private KitchenObject _kitchenObject;
+    private FoodObject _kitchenObject;
     private float _cuttingProgress;
-    private Animator _ani;
+    //[SerializeField] private Animator _ani;
 
     protected override void Awake()
     {
         base.Awake();
-        _ani = GetComponentInChildren<Animator>();
     }
 
     public override void Interact(Player player)
     { 
         base.Interact(player);
-
+        Debug.Log("Hello");
         if (HasKitchenObject())
         {
-            
+            Debug.Log("Hello1");
+
         }
         else
-        {
-            
+        {        
+            Debug.Log("Hello3");
+            player.GetKitchenObject().SetKitchenObjectParent(this);
+            //_kitchenObject = player.GetKitchenObject() is FoodObject ? player.GetKitchenObject() as FoodObject : null;
         }
     }
     
@@ -36,19 +38,19 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
         base.InteractAlternate(player);
         if (HasKitchenObject())
         {
-            
+            _kitchenObject.Cut();
         }
         
     }
 
     public void CuttingSoundAndAnimation()
     {
-        _ani.SetBool(ContainString.Cut, true);
+        //_ani.SetBool(ContainString.Cut, true);
     }
     
     public void StopAnimationCut()
     {
-        _ani.SetBool(ContainString.Cut, false);
+        //_ani.SetBool(ContainString.Cut, false);
     }
     
 
@@ -61,7 +63,7 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
 
     public void SetKitchenObject(KitchenObject kitchenObject)
     {
-        this._kitchenObject = kitchenObject;
+        this._kitchenObject = kitchenObject as FoodObject;
     }
 
     public KitchenObject GetKitchenObject()

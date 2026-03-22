@@ -7,7 +7,15 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 {
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float rotateSpeed = 10f;
+    [SerializeField] private float interactDistance = 1f;
+    [SerializeField] private float sphereRadius = 0.5f;
+    [SerializeField] private float playerHeight = 2f;
+    [SerializeField] private float playerRadius = 0.7f;
+    
     [SerializeField] private Transform _handPoint;
+    [SerializeField] private Transform interactPoint;
+    
+    [SerializeField] private Animator animator;
     
     private Vector2 _moveInput;
     private Vector3 _lastInteractDir;
@@ -33,7 +41,51 @@ public class Player : MonoBehaviour, IKitchenObjectParent
             StopCutting();
         }
     }
+
+    private void OnDrawGizmos()
+    {
+        Vector3 origin = interactPoint.position;
+        Vector3 dir = _lastInteractDir == Vector3.zero ? transform.forward : _lastInteractDir.normalized;
     
+        Vector3 endPoint = origin + dir * interactDistance;
+
+        Gizmos.color = Color.yellow;
+
+        Gizmos.DrawWireSphere(origin, sphereRadius);
+        
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(endPoint, sphereRadius);
+        
+        Gizmos.color = Color.black;
+        Gizmos.DrawLine(origin, endPoint);
+        
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(this.transform.position, this.transform.position + Vector3.up * playerHeight);
+        
+        Vector3 point1 = transform.position;
+        Vector3 point2 = transform.position + Vector3.up * playerHeight;
+
+        Gizmos.color = Color.blue;
+
+        DrawCapsule(point1, point2, playerRadius);
+
+    }
+    
+    private void DrawCapsule(Vector3 point1, Vector3 point2, float radius)
+    {
+        Gizmos.DrawWireSphere(point1, radius);
+        Gizmos.DrawWireSphere(point2, radius);
+
+        Vector3 up = (point2 - point1).normalized;
+        Vector3 right = Vector3.Cross(up, Vector3.forward).normalized * radius;
+        Vector3 forward = Vector3.Cross(up, right).normalized * radius;
+
+        Gizmos.DrawLine(point1 + right, point2 + right);
+        Gizmos.DrawLine(point1 - right, point2 - right);
+        Gizmos.DrawLine(point1 + forward, point2 + forward);
+        Gizmos.DrawLine(point1 - forward, point2 - forward);
+    }
+
     #region Move
     
     private void InputHandler()
@@ -48,12 +100,11 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void UpdateAnimation()
     {
+        animator.SetFloat("MovingValue", _moveInput.magnitude);
+
     }
     private void Move()
     {
-        float playerHeight = 2f;
-        float playerRadius = 0.7f;
-        
         Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
         float moveDistance = moveSpeed  * Time.deltaTime;
         
@@ -80,8 +131,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         
         if (finalMove != Vector3.zero)
         {
-            transform.forward = Vector3.Slerp(transform.forward, finalMove.normalized,
-                Time.deltaTime * rotateSpeed);
+            transform.forward = Vector3.Slerp(transform.forward, finalMove.normalized, Time.deltaTime * rotateSpeed);
         }
        
     }
@@ -97,11 +147,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         if (moveDir != Vector3.zero)
             _lastInteractDir = moveDir;
 
-        float interactDistance = 1f;
-        float sphereRadius = 0.5f;
-
-        if (Physics.SphereCast(transform.position, sphereRadius, 
-                _lastInteractDir, out RaycastHit hit, interactDistance))
+        if (Physics.SphereCast(interactPoint.position, sphereRadius, _lastInteractDir, out RaycastHit hit, interactDistance))
         {
             if (hit.collider.TryGetComponent(out BaseCounter baseCounter))
             {
@@ -112,11 +158,15 @@ public class Player : MonoBehaviour, IKitchenObjectParent
                 
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
+                    if((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||
+                       (HasKitchenObject() && _selectedCounter is ClearCounter)) 
+                        animator.SetTrigger("IsPicked");
+                    
                     baseCounter.Interact(this);
+                    animator.SetBool("HasObject", this.HasKitchenObject());
                 }
                 
-                if (_selectedCounter == baseCounter &&
-                    Input.GetKeyDown(KeyCode.R) && _moveInput == Vector2.zero)
+                if (_selectedCounter == baseCounter && Input.GetKeyDown(KeyCode.R) && _moveInput == Vector2.zero)
                 {
                     if (baseCounter is CuttingCounter cuttingCounter && cuttingCounter.HasKitchenObject())
                         StartCutting(cuttingCounter);
@@ -213,5 +263,5 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     }
 
     #endregion
-
+        
 }

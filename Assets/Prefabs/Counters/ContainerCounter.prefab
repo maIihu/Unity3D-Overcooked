@@ -136,7 +136,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 0.63849396, z: 1}
+  m_Size: {x: 0.95, y: 0.63849396, z: 0.95}
   m_Center: {x: 0, y: 0.31924698, z: 0}
 --- !u!114 &7082521471990096122
 MonoBehaviour:
@@ -156,6 +156,7 @@ MonoBehaviour:
   containerFoodType: 0
   foodObjects:
   - {fileID: 367040949537793641, guid: f8d4e2d83c731cf4f83b78b2a086315e, type: 3}
+  - {fileID: 2805479275731452759, guid: 9169157c329eca84ca7a51824183ff7e, type: 3}
 --- !u!1001 &1555702091940458490
 PrefabInstance:
   m_ObjectHideFlags: 0

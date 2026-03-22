@@ -16,12 +16,14 @@ public class ContainerCounter : BaseCounter
     
     public override void Interact(Player player)
     {
+        if (player.HasKitchenObject()) return;
         foreach (var food in foodObjects)
         {
             if (food.FoodType == containerFoodType)
             {
                 anim.Play("OpenClose");
                 var foodGO = Instantiate(food);
+                foodGO.SetInitFood();
                 foodGO.SetKitchenObjectParent(player);
             }
         }
