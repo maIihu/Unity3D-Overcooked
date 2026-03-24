@@ -5,7 +5,10 @@ using UnityEngine;
 
 public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
 {
+    [SerializeField] private float cuttingTime;
     public event EventHandler<IHasProgress.OnProgressBarChangedEventArgs> OnProgressBarChanged;
+
+    public event Action OnCutComplete;
     
     private FoodObject _kitchenObject;
     private float _cuttingProgress;
@@ -19,17 +22,13 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
     public override void Interact(Player player)
     { 
         base.Interact(player);
-        Debug.Log("Hello");
         if (HasKitchenObject())
         {
-            Debug.Log("Hello1");
 
         }
         else
         {        
-            Debug.Log("Hello3");
             player.GetKitchenObject().SetKitchenObjectParent(this);
-            //_kitchenObject = player.GetKitchenObject() is FoodObject ? player.GetKitchenObject() as FoodObject : null;
         }
     }
     
@@ -38,7 +37,13 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
         base.InteractAlternate(player);
         if (HasKitchenObject())
         {
-            _kitchenObject.Cut();
+            _cuttingProgress += Time.deltaTime;
+            if (_cuttingProgress >= cuttingTime)
+            {
+                _cuttingProgress = 0f;
+                _kitchenObject.Cut();
+                OnCutComplete?.Invoke();
+            }
         }
         
     }

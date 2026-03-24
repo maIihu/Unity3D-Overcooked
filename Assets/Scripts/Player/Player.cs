@@ -169,7 +169,10 @@ public class Player : MonoBehaviour, IKitchenObjectParent
                 if (_selectedCounter == baseCounter && Input.GetKeyDown(KeyCode.R) && _moveInput == Vector2.zero)
                 {
                     if (baseCounter is CuttingCounter cuttingCounter && cuttingCounter.HasKitchenObject())
-                        StartCutting(cuttingCounter);
+                    {
+                        if(cuttingCounter.GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
+                            StartCutting(cuttingCounter);
+                    }
                 }
 
                 
@@ -215,15 +218,19 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void StartCutting(CuttingCounter counter)
     {
+        animator.SetBool("IsChopping", true);
         _isCutting = true;
         _currentCuttingCounter = counter;
         _currentCuttingCounter.CuttingSoundAndAnimation();
         _cutCoroutine = StartCoroutine(CutRoutine());
+        _currentCuttingCounter.OnCutComplete += StopCutting;
     }
 
     private void StopCutting()
     {
+        animator.SetBool("IsChopping", false);
         _isCutting = false;
+        _currentCuttingCounter.OnCutComplete -= StopCutting;
         _currentCuttingCounter.StopAnimationCut();
         _currentCuttingCounter = null;
         if (_cutCoroutine != null)
