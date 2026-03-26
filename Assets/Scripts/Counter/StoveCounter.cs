@@ -12,6 +12,9 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
     
     public event EventHandler<IHasProgress.OnProgressBarChangedEventArgs> OnProgressBarChanged;
 
+    [SerializeField] private PotObject potObject;
+    [SerializeField] private Transform potPoint;
+
     private KitchenObject _kitchenObject;
     
     private State _state;
@@ -27,6 +30,8 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
         base.Start();
         _state = State.Idle;
         HideEffect();
+        var go = Instantiate(potObject, potPoint.position, Quaternion.identity);
+        go.SetKitchenObjectParent(this);
     }
 
     private void Update()
@@ -69,9 +74,9 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
         }
         else
         {
-            if (player.HasKitchenObject())
+            if (player.HasKitchenObject() && player.GetKitchenObject() is PotObject)
             {
-                
+                player.GetKitchenObject().SetKitchenObjectParent(this);
             }
         }
     }
