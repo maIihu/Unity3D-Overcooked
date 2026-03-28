@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
+public class CuttingCounter : BaseCounter, IKitchenObjectParent
 {
     [SerializeField] private float cuttingTime;
-    public event EventHandler<IHasProgress.OnProgressBarChangedEventArgs> OnProgressBarChanged;
-
+    [SerializeField] private ProgressBarUI progressBarUI;
+    
     public event Action OnCutComplete;
     
     private FoodObject _kitchenObject;
