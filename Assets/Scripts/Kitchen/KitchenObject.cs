@@ -10,7 +10,7 @@ public class KitchenObject : MonoBehaviour
     {
     }
 
-    public void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent)
+    public virtual void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent)
     {
         if (kitchenObjectParent.HasKitchenObject())
         {

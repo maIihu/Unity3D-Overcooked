@@ -69,7 +69,14 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent, IHasProgress
             }
             else
             {
-                
+                if (GetKitchenObject() is PotObject pot && player.GetKitchenObject() is FoodObject food)
+                {
+                    if(pot.CanAddIngredient())
+                    {
+                        food.DestroySelf();
+                        pot.OnIngredientAdded();
+                    }
+                }
             }
         }
         else

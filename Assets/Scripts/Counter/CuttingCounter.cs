@@ -24,11 +24,12 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent, IHasProgress
         base.Interact(player);
         if (HasKitchenObject())
         {
-
+            _kitchenObject.SetKitchenObjectParent(player);
         }
         else
         {        
-            player.GetKitchenObject().SetKitchenObjectParent(this);
+            if(player.HasKitchenObject())
+                player.GetKitchenObject().SetKitchenObjectParent(this);
         }
     }
     

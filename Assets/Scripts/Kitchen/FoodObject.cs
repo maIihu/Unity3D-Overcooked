@@ -34,4 +34,5 @@ public class FoodObject : KitchenObject
         normalVisual.SetActive(false);
         cuttingVisual.SetActive(true);
     }
+    
 }
