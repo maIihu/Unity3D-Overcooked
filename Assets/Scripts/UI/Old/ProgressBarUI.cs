@@ -7,21 +7,18 @@ using UnityEngine.UI;
 
 public class ProgressBarUI : MonoBehaviour
 {
-    [SerializeField] private GameObject counter;
     [SerializeField] private Image barImage;
 
     private void Start()
     {
-        counter.TryGetComponent(out IHasProgress hasProgress);
-        hasProgress.OnProgressBarChanged += HasProgress_OnProgressChanged;
         barImage.fillAmount = 0;
         Hide();
     }
 
-    private void HasProgress_OnProgressChanged(object sender, IHasProgress.OnProgressBarChangedEventArgs e)
+    public void UpdateProgress(float progressNormalized)
     {
-        barImage.fillAmount = e.progressNormalized;
-        if(e.progressNormalized is 0 or >= 1f)
+        barImage.fillAmount = progressNormalized;
+        if(progressNormalized is 0 or >= 1f)
             Hide();
         else 
             Show();

@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 3099340490246079765}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.831, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -102,8 +102,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 7855923016644956000}
   selectedCounter: {fileID: 6864186234095507237}
-  plateKitchenObjectSO: {fileID: 11400000, guid: 7a09b52011ffd3c4eb6aac3c03f741c6,
-    type: 2}
+  plateObjectPrefab: {fileID: 4133019759459701955, guid: db3fa1e9ad9ecdc479a8cc57cb0f73b3,
+    type: 3}
 --- !u!1001 &589174309578757794
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,20 +1,24 @@
-﻿
+
 using System;
 using UnityEngine;
 
-public class PotObject : KitchenObject
+public class PotObject : KitchenObject, IKitchenObjectParent
 {
     [SerializeField] private float liquidHeight;
     [SerializeField] private GameObject liquidGO;
-    [SerializeField] private float cookTime = 3f;
 
-    private float _cookTimer;
-    private bool _isCooking;
-    
+    public bool IsCooked { get; set; }
+    public bool IsBurned { get; set; }
+
+    public float FryingTimer { get; set; }
+    public float BurningTimer { get; set; }
+
     private const int MaxCapacity = 3;
 
     private int _currentCount;
-    
+
+    [SerializeField] private Transform topPoint;
+    private KitchenObject _kitchenObject;
 
     public bool CanAddIngredient()
     {
@@ -25,27 +29,59 @@ public class PotObject : KitchenObject
     {
         _currentCount++;
         liquidGO.transform.localPosition = Vector3.up * (liquidHeight * _currentCount);
-        
-        _cookTimer = 0f;
-        _isCooking = true;
+        IsCooked = false;
+        IsBurned = false;
+        FryingTimer = 0f;
+        BurningTimer = 0f;
     }
 
-    private void Update()
+    public bool IsFull()
     {
-        if (_isCooking)
-        {
-            _cookTimer += Time.deltaTime;
+        return _currentCount >= MaxCapacity;
+    }
 
-            if (_cookTimer >= cookTime)
-            {
-                _isCooking = false;
-                OnCooked();
-            }
-        }
-    }
-    
-    private void OnCooked()
+    public bool HasIngredients()
     {
-        Debug.Log("Cooked!");
+        return _currentCount > 0;
     }
+
+
+    public void EmptyPot()
+    {
+        _currentCount = 0;
+        IsCooked = false;
+        IsBurned = false;
+        FryingTimer = 0f;
+        BurningTimer = 0f;
+        liquidGO.transform.localPosition = Vector3.zero;
+    }
+
+    #region IKitchenObjectParent
+
+    public Transform GetKitchenObjectToTransform()
+    {
+        return topPoint;
+    }
+
+    public void SetKitchenObject(KitchenObject kitchenObject)
+    {
+        this._kitchenObject = kitchenObject;
+    }
+
+    public KitchenObject GetKitchenObject()
+    {
+        return this._kitchenObject;
+    }
+
+    public void ClearKitchenObject()
+    {
+        this._kitchenObject = null;
+    }
+
+    public bool HasKitchenObject()
+    {
+        return this._kitchenObject != null;
+    }
+
+    #endregion
 }
