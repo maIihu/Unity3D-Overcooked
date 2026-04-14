@@ -1697,6 +1697,31 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2871874777693448524, guid: ff319b93ebba1af4b87b1894cdff506f,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871874777693448524, guid: ff319b93ebba1af4b87b1894cdff506f,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871874777693448524, guid: ff319b93ebba1af4b87b1894cdff506f,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871874777693448524, guid: ff319b93ebba1af4b87b1894cdff506f,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.383
+      objectReference: {fileID: 0}
+    - target: {fileID: 5464922795783465971, guid: ff319b93ebba1af4b87b1894cdff506f,
+        type: 3}
+      propertyPath: steamCookingEffect
+      value: 
+      objectReference: {fileID: 1651064424}
     - target: {fileID: 5498409353710322713, guid: ff319b93ebba1af4b87b1894cdff506f,
         type: 3}
       propertyPath: m_Name
@@ -2185,6 +2210,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 718905939}
+  - component: {fileID: 718905940}
   m_Layer: 0
   m_Name: Level_1
   m_TagString: Untagged
@@ -2209,12 +2235,27 @@ Transform:
   - {fileID: 1547254064}
   - {fileID: 1112000827}
   - {fileID: 61082237}
-  - {fileID: 464759854}
   - {fileID: 673236706}
   - {fileID: 1452143041}
   - {fileID: 5548562051748089271}
+  - {fileID: 464759854}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &718905940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 718905938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14a6069085fd0b942bf581e5393f61b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 0
+  gamePlayingTimerMax: 360
+  deliveryControl: {fileID: 1131503893}
 --- !u!1001 &726400390
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3338,6 +3379,52 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ceb2aaf7c593efa4885fea05ca34aa26, type: 3}
+--- !u!1 &1131503892
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1131503894}
+  - component: {fileID: 1131503893}
+  m_Layer: 0
+  m_Name: DeliveryController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1131503893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131503892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 148bfd668e529da4892df20ff741ad91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnRecipeTimerMax: 4
+  waitingRecipesMax: 4
+--- !u!4 &1131503894
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131503892}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1140521450
 GameObject:
   m_ObjectHideFlags: 0
@@ -5462,6 +5549,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 916612539}
   m_PrefabAsset: {fileID: 0}
+--- !u!198 &1651064424 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 8154246955723224593, guid: ff319b93ebba1af4b87b1894cdff506f,
+    type: 3}
+  m_PrefabInstance: {fileID: 464759853}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1686412884
 GameObject:
   m_ObjectHideFlags: 0
@@ -5506,8 +5599,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68e37852088560b48bb185d6ee6ba674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameOverUI: {fileID: 1334650074}
-  pauseUI: {fileID: 236636653}
+  _dontDestroyOnLoad: 1
 --- !u!1001 &1819638183
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6647,6 +6739,11 @@ PrefabInstance:
       propertyPath: m_LocalScale.y
       value: 1.5
       objectReference: {fileID: 0}
+    - target: {fileID: 2238836658218716048, guid: 99cb029ea35fbf94db16341c042878f7,
+        type: 3}
+      propertyPath: deliveryController
+      value: 
+      objectReference: {fileID: 1131503893}
     - target: {fileID: 4466432340252433760, guid: 99cb029ea35fbf94db16341c042878f7,
         type: 3}
       propertyPath: m_LocalScale.y
@@ -6699,3 +6796,4 @@ SceneRoots:
   - {fileID: 518764713}
   - {fileID: 73555391}
   - {fileID: 718905939}
+  - {fileID: 1131503894}

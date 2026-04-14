@@ -6,9 +6,25 @@ public class PotObject : KitchenObject, IKitchenObjectParent
 {
     [SerializeField] private float liquidHeight;
     [SerializeField] private GameObject liquidGO;
+    [SerializeField] private Color burnedColor = new Color(0.2f, 0.2f, 0.2f);
+
+    private Material _liquidMaterial;
+    private Color _defaultLiquidColor;
+    private bool _isBurned;
 
     public bool IsCooked { get; set; }
-    public bool IsBurned { get; set; }
+    public bool IsBurned 
+    { 
+        get => _isBurned; 
+        set 
+        {
+            _isBurned = value;
+            if (_liquidMaterial != null)
+            {
+                _liquidMaterial.color = _isBurned ? burnedColor : _defaultLiquidColor;
+            }
+        }
+    }
 
     public float FryingTimer { get; set; }
     public float BurningTimer { get; set; }
@@ -20,9 +36,18 @@ public class PotObject : KitchenObject, IKitchenObjectParent
     [SerializeField] private Transform topPoint;
     private KitchenObject _kitchenObject;
 
+    private void Awake()
+    {
+        if (liquidGO != null && liquidGO.TryGetComponent<Renderer>(out var renderer))
+        {
+            _liquidMaterial = renderer.material;
+            _defaultLiquidColor = _liquidMaterial.color;
+        }
+    }
+
     public bool CanAddIngredient()
     {
-        return _currentCount < MaxCapacity;
+        return _currentCount < MaxCapacity && !IsBurned;
     }
 
     public void OnIngredientAdded()

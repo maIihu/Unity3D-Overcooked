@@ -10,6 +10,9 @@ public class GameClockUI : MonoBehaviour
 
     private void Update()
     {
-        timerImage.fillAmount = KitchenGameManager.Instance.GetPlayingTimerNormalized();
+        if (LevelController.Instance != null)
+        {
+            timerImage.fillAmount = LevelController.Instance.GetPlayingTimerNormalized();
+        }
     }
 }

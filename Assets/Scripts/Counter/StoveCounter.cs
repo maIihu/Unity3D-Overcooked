@@ -17,9 +17,21 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
     [SerializeField] private float fryingTimerMax = 4f;
     [SerializeField] private float burningTimerMax = 5f;
 
+    [SerializeField] private ParticleSystem steamCookingEffect;
+    [SerializeField] private ParticleSystem burnedCookingEffect;
+
     private KitchenObject _kitchenObject;
 
     private State _state;
+    private State CurrentState
+    {
+        get => _state;
+        set
+        {
+            _state = value;
+            ShowEffect();
+        }
+    }
 
     protected override void Awake()
     {
@@ -29,7 +41,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
     protected override void Start()
     {
         base.Start();
-        _state = State.Idle;
+        CurrentState = State.Idle;
         HideEffect();
         var go = Instantiate(potObject, potPoint.position, Quaternion.identity);
         go.SetKitchenObjectParent(this);
@@ -44,9 +56,9 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
                 case State.Idle:
                     if (pot.HasIngredients())
                     {
-                        if (pot.IsBurned) _state = State.Burned;
-                        else if (pot.IsCooked) _state = State.Fried;
-                        else _state = State.Frying;
+                        if (pot.IsBurned) CurrentState = State.Burned;
+                        else if (pot.IsCooked) CurrentState = State.Fried;
+                        else CurrentState = State.Frying;
                     }
                     break;
                 case State.Frying:
@@ -57,7 +69,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
 
                     if (pot.FryingTimer >= fryingTimerMax)
                     {
-                        _state = State.Fried;
+                        CurrentState = State.Fried;
                         pot.IsCooked = true;
                         Debug.Log("StoveCounter: Nấu xong! Chuyển sang đợi khét.");
 
@@ -73,7 +85,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
 
                     if (pot.BurningTimer >= burningTimerMax)
                     {
-                        _state = State.Burned;
+                        CurrentState = State.Burned;
                         pot.IsBurned = true;
                         Debug.Log("StoveCounter: Khét lẹt!!!");
 
@@ -92,7 +104,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
         {
             if (_state != State.Idle)
             {
-                _state = State.Idle;
+                CurrentState = State.Idle;
                 progressBarUI?.UpdateProgress(0f);
             }
         }
@@ -100,12 +112,35 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
 
     private void ShowEffect()
     {
-
+        if (steamCookingEffect != null) 
+        {
+            if (_state == State.Fried)
+            {
+                if (!steamCookingEffect.isPlaying) steamCookingEffect.Play();
+            }
+            else
+            {
+                steamCookingEffect.Stop();
+            }
+        }
+        
+        if (burnedCookingEffect != null) 
+        {
+            if (_state == State.Burned)
+            {
+                if (!burnedCookingEffect.isPlaying) burnedCookingEffect.Play();
+            }
+            else
+            {
+                burnedCookingEffect.Stop();
+            }
+        }
     }
 
     private void HideEffect()
     {
-
+        if (steamCookingEffect != null) steamCookingEffect.Stop();
+        if (burnedCookingEffect != null) burnedCookingEffect.Stop();
     }
 
     public override void Interact(Player player)
@@ -116,7 +151,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
             if (!player.HasKitchenObject())
             {
                 GetKitchenObject().SetKitchenObjectParent(player);
-                _state = State.Idle;
+                CurrentState = State.Idle;
                 progressBarUI?.UpdateProgress(0f);
                 HideEffect();
             }
@@ -139,7 +174,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
                         food.Soup();
 
                         // Nếu bỏ món mới trong lúc đang nấu hoặc nấu xong => Reset timer nấu (đã xử lý trong OnIngredientAdded của Pot)
-                        _state = State.Frying;
+                        CurrentState = State.Frying;
                         Debug.Log("StoveCounter: Đã bỏ thêm nguyên liệu, nấu lại từ đầu!");
                     }
                     else if (player.GetKitchenObject() is PlateObject plate && pot.IsCooked && !pot.IsBurned && pot.IsFull())
@@ -149,7 +184,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
                             KitchenObject potFood = pot.GetKitchenObject();
                             potFood.SetKitchenObjectParent(plate);
                             pot.EmptyPot();
-                            _state = State.Idle;
+                            CurrentState = State.Idle;
                             progressBarUI?.UpdateProgress(0f);
                         }
                     }
@@ -163,7 +198,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
                 pot.SetKitchenObjectParent(this);
                 if (pot.HasIngredients())
                 {
-                    _state = State.Frying;
+                    CurrentState = State.Frying;
                     Debug.Log("StoveCounter: Bắt đầu nấu!");
 
                 }

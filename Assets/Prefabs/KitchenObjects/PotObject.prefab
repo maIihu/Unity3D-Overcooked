@@ -111,7 +111,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   liquidHeight: 0.1
   liquidGO: {fileID: 3975085236037813863}
-  cookTime: 3
   topPoint: {fileID: 5584683170457929501}
 --- !u!1001 &1657609963510813592
 PrefabInstance:

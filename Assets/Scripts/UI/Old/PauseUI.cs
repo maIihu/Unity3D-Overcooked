@@ -13,9 +13,9 @@ public class PauseUI : MonoBehaviour
         playButton.onClick.AddListener(() =>
         {
             this.gameObject.SetActive(false);
-            KitchenGameManager.Instance.ChangeState(KitchenGameManager.GameState.GamePlaying);
+            GameManager.Instance.ChangeState(GameManager.GameState.GamePlaying);
         });
-        
+
         quitButton.onClick.AddListener(() =>
         {
             Loader.LoadScene(Loader.Scene.MainMenuScene);
