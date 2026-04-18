@@ -1,4 +1,3 @@
-
 using System;
 using UnityEngine;
 
@@ -10,6 +9,8 @@ public class PotObject : KitchenObject, IKitchenObjectParent
 
     [SerializeField] private ParticleSystem steamCookingEffect;
     [SerializeField] private ParticleSystem burnedCookingEffect;
+    
+    [SerializeField] private ProgressBarUI progressBarUI;
 
     private Material _liquidMaterial;
     private Color _defaultLiquidColor;
@@ -31,6 +32,9 @@ public class PotObject : KitchenObject, IKitchenObjectParent
 
     public float FryingTimer { get; set; }
     public float BurningTimer { get; set; }
+    
+    // Lưu lại bộ đếm thời gian tối đa để kiểm tra % tiến độ khi cầm trên tay
+    public float BurningTimerMax { get; set; } 
 
     private const int MaxCapacity = 3;
 
@@ -60,6 +64,13 @@ public class PotObject : KitchenObject, IKitchenObjectParent
         // Hiệu ứng cháy: Khi đã bị cháy (vẫn hiện kể cả khi nhấc ra khỏi bếp)
         bool shouldShowBurned = IsBurned;
         PlayBurnedEffect(shouldShowBurned);
+    }
+
+    public void UpdateCookingProgress(float progress)
+    {
+        if (progressBarUI == null) return;
+        
+        progressBarUI.UpdateProgress(progress);
     }
 
     public void PlayFryingEffect(bool isPlaying)
@@ -107,6 +118,11 @@ public class PotObject : KitchenObject, IKitchenObjectParent
         IsBurned = false;
         FryingTimer = 0f;
         BurningTimer = 0f;
+        if (progressBarUI != null)
+        {
+            progressBarUI.Hide();
+            progressBarUI.UpdateProgress(0f);
+        }
     }
 
     public bool IsFull()
@@ -128,6 +144,11 @@ public class PotObject : KitchenObject, IKitchenObjectParent
         FryingTimer = 0f;
         BurningTimer = 0f;
         liquidGO.transform.localPosition = Vector3.zero;
+        if (progressBarUI != null)
+        {
+            progressBarUI.UpdateProgress(0f);
+            progressBarUI.Hide();
+        }
     }
 
     #region IKitchenObjectParent

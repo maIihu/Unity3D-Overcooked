@@ -12,7 +12,6 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
         Idle, Frying, Fried, Burned
     }
 
-    [SerializeField] private ProgressBarUI progressBarUI;
     [SerializeField] private PotObject potObjectPrefab;
     [SerializeField] private Transform potPoint;
 
@@ -83,7 +82,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
 
                 case State.Frying:
                     _currentPot.FryingTimer += Time.deltaTime;
-                    progressBarUI?.UpdateProgress(_currentPot.FryingTimer / fryingTimerMax);
+                    _currentPot.UpdateCookingProgress(_currentPot.FryingTimer / fryingTimerMax);
 
                     if (_currentPot.FryingTimer >= fryingTimerMax)
                     {
@@ -100,6 +99,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
 
                 case State.Fried:
                     _currentPot.BurningTimer += Time.deltaTime;
+                    _currentPot.UpdateCookingProgress(_currentPot.BurningTimer / burningTimerMax);
 
                     // Xử lý UI Warning / Complete
                     HandleFriedUI();
@@ -118,7 +118,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
                     break;
 
                 case State.Burned:
-                    progressBarUI?.UpdateProgress(0f);
+                    if (_currentPot != null) _currentPot.UpdateCookingProgress(0f);
                     break;
             }
         }
@@ -127,7 +127,6 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
             if (_state != State.Idle)
             {
                 CurrentState = State.Idle;
-                progressBarUI?.UpdateProgress(0f);
             }
         }
     }
@@ -141,7 +140,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
         if (burnProgress >= 0.5f)
         {
             // Trạng thái gần cháy: Sử dụng DOTween để nhấp nháy, càng gần cháy càng nhanh
-            if (imageUI.sprite != warningSprite)
+            if (imageUI.sprite != warningSprite || !imageUI.enabled)
             {
                 _imageFadeTween?.Kill();
                 imageUI.sprite = warningSprite;
@@ -186,12 +185,6 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
     private void UpdateUIState()
     {
         if (imageUI == null) return;
-
-        // Ẩn ProgressBar nếu không phải đang trong quá trình nấu
-        if (_state != State.Frying)
-        {
-            progressBarUI?.Hide();
-        }
 
         // Reset trạng thái UI thông báo (icon hoàn thành/cảnh báo)
         if (_state != State.Fried)
@@ -239,7 +232,6 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
                             potFood.SetKitchenObjectParent(plate);
                             _currentPot.EmptyPot();
                             CurrentState = State.Idle;
-                            progressBarUI?.Hide();
                         }
                     }
                 }
@@ -269,11 +261,19 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
         _isCompleteUIShown = false;
         _imageFadeTween?.Kill();
 
-        if (_currentPot != null && _currentPot.HasIngredients())
+        if (_currentPot != null)
         {
-            if (_currentPot.IsBurned) CurrentState = State.Burned;
-            else if (_currentPot.IsCooked) CurrentState = State.Fried;
-            else CurrentState = State.Frying;
+            _currentPot.BurningTimerMax = burningTimerMax;
+            if (_currentPot.HasIngredients())
+            {
+                if (_currentPot.IsBurned) CurrentState = State.Burned;
+                else if (_currentPot.IsCooked) CurrentState = State.Fried;
+                else CurrentState = State.Frying;
+            }
+            else
+            {
+                CurrentState = State.Idle;
+            }
         }
         else
         {
@@ -292,7 +292,6 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
         this._currentPot = null;
         _imageFadeTween?.Kill();
         CurrentState = State.Idle;
-        progressBarUI?.UpdateProgress(0f);
     }
 
     public bool HasKitchenObject()
