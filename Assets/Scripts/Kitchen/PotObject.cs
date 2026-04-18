@@ -8,6 +8,9 @@ public class PotObject : KitchenObject, IKitchenObjectParent
     [SerializeField] private GameObject liquidGO;
     [SerializeField] private Color burnedColor = new Color(0.2f, 0.2f, 0.2f);
 
+    [SerializeField] private ParticleSystem steamCookingEffect;
+    [SerializeField] private ParticleSystem burnedCookingEffect;
+
     private Material _liquidMaterial;
     private Color _defaultLiquidColor;
     private bool _isBurned;
@@ -43,6 +46,52 @@ public class PotObject : KitchenObject, IKitchenObjectParent
             _liquidMaterial = renderer.material;
             _defaultLiquidColor = _liquidMaterial.color;
         }
+    }
+
+    private void Update()
+    {
+        // Tự động điều khiển VFX dựa trên trạng thái của nồi
+        bool isOnStove = GetKitchenObjectParent() is StoveCounter;
+        
+        // Hiệu ứng khói: Chỉ hiển thị khi đã nấu chín nhưng chưa cháy, và phải đang ở trên bếp
+        bool shouldShowSteam = isOnStove && HasIngredients() && !IsBurned && IsCooked;
+        PlayFryingEffect(shouldShowSteam);
+
+        // Hiệu ứng cháy: Khi đã bị cháy (vẫn hiện kể cả khi nhấc ra khỏi bếp)
+        bool shouldShowBurned = IsBurned;
+        PlayBurnedEffect(shouldShowBurned);
+    }
+
+    public void PlayFryingEffect(bool isPlaying)
+    {
+        if (steamCookingEffect == null) return;
+        if (isPlaying)
+        {
+            if (!steamCookingEffect.isPlaying) steamCookingEffect.Play();
+        }
+        else
+        {
+            steamCookingEffect.Stop();
+        }
+    }
+
+    public void PlayBurnedEffect(bool isPlaying)
+    {
+        if (burnedCookingEffect == null) return;
+        if (isPlaying)
+        {
+            if (!burnedCookingEffect.isPlaying) burnedCookingEffect.Play();
+        }
+        else
+        {
+            burnedCookingEffect.Stop();
+        }
+    }
+
+    public void HideEffects()
+    {
+        if (steamCookingEffect != null) steamCookingEffect.Stop();
+        if (burnedCookingEffect != null) burnedCookingEffect.Stop();
     }
 
     public bool CanAddIngredient()

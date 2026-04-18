@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using DG.Tweening;
 
 public class StoveCounter : BaseCounter, IKitchenObjectParent
 {
@@ -11,16 +13,22 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
     }
 
     [SerializeField] private ProgressBarUI progressBarUI;
-    [SerializeField] private PotObject potObject;
+    [SerializeField] private PotObject potObjectPrefab;
     [SerializeField] private Transform potPoint;
 
     [SerializeField] private float fryingTimerMax = 4f;
     [SerializeField] private float burningTimerMax = 5f;
 
-    [SerializeField] private ParticleSystem steamCookingEffect;
-    [SerializeField] private ParticleSystem burnedCookingEffect;
+    [SerializeField] private Sprite completeSprite;
+    [SerializeField] private Sprite warningSprite;
+
+    [SerializeField] private Image imageUI;
 
     private KitchenObject _kitchenObject;
+    private PotObject _currentPot;
+
+    private bool _isCompleteUIShown;
+    private Tween _imageFadeTween;
 
     private State _state;
     private State CurrentState
@@ -29,7 +37,7 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
         set
         {
             _state = value;
-            ShowEffect();
+            UpdateUIState();
         }
     }
 
@@ -38,63 +46,77 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
         base.Awake();
     }
 
+    private void OnDestroy()
+    {
+        _imageFadeTween?.Kill();
+    }
+
     protected override void Start()
     {
         base.Start();
         CurrentState = State.Idle;
-        HideEffect();
-        var go = Instantiate(potObject, potPoint.position, Quaternion.identity);
-        go.SetKitchenObjectParent(this);
+        if (imageUI != null) imageUI.enabled = false;
+
+        // Tự động tạo nồi khi bắt đầu nếu được gán prefab
+        if (potObjectPrefab != null)
+        {
+            var go = Instantiate(potObjectPrefab, potPoint.position, Quaternion.identity);
+            go.SetKitchenObjectParent(this);
+        }
     }
 
     private void Update()
     {
-        if (HasKitchenObject() && GetKitchenObject() is PotObject pot)
+        // Sử dụng cache _currentPot để tối ưu, không cần cast mỗi frame
+        if (_currentPot != null)
         {
             switch (_state)
             {
                 case State.Idle:
-                    if (pot.HasIngredients())
+                    if (_currentPot.HasIngredients())
                     {
-                        if (pot.IsBurned) CurrentState = State.Burned;
-                        else if (pot.IsCooked) CurrentState = State.Fried;
+                        if (_currentPot.IsBurned) CurrentState = State.Burned;
+                        else if (_currentPot.IsCooked) CurrentState = State.Fried;
                         else CurrentState = State.Frying;
                     }
                     break;
+
                 case State.Frying:
-                    pot.FryingTimer += Time.deltaTime;
+                    _currentPot.FryingTimer += Time.deltaTime;
+                    progressBarUI?.UpdateProgress(_currentPot.FryingTimer / fryingTimerMax);
 
-                    if (progressBarUI == null) Debug.LogWarning("Chưa gán ProgressBarUI vào StoveCounter!");
-                    progressBarUI?.UpdateProgress(pot.FryingTimer / fryingTimerMax);
-
-                    if (pot.FryingTimer >= fryingTimerMax)
+                    if (_currentPot.FryingTimer >= fryingTimerMax)
                     {
+                        _currentPot.IsCooked = true;
                         CurrentState = State.Fried;
-                        pot.IsCooked = true;
-                        Debug.Log("StoveCounter: Nấu xong! Chuyển sang đợi khét.");
+                        Debug.Log("StoveCounter: Nấu xong! Chuyển sangFried.");
 
-                        if (pot.HasKitchenObject() && pot.GetKitchenObject() is FoodObject food)
+                        if (_currentPot.HasKitchenObject() && _currentPot.GetKitchenObject() is FoodObject food)
                         {
                             food.Fried();
                         }
                     }
                     break;
-                case State.Fried:
-                    pot.BurningTimer += Time.deltaTime;
-                    progressBarUI?.UpdateProgress(pot.BurningTimer / burningTimerMax);
 
-                    if (pot.BurningTimer >= burningTimerMax)
+                case State.Fried:
+                    _currentPot.BurningTimer += Time.deltaTime;
+
+                    // Xử lý UI Warning / Complete
+                    HandleFriedUI();
+
+                    if (_currentPot.BurningTimer >= burningTimerMax)
                     {
+                        _currentPot.IsBurned = true;
                         CurrentState = State.Burned;
-                        pot.IsBurned = true;
                         Debug.Log("StoveCounter: Khét lẹt!!!");
 
-                        if (pot.HasKitchenObject() && pot.GetKitchenObject() is FoodObject food)
+                        if (_currentPot.HasKitchenObject() && _currentPot.GetKitchenObject() is FoodObject food)
                         {
                             food.Burned();
                         }
                     }
                     break;
+
                 case State.Burned:
                     progressBarUI?.UpdateProgress(0f);
                     break;
@@ -110,82 +132,114 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
         }
     }
 
-    private void ShowEffect()
+    private void HandleFriedUI()
     {
-        if (steamCookingEffect != null) 
+        if (imageUI == null) return;
+
+        float burnProgress = _currentPot.BurningTimer / burningTimerMax;
+
+        if (burnProgress >= 0.5f)
         {
-            if (_state == State.Fried)
+            // Trạng thái gần cháy: Sử dụng DOTween để nhấp nháy, càng gần cháy càng nhanh
+            if (imageUI.sprite != warningSprite)
             {
-                if (!steamCookingEffect.isPlaying) steamCookingEffect.Play();
+                _imageFadeTween?.Kill();
+                imageUI.sprite = warningSprite;
+                imageUI.color = Color.white;
+                imageUI.enabled = true;
+
+                // Khởi tạo tween nhấp nháy (Yoyo)
+                _imageFadeTween = imageUI.DOFade(0.2f, 0.5f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
             }
-            else
-            {
-                steamCookingEffect.Stop();
-            }
+
+            // Tăng tốc độ nhấp nháy dựa trên tiến trình cháy (từ 0.5 đến 1.0)
+            float intensity = (burnProgress - 0.5f) / 0.5f; // 0 -> 1
+            _imageFadeTween.timeScale = Mathf.Lerp(1f, 5f, intensity); // Tốc độ nhanh dần từ x1 đến x5
         }
-        
-        if (burnedCookingEffect != null) 
+        else
         {
-            if (_state == State.Burned)
+            // Trạng thái nấu thành công: Hiện dần completeSprite rồi mờ dần
+            if (!_isCompleteUIShown)
             {
-                if (!burnedCookingEffect.isPlaying) burnedCookingEffect.Play();
-            }
-            else
-            {
-                burnedCookingEffect.Stop();
+                _isCompleteUIShown = true;
+                _imageFadeTween?.Kill();
+
+                imageUI.sprite = completeSprite;
+                imageUI.color = new Color(1, 1, 1, 0); // Bắt đầu từ trong suốt
+                imageUI.enabled = true;
+
+                // Tạo chuỗi hiệu ứng: Hiện dần -> Chờ -> Mờ dần
+                Sequence completeSequence = DOTween.Sequence();
+                completeSequence.Append(imageUI.DOFade(1f, 0.3f)); // Hiện dần trong 0.3s
+                completeSequence.AppendInterval(1f);              // Chờ 1s
+                completeSequence.Append(imageUI.DOFade(0f, 0.5f)); // Mờ dần trong 0.5s
+                completeSequence.OnComplete(() =>
+                {
+                    imageUI.enabled = false;
+                });
+
+                _imageFadeTween = completeSequence;
             }
         }
     }
 
-    private void HideEffect()
+    private void UpdateUIState()
     {
-        if (steamCookingEffect != null) steamCookingEffect.Stop();
-        if (burnedCookingEffect != null) burnedCookingEffect.Stop();
+        if (imageUI == null) return;
+
+        // Ẩn ProgressBar nếu không phải đang trong quá trình nấu
+        if (_state != State.Frying)
+        {
+            progressBarUI?.Hide();
+        }
+
+        // Reset trạng thái UI thông báo (icon hoàn thành/cảnh báo)
+        if (_state != State.Fried)
+        {
+            _imageFadeTween?.Kill();
+            imageUI.enabled = false;
+            _isCompleteUIShown = false;
+        }
     }
 
     public override void Interact(Player player)
     {
-        base.Interact(player);
         if (HasKitchenObject())
         {
             if (!player.HasKitchenObject())
             {
                 GetKitchenObject().SetKitchenObjectParent(player);
-                CurrentState = State.Idle;
-                progressBarUI?.UpdateProgress(0f);
-                HideEffect();
             }
             else
             {
-                if (GetKitchenObject() is PotObject pot)
+                if (_currentPot != null)
                 {
-                    if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && pot.CanAddIngredient())
+                    if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && _currentPot.CanAddIngredient())
                     {
-                        if (!pot.HasKitchenObject())
+                        if (!_currentPot.HasKitchenObject())
                         {
-                            food.SetKitchenObjectParent(pot);
+                            food.SetKitchenObjectParent(_currentPot);
                         }
                         else
                         {
                             food.DestroySelf();
                         }
 
-                        pot.OnIngredientAdded();
+                        _currentPot.OnIngredientAdded();
                         food.Soup();
 
-                        // Nếu bỏ món mới trong lúc đang nấu hoặc nấu xong => Reset timer nấu (đã xử lý trong OnIngredientAdded của Pot)
                         CurrentState = State.Frying;
-                        Debug.Log("StoveCounter: Đã bỏ thêm nguyên liệu, nấu lại từ đầu!");
+                        Debug.Log("StoveCounter: Đã bỏ thêm nguyên liệu, nấu lại!");
                     }
-                    else if (player.GetKitchenObject() is PlateObject plate && pot.IsCooked && !pot.IsBurned && pot.IsFull())
+                    else if (player.GetKitchenObject() is PlateObject plate && _currentPot.IsCooked && !_currentPot.IsBurned && _currentPot.IsFull())
                     {
-                        if (pot.HasKitchenObject() && !plate.HasKitchenObject())
+                        if (_currentPot.HasKitchenObject() && !plate.HasKitchenObject())
                         {
-                            KitchenObject potFood = pot.GetKitchenObject();
+                            KitchenObject potFood = _currentPot.GetKitchenObject();
                             potFood.SetKitchenObjectParent(plate);
-                            pot.EmptyPot();
+                            _currentPot.EmptyPot();
                             CurrentState = State.Idle;
-                            progressBarUI?.UpdateProgress(0f);
+                            progressBarUI?.Hide();
                         }
                     }
                 }
@@ -196,16 +250,9 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
             if (player.HasKitchenObject() && player.GetKitchenObject() is PotObject pot)
             {
                 pot.SetKitchenObjectParent(this);
-                if (pot.HasIngredients())
-                {
-                    CurrentState = State.Frying;
-                    Debug.Log("StoveCounter: Bắt đầu nấu!");
-
-                }
             }
         }
     }
-
 
     #region IKitchenObjectParent
 
@@ -217,6 +264,21 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
     public void SetKitchenObject(KitchenObject kitchenObject)
     {
         this._kitchenObject = kitchenObject;
+        this._currentPot = kitchenObject as PotObject;
+
+        _isCompleteUIShown = false;
+        _imageFadeTween?.Kill();
+
+        if (_currentPot != null && _currentPot.HasIngredients())
+        {
+            if (_currentPot.IsBurned) CurrentState = State.Burned;
+            else if (_currentPot.IsCooked) CurrentState = State.Fried;
+            else CurrentState = State.Frying;
+        }
+        else
+        {
+            CurrentState = State.Idle;
+        }
     }
 
     public KitchenObject GetKitchenObject()
@@ -227,6 +289,10 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
     public void ClearKitchenObject()
     {
         this._kitchenObject = null;
+        this._currentPot = null;
+        _imageFadeTween?.Kill();
+        CurrentState = State.Idle;
+        progressBarUI?.UpdateProgress(0f);
     }
 
     public bool HasKitchenObject()
@@ -235,5 +301,4 @@ public class StoveCounter : BaseCounter, IKitchenObjectParent
     }
 
     #endregion
-
 }

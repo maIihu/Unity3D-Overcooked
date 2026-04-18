@@ -21,7 +21,8 @@ public class FoodObject : KitchenObject
     [SerializeField] private GameObject normalVisual;
     [SerializeField] private GameObject cuttingVisual;
     [SerializeField] private GameObject soupVisual;
-    
+    [SerializeField] private float timeCooked;
+
     public FoodState FoodState { get; private set; }
     public FoodType FoodType => foodType;
 
@@ -40,22 +41,25 @@ public class FoodObject : KitchenObject
         cuttingVisual.SetActive(true);
         soupVisual.SetActive(false);
     }
-    
-    public void Soup(){
+
+    public void Soup()
+    {
         FoodState = FoodState.Soup;
         normalVisual.SetActive(false);
         cuttingVisual.SetActive(false);
         soupVisual.SetActive(true);
     }
-    
-    public void Fried(){
+
+    public void Fried()
+    {
         FoodState = FoodState.Fried;
         normalVisual.SetActive(false);
         cuttingVisual.SetActive(false);
         soupVisual.SetActive(true);
     }
 
-    public void Burned(){
+    public void Burned()
+    {
         FoodState = FoodState.Burned;
         normalVisual.SetActive(false);
         cuttingVisual.SetActive(false);

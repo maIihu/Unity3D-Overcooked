@@ -1697,31 +1697,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2871874777693448524, guid: ff319b93ebba1af4b87b1894cdff506f,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 2.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 2871874777693448524, guid: ff319b93ebba1af4b87b1894cdff506f,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 2.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 2871874777693448524, guid: ff319b93ebba1af4b87b1894cdff506f,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 2.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 2871874777693448524, guid: ff319b93ebba1af4b87b1894cdff506f,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0.383
-      objectReference: {fileID: 0}
-    - target: {fileID: 5464922795783465971, guid: ff319b93ebba1af4b87b1894cdff506f,
-        type: 3}
-      propertyPath: steamCookingEffect
-      value: 
-      objectReference: {fileID: 1651064424}
     - target: {fileID: 5498409353710322713, guid: ff319b93ebba1af4b87b1894cdff506f,
         type: 3}
       propertyPath: m_Name
@@ -3294,11 +3269,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CuttingCounter
-      objectReference: {fileID: 0}
-    - target: {fileID: 6590996590326125241, guid: 0066b7dcb7e59134e9d84c08ea50ac62,
-        type: 3}
-      propertyPath: m_PresetInfoIsWorld
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5548,12 +5518,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1130317772440694930, guid: b635bd3d1d5dc6942a4fd8bde0811f16,
     type: 3}
   m_PrefabInstance: {fileID: 916612539}
-  m_PrefabAsset: {fileID: 0}
---- !u!198 &1651064424 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 8154246955723224593, guid: ff319b93ebba1af4b87b1894cdff506f,
-    type: 3}
-  m_PrefabInstance: {fileID: 464759853}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1686412884
 GameObject:
