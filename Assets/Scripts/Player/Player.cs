@@ -9,14 +9,13 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     [SerializeField] private float rotateSpeed = 10f;
     [SerializeField] private float interactDistance = 1f;
     [SerializeField] private float sphereRadius = 0.5f;
-    [SerializeField] private float playerHeight = 2f;
-    [SerializeField] private float playerRadius = 0.7f;
-    
+
     [SerializeField] private Transform _handPoint;
     [SerializeField] private Transform interactPoint;
-    
+
     [SerializeField] private Animator animator;
-    
+    [SerializeField] private Rigidbody _rb;
+
     private Vector2 _moveInput;
     private Vector3 _lastInteractDir;
     private BaseCounter _selectedCounter;
@@ -25,16 +24,11 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     private CuttingCounter _currentCuttingCounter;
     private bool _isCutting;
     private Coroutine _cutCoroutine;
-    
-    private void Awake()
-    {
-    }
 
     private void Update()
     {
         InputHandler();
         UpdateAnimation();
-        Move();
         HandleInteractions();
         if (_moveInput != Vector2.zero && _isCutting)
         {
@@ -42,35 +36,67 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         }
     }
 
+    private void FixedUpdate()
+    {
+        Move();
+    }
+
+    #region Move
+
+    private void InputHandler()
+    {
+        _moveInput = Vector2.zero;
+        if (Input.GetKey(KeyCode.W)) _moveInput.y += 1;
+        if (Input.GetKey(KeyCode.A)) _moveInput.x -= 1;
+        if (Input.GetKey(KeyCode.S)) _moveInput.y -= 1;
+        if (Input.GetKey(KeyCode.D)) _moveInput.x += 1;
+        _moveInput.Normalize();
+    }
+
+    private void UpdateAnimation()
+    {
+        animator.SetFloat("MovingValue", _moveInput.magnitude);
+    }
+
+    private void Move()
+    {
+        Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
+
+        // Áp dụng vận tốc cho Rigidbody
+        Vector3 targetVelocity = moveDir * moveSpeed;
+        if (_rb != null)
+        {
+            targetVelocity.y = _rb.velocity.y; // Giữ nguyên trọng lực
+            _rb.velocity = targetVelocity;
+        }
+
+        if (moveDir != Vector3.zero)
+        {
+            transform.forward = Vector3.Slerp(transform.forward, moveDir.normalized, Time.fixedDeltaTime * rotateSpeed);
+        }
+    }
+
+    #endregion
+
     private void OnDrawGizmos()
     {
         Vector3 origin = interactPoint.position;
         Vector3 dir = _lastInteractDir == Vector3.zero ? transform.forward : _lastInteractDir.normalized;
-    
+
         Vector3 endPoint = origin + dir * interactDistance;
 
         Gizmos.color = Color.yellow;
 
         Gizmos.DrawWireSphere(origin, sphereRadius);
-        
+
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(endPoint, sphereRadius);
-        
+
         Gizmos.color = Color.black;
         Gizmos.DrawLine(origin, endPoint);
-        
-        Gizmos.color = Color.green;
-        Gizmos.DrawLine(this.transform.position, this.transform.position + Vector3.up * playerHeight);
-        
-        Vector3 point1 = transform.position;
-        Vector3 point2 = transform.position + Vector3.up * playerHeight;
-
-        Gizmos.color = Color.blue;
-
-        DrawCapsule(point1, point2, playerRadius);
 
     }
-    
+
     private void DrawCapsule(Vector3 point1, Vector3 point2, float radius)
     {
         Gizmos.DrawWireSphere(point1, radius);
@@ -85,59 +111,6 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         Gizmos.DrawLine(point1 + forward, point2 + forward);
         Gizmos.DrawLine(point1 - forward, point2 - forward);
     }
-
-    #region Move
-    
-    private void InputHandler()
-    {
-        _moveInput = Vector2.zero;
-        if (Input.GetKey(KeyCode.W)) _moveInput.y += 1;
-        if (Input.GetKey(KeyCode.A)) _moveInput.x -= 1;
-        if (Input.GetKey(KeyCode.S)) _moveInput.y -= 1;
-        if (Input.GetKey(KeyCode.D)) _moveInput.x += 1;
-        _moveInput.Normalize();
-    }
-
-    private void UpdateAnimation()
-    {
-        animator.SetFloat("MovingValue", _moveInput.magnitude);
-
-    }
-    private void Move()
-    {
-        Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
-        float moveDistance = moveSpeed  * Time.deltaTime;
-        
-        Vector3 pos = transform.position;
-        Vector3 upOffset = Vector3.up * playerHeight;
-        
-        // tach truc X
-        Vector3 moveDirX = new Vector3(moveDir.x, 0, 0);
-        bool canMoveX = !Physics.CapsuleCast(pos, pos + upOffset, 
-            playerRadius, moveDirX, moveDistance);
-        
-        // tach truc Z
-        Vector3 moveDirZ = new Vector3(0, 0, moveDir.z);
-        bool canMoveZ =  !Physics.CapsuleCast(pos, pos + upOffset, 
-            playerRadius, moveDirZ, moveDistance);
-        
-        if(canMoveX)
-            transform.position += moveDirX * moveDistance;
-        if (canMoveZ)
-            transform.position += moveDirZ * moveDistance;
-        
-        Vector3 finalMove = new Vector3(canMoveX ? moveDirX.x : 0,
-            0, canMoveZ ? moveDirZ.z : 0);
-        
-        if (finalMove != Vector3.zero)
-        {
-            transform.forward = Vector3.Slerp(transform.forward, finalMove.normalized, Time.deltaTime * rotateSpeed);
-        }
-       
-    }
-
-
-    #endregion
 
     #region Interactions
 
@@ -155,34 +128,55 @@ public class Player : MonoBehaviour, IKitchenObjectParent
                 {
                     SetSelectedCounter(baseCounter);
                 }
-                
+
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    if((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||
-                       (HasKitchenObject() && _selectedCounter is ClearCounter)) 
+                    if ((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||
+                       (HasKitchenObject() && _selectedCounter is ClearCounter))
                         animator.SetTrigger("IsPicked");
-                    
+
                     baseCounter.Interact(this);
                     animator.SetBool("HasObject", this.HasKitchenObject());
                 }
-                
+
                 if (_selectedCounter == baseCounter && Input.GetKeyDown(KeyCode.R) && _moveInput == Vector2.zero)
                 {
                     if (baseCounter is CuttingCounter cuttingCounter && cuttingCounter.HasKitchenObject())
                     {
-                        if(cuttingCounter.GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
+                        if (cuttingCounter.GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
                             StartCutting(cuttingCounter);
                     }
                 }
-
-                
-                //if (Input.GetKey(KeyCode.R)) baseCounter.InteractAlternate(this);
+                return;
             }
-            else SetSelectedCounter(null);
+
+            // Kiểm tra vật phẩm dưới đất
+            if (hit.collider.TryGetComponent(out KitchenObject kitchenObject))
+            {
+                // Chỉ xử lý nếu không phải là vật phẩm đang cầm trên tay
+                if (kitchenObject != GetKitchenObject())
+                {
+                    SetSelectedCounter(null);
+                    if (Input.GetKeyDown(KeyCode.Space) && !HasKitchenObject() && kitchenObject.GetKitchenObjectParent() == null)
+                    {
+                        kitchenObject.SetKitchenObjectParent(this);
+                        animator.SetBool("HasObject", true);
+                        animator.SetTrigger("IsPicked");
+                    }
+                    return;
+                }
+            }
         }
-        else SetSelectedCounter(null);
+
+        SetSelectedCounter(null);
+
+        // Logic thả đồ xuống đất khi không nhìn vào bàn
+        if (Input.GetKeyDown(KeyCode.Space) && HasKitchenObject())
+        {
+            DropKitchenObject();
+        }
     }
-    
+
     private void SetSelectedCounter(BaseCounter baseCounter)
     {
         if (_selectedCounter != null)
@@ -196,6 +190,20 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         {
             _selectedCounter.Show();
         }
+    }
+
+    private void DropKitchenObject()
+    {
+        KitchenObject kitchenObject = GetKitchenObject();
+        if (kitchenObject == null) return;
+
+        // Thả vật phẩm từ vị trí ngang tay (chest height) và để nó tự rơi theo trọng lực
+        Vector3 dropPosition = transform.position + transform.forward * 1f + Vector3.up * 0.5f;
+
+        kitchenObject.SetKitchenObjectParent(null);
+        kitchenObject.transform.position = dropPosition;
+
+        animator.SetBool("HasObject", false);
     }
 
     #endregion
@@ -230,9 +238,12 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     {
         animator.SetBool("IsChopping", false);
         _isCutting = false;
-        _currentCuttingCounter.OnCutComplete -= StopCutting;
-        _currentCuttingCounter.StopAnimationCut();
-        _currentCuttingCounter = null;
+        if (_currentCuttingCounter != null)
+        {
+            _currentCuttingCounter.OnCutComplete -= StopCutting;
+            _currentCuttingCounter.StopAnimationCut();
+            _currentCuttingCounter = null;
+        }
         if (_cutCoroutine != null)
         {
             StopCoroutine(_cutCoroutine);
@@ -241,7 +252,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     }
 
     #endregion
-    
+
     #region IKitchenObjectParent
 
     public Transform GetKitchenObjectToTransform()
@@ -251,12 +262,12 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     public void SetKitchenObject(KitchenObject kitchenObject)
     {
-        this._kitchenObject =  kitchenObject;
+        this._kitchenObject = kitchenObject;
     }
 
     public KitchenObject GetKitchenObject()
     {
-        return  this._kitchenObject;
+        return this._kitchenObject;
     }
 
     public void ClearKitchenObject()
@@ -270,5 +281,5 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     }
 
     #endregion
-        
+
 }

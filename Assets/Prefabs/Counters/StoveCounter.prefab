@@ -297,8 +297,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9775559, y: 0.57194245, z: 0.86661375}
-  m_Center: {x: -0.07131833, y: 0.28072387, z: -0.09685403}
+  m_Size: {x: 0.9479205, y: 0.57194245, z: 0.91196024}
+  m_Center: {x: -0.013873011, y: 0.28072387, z: 0.012624562}
 --- !u!114 &5464922795783465971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,7 +313,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 7855923016644956000}
   selectedCounter: {fileID: 7914324331464937705}
-  progressBarUI: {fileID: 6148309530234754046}
   potObjectPrefab: {fileID: 7388250531353371702, guid: dd26e63db74aef9419c28626eee1e7c3,
     type: 3}
   potPoint: {fileID: 7445141532680819052}
@@ -731,18 +730,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fcd6bf12dfdfbf54db300dfd172dc910, type: 3}
---- !u!114 &6148309530234754046 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8751547362541742451, guid: fcd6bf12dfdfbf54db300dfd172dc910,
-    type: 3}
-  m_PrefabInstance: {fileID: 3179702983076362893}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2cf189c2156ee854ab98302a52ae85ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &7002441251292423185 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5552155709498957468, guid: fcd6bf12dfdfbf54db300dfd172dc910,

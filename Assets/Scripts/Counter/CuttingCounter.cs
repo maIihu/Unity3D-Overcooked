@@ -24,6 +24,9 @@ public class CuttingCounter : BaseCounter, IKitchenObjectParent
         base.Interact(player);
         if (HasKitchenObject())
         {
+            // Kiểm tra nếu đang cắt (tiến trình > 0) thì không cho lấy ra
+            if (_cuttingProgress > 0) return;
+
             _kitchenObject.SetKitchenObjectParent(player);
 
             progressBarUI?.UpdateProgress(0f);
