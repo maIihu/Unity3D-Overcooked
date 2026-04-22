@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78e784b19c5b9214c9ea061227e27a07, type: 3}
+  m_Name: CounterTemplateList
+  m_EditorClassIdentifier: 
+  templates:
+  - counterId: ClearCounter
+    displayName: Clear Counter
+    prefab: {fileID: 9026034541025303468, guid: bd3e8175b683f7b4d9b0dd8cf7f4d58b,
+      type: 3}
+    foodType: 0
+    vesselPrefab: {fileID: 0}
+  - counterId: Container:Tomato
+    displayName: Tomato Box
+    prefab: {fileID: 5498409353710322713, guid: b635bd3d1d5dc6942a4fd8bde0811f16,
+      type: 3}
+    foodType: 1
+    vesselPrefab: {fileID: 0}
+  - counterId: Container:Onion
+    displayName: Onion Box
+    prefab: {fileID: 5498409353710322713, guid: b635bd3d1d5dc6942a4fd8bde0811f16,
+      type: 3}
+    foodType: 2
+    vesselPrefab: {fileID: 0}
+  - counterId: Stove:Pot
+    displayName: Stove (Pot)
+    prefab: {fileID: 5498409353710322713, guid: ff319b93ebba1af4b87b1894cdff506f,
+      type: 3}
+    foodType: 0
+    vesselPrefab: {fileID: 7388250531353371702, guid: dd26e63db74aef9419c28626eee1e7c3,
+      type: 3}
+  - counterId: CuttingCounter
+    displayName: Cutting Counter
+    prefab: {fileID: 5498409353710322713, guid: 0066b7dcb7e59134e9d84c08ea50ac62,
+      type: 3}
+    foodType: 0
+    vesselPrefab: {fileID: 0}
+  - counterId: TrashCounter
+    displayName: Trash Bin
+    prefab: {fileID: 5498409353710322713, guid: ceb2aaf7c593efa4885fea05ca34aa26,
+      type: 3}
+    foodType: 0
+    vesselPrefab: {fileID: 0}
