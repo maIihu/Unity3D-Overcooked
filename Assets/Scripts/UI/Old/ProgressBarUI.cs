@@ -1,36 +1,38 @@
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ProgressBarUI : MonoBehaviour
+namespace GameUI
 {
-    [SerializeField] private Image barImage;
-
-    private void Start()
+    public class ProgressBarUI : MonoBehaviour
     {
-        barImage.fillAmount = 0;
-        Hide();
-    }
+        [SerializeField] private Image barImage;
 
-    public void UpdateProgress(float progressNormalized)
-    {
-        barImage.fillAmount = progressNormalized;
-        if (progressNormalized is 0 or >= 1f)
+        private void Start()
+        {
+            barImage.fillAmount = 0;
             Hide();
-        else
-            Show();
-    }
+        }
 
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
+        public void UpdateProgress(float progressNormalized)
+        {
+            barImage.fillAmount = progressNormalized;
+            if (progressNormalized is 0 or >= 1f)
+                Hide();
+            else
+                Show();
+        }
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
     }
 }

@@ -1,71 +1,15 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using DesignPattern;
 
-public class GameManager : Singleton<GameManager>
+namespace GameCore
 {
-    public enum GameState
+    public class GameManager : MonoBehaviour
     {
-        GamePlaying, GameOver, Pause
-    }
+        public static GameManager Instance { get; private set; }
 
-    public event EventHandler OnStateChanged;
-
-    private GameState _currentState;
-
-    private void Awake()
-    {
-        Initialize(this);
-    }
-
-    protected override void OnRegistration()
-    {
-        ChangeState(GameState.GamePlaying);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        private void Awake()
         {
-            if (_currentState == GameState.GamePlaying)
-            {
-                ChangeState(GameState.Pause);
-            }
-            else if (_currentState == GameState.Pause)
-            {
-                ChangeState(GameState.GamePlaying);
-            }
+            Instance = this;
         }
-    }
-
-    public void ChangeState(GameState newState)
-    {
-        _currentState = newState;
-        ApplyState();
-    }
-
-    private void ApplyState()
-    {
-        switch (_currentState)
-        {
-            case GameState.GamePlaying:
-                Time.timeScale = 1f;
-                break;
-            case GameState.Pause:
-                Time.timeScale = 0f;
-                break;
-            case GameState.GameOver:
-                Time.timeScale = 0f;
-                break;
-        }
-
-        OnStateChanged?.Invoke(this, EventArgs.Empty);
-    }
-
-    public GameState GetCurrentState()
-    {
-        return _currentState;
     }
 }

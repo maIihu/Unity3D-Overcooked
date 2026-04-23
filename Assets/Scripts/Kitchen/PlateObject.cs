@@ -2,37 +2,49 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlateObject : KitchenObject, IKitchenObjectParent
+namespace Kitchen
 {
-    [SerializeField] private Transform topPoint;
-    private KitchenObject _kitchenObject;
-
-    #region IKitchenObjectParent
-
-    public Transform GetKitchenObjectToTransform()
+    public class PlateObject : KitchenObject, IKitchenObjectParent
     {
-        return topPoint;
-    }
+        [SerializeField] private Transform topPoint;
+        private KitchenObject _kitchenObject;
 
-    public void SetKitchenObject(KitchenObject kitchenObject)
-    {
-        this._kitchenObject = kitchenObject;
-    }
+        public override void OnDespawn()
+        {
+            base.OnDespawn();
+            if (HasKitchenObject())
+            {
+                _kitchenObject.DestroySelf();
+            }
+        }
 
-    public KitchenObject GetKitchenObject()
-    {
-        return this._kitchenObject;
-    }
+        #region IKitchenObjectParent
 
-    public void ClearKitchenObject()
-    {
-        this._kitchenObject = null;
-    }
+        public Transform GetKitchenObjectToTransform()
+        {
+            return topPoint;
+        }
 
-    public bool HasKitchenObject()
-    {
-        return this._kitchenObject != null;
-    }
+        public void SetKitchenObject(KitchenObject kitchenObject)
+        {
+            this._kitchenObject = kitchenObject;
+        }
 
-    #endregion
+        public KitchenObject GetKitchenObject()
+        {
+            return this._kitchenObject;
+        }
+
+        public void ClearKitchenObject()
+        {
+            this._kitchenObject = null;
+        }
+
+        public bool HasKitchenObject()
+        {
+            return this._kitchenObject != null;
+        }
+
+        #endregion
+    }
 }

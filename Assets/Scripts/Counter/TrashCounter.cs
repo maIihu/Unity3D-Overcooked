@@ -1,34 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Kitchen;
+using Player;
 
-public class TrashCounter : BaseCounter
+namespace Counter
 {
-    public override void Interact(Player player)
+    public class TrashCounter : BaseCounter
     {
-        base.Interact(player);
-        if (player.HasKitchenObject())
+        public override void Interact(Player.Player player)
         {
-            KitchenObject playerObject = player.GetKitchenObject();
+            base.Interact(player);
+            if (player.HasKitchenObject())
+            {
+                KitchenObject playerObject = player.GetKitchenObject();
 
-            if (playerObject is PlateObject plate)
-            {
-                if (plate.HasKitchenObject())
+                if (playerObject is PlateObject plate)
                 {
-                    plate.GetKitchenObject().DestroySelf();
+                    if (plate.HasKitchenObject())
+                    {
+                        plate.GetKitchenObject().DestroySelf();
+                    }
                 }
-            }
-            else if (playerObject is PotObject pot)
-            {
-                if (pot.HasKitchenObject())
+                else if (playerObject is PotObject pot)
                 {
-                    pot.GetKitchenObject().DestroySelf();
+                    if (pot.HasKitchenObject())
+                    {
+                        pot.GetKitchenObject().DestroySelf();
+                    }
+                    pot.EmptyPot();
                 }
-                pot.EmptyPot();
-            }
-            else
-            {
-                playerObject.DestroySelf();
+                else
+                {
+                    playerObject.DestroySelf();
+                }
             }
         }
     }

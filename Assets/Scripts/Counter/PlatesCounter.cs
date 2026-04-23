@@ -1,104 +1,63 @@
 using System;
 using UnityEngine;
+using Pooling;
+using Kitchen;
+using Player;
 
-public class PlatesCounter : BaseCounter, IKitchenObjectParent
+namespace Counter
 {
-    [SerializeField] private PlateObject plateObjectPrefab;
-
-    private KitchenObject _kitchenObject;
-
-    private float _spawnPlateTimer;
-    private float _spawnPlateTimerMax = 4f;
-
-    protected override void Start()
+    public class PlatesCounter : BaseCounter
     {
-        base.Start();
-        // Không gọi SpawnPlate() ở đây nữa để tránh việc sinh đĩa đè lên nhau nếu chưa trễ 4 giây từ lúc start.
-        // Hoặc giữ nguyên tuỳ ý, nhưng vòng lặp Update() sẽ lo việc sinh đĩa.
-    }
+        private float _spawnPlateTimer;
+        private float _spawnPlateTimerMax = 4f;
 
-    private void Update()
-    {
-        if (!HasKitchenObject())
+        private void Update()
         {
-            _spawnPlateTimer += Time.deltaTime;
-            if (_spawnPlateTimer > _spawnPlateTimerMax)
+            if (!HasKitchenObject())
             {
-                SpawnPlate();
-                _spawnPlateTimer = 0;
-            }
-        }
-    }
-
-    public override void Interact(Player player)
-    {
-        base.Interact(player);
-        if (HasKitchenObject())
-        {
-            // Trên bàn đang có đĩa
-            if (!player.HasKitchenObject())
-            {
-                // Người chơi không cầm gì -> Lấy đĩa từ bàn
-                _kitchenObject.SetKitchenObjectParent(player);
-            }
-            else
-            {
-                // Người chơi đang cầm 1 vật
-                if (player.GetKitchenObject() is FoodObject food)
+                _spawnPlateTimer += Time.deltaTime;
+                if (_spawnPlateTimer > _spawnPlateTimerMax)
                 {
-                    // Ép kiểu đĩa trên bàn và thả thức ăn vào đĩa
-                    PlateObject plate = _kitchenObject as PlateObject;
-                    if (food.FoodState == FoodState.Cut)
-                    {
-                        food.SetKitchenObjectParent(plate);
-                    }
+                    SpawnPlate();
+                    _spawnPlateTimer = 0;
                 }
             }
         }
-        else
+
+        public override void Interact(Player.Player player)
         {
-            // Bàn đang trống
-            if (player.HasKitchenObject() && player.GetKitchenObject() is PlateObject)
+            base.Interact(player);
+            if (HasKitchenObject())
             {
-                // Chỉ cho phép đặt Đĩa trở lại bàn PlatesCounter
-                player.GetKitchenObject().SetKitchenObjectParent(this);
+                if (!player.HasKitchenObject())
+                {
+                    GetKitchenObject().SetKitchenObjectParent(player);
+                }
+                else
+                {
+                    if (player.GetKitchenObject() is FoodObject food)
+                    {
+                        PlateObject plate = GetKitchenObject() as PlateObject;
+                        if (food.FoodState == FoodState.Cut)
+                        {
+                            food.SetKitchenObjectParent(plate);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (player.HasKitchenObject() && player.GetKitchenObject() is PlateObject)
+                {
+                    player.GetKitchenObject().SetKitchenObjectParent(this);
+                }
             }
         }
+
+        private void SpawnPlate()
+        {
+            // Use the new pooling helper from BaseCounter
+            SpawnKitchenObject(KitchenType.Plate);
+        }
     }
-
-    private void SpawnPlate()
-    {
-        PlateObject plate = Instantiate(plateObjectPrefab);
-        plate.SetKitchenObjectParent(this);
-    }
-
-    #region IKitchenObjectParent
-
-    public Transform GetKitchenObjectToTransform()
-    {
-        return CounterTopPoint;
-    }
-
-    public void SetKitchenObject(KitchenObject kitchenObject)
-    {
-        this._kitchenObject = kitchenObject;
-    }
-
-    public KitchenObject GetKitchenObject()
-    {
-        return this._kitchenObject;
-    }
-
-    public void ClearKitchenObject()
-    {
-        this._kitchenObject = null;
-    }
-
-    public bool HasKitchenObject()
-    {
-        return this._kitchenObject != null;
-    }
-
-    #endregion
-
 }

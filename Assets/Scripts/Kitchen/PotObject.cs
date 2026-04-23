@@ -1,182 +1,187 @@
 using System;
 using UnityEngine;
+using Counter;
+using GameUI;
 
-public class PotObject : KitchenObject, IKitchenObjectParent
+namespace Kitchen
 {
-    [SerializeField] private float liquidHeight;
-    [SerializeField] private GameObject liquidGO;
-    [SerializeField] private Color burnedColor = new Color(0.2f, 0.2f, 0.2f);
+    public class PotObject : KitchenObject, IKitchenObjectParent
+    {
+        [SerializeField] private float liquidHeight;
+        [SerializeField] private GameObject liquidGO;
+        [SerializeField] private Color burnedColor = new Color(0.2f, 0.2f, 0.2f);
 
-    [SerializeField] private ParticleSystem steamCookingEffect;
-    [SerializeField] private ParticleSystem burnedCookingEffect;
-    
-    [SerializeField] private ProgressBarUI progressBarUI;
+        [SerializeField] private ParticleSystem steamCookingEffect;
+        [SerializeField] private ParticleSystem burnedCookingEffect;
 
-    private Material _liquidMaterial;
-    private Color _defaultLiquidColor;
-    private bool _isBurned;
+        [SerializeField] private ProgressBarUI progressBarUI;
 
-    public bool IsCooked { get; set; }
-    public bool IsBurned 
-    { 
-        get => _isBurned; 
-        set 
+        private Material _liquidMaterial;
+        private Color _defaultLiquidColor;
+        private bool _isBurned;
+
+        public bool IsCooked { get; set; }
+        public bool IsBurned
         {
-            _isBurned = value;
-            if (_liquidMaterial != null)
+            get => _isBurned;
+            set
             {
-                _liquidMaterial.color = _isBurned ? burnedColor : _defaultLiquidColor;
+                _isBurned = value;
+                if (_liquidMaterial != null)
+                {
+                    _liquidMaterial.color = _isBurned ? burnedColor : _defaultLiquidColor;
+                }
             }
         }
-    }
 
-    public float FryingTimer { get; set; }
-    public float BurningTimer { get; set; }
-    
-    // Lưu lại bộ đếm thời gian tối đa để kiểm tra % tiến độ khi cầm trên tay
-    public float BurningTimerMax { get; set; } 
+        public float FryingTimer { get; set; }
+        public float BurningTimer { get; set; }
 
-    private const int MaxCapacity = 3;
+        // Lưu lại bộ đếm thời gian tối đa để kiểm tra % tiến độ khi cầm trên tay
+        public float BurningTimerMax { get; set; }
 
-    private int _currentCount;
+        private const int MaxCapacity = 3;
 
-    [SerializeField] private Transform topPoint;
-    private KitchenObject _kitchenObject;
+        private int _currentCount;
 
-    private void Awake()
-    {
-        if (liquidGO != null && liquidGO.TryGetComponent<Renderer>(out var renderer))
+        [SerializeField] private Transform topPoint;
+        private KitchenObject _kitchenObject;
+
+        private void Awake()
         {
-            _liquidMaterial = renderer.material;
-            _defaultLiquidColor = _liquidMaterial.color;
+            if (liquidGO != null && liquidGO.TryGetComponent<Renderer>(out var renderer))
+            {
+                _liquidMaterial = renderer.material;
+                _defaultLiquidColor = _liquidMaterial.color;
+            }
         }
-    }
 
-    private void Update()
-    {
-        // Tự động điều khiển VFX dựa trên trạng thái của nồi
-        bool isOnStove = GetKitchenObjectParent() is StoveCounter;
-        
-        // Hiệu ứng khói: Chỉ hiển thị khi đã nấu chín nhưng chưa cháy, và phải đang ở trên bếp
-        bool shouldShowSteam = isOnStove && HasIngredients() && !IsBurned && IsCooked;
-        PlayFryingEffect(shouldShowSteam);
-
-        // Hiệu ứng cháy: Khi đã bị cháy (vẫn hiện kể cả khi nhấc ra khỏi bếp)
-        bool shouldShowBurned = IsBurned;
-        PlayBurnedEffect(shouldShowBurned);
-    }
-
-    public void UpdateCookingProgress(float progress)
-    {
-        if (progressBarUI == null) return;
-        
-        progressBarUI.UpdateProgress(progress);
-    }
-
-    public void PlayFryingEffect(bool isPlaying)
-    {
-        if (steamCookingEffect == null) return;
-        if (isPlaying)
+        private void Update()
         {
-            if (!steamCookingEffect.isPlaying) steamCookingEffect.Play();
+            // Tự động điều khiển VFX dựa trên trạng thái của nồi
+            bool isOnStove = GetKitchenObjectParent() is StoveCounter;
+
+            // Hiệu ứng khói: Chỉ hiển thị khi đã nấu chín nhưng chưa cháy, và phải đang ở trên bếp
+            bool shouldShowSteam = isOnStove && HasIngredients() && !IsBurned && IsCooked;
+            PlayFryingEffect(shouldShowSteam);
+
+            // Hiệu ứng cháy: Khi đã bị cháy (vẫn hiện kể cả khi nhấc ra khỏi bếp)
+            bool shouldShowBurned = IsBurned;
+            PlayBurnedEffect(shouldShowBurned);
         }
-        else
+
+        public void UpdateCookingProgress(float progress)
         {
-            steamCookingEffect.Stop();
-        }
-    }
+            if (progressBarUI == null) return;
 
-    public void PlayBurnedEffect(bool isPlaying)
-    {
-        if (burnedCookingEffect == null) return;
-        if (isPlaying)
+            progressBarUI.UpdateProgress(progress);
+        }
+
+        public void PlayFryingEffect(bool isPlaying)
         {
-            if (!burnedCookingEffect.isPlaying) burnedCookingEffect.Play();
+            if (steamCookingEffect == null) return;
+            if (isPlaying)
+            {
+                if (!steamCookingEffect.isPlaying) steamCookingEffect.Play();
+            }
+            else
+            {
+                steamCookingEffect.Stop();
+            }
         }
-        else
+
+        public void PlayBurnedEffect(bool isPlaying)
         {
-            burnedCookingEffect.Stop();
+            if (burnedCookingEffect == null) return;
+            if (isPlaying)
+            {
+                if (!burnedCookingEffect.isPlaying) burnedCookingEffect.Play();
+            }
+            else
+            {
+                burnedCookingEffect.Stop();
+            }
         }
-    }
 
-    public void HideEffects()
-    {
-        if (steamCookingEffect != null) steamCookingEffect.Stop();
-        if (burnedCookingEffect != null) burnedCookingEffect.Stop();
-    }
-
-    public bool CanAddIngredient()
-    {
-        return _currentCount < MaxCapacity && !IsBurned;
-    }
-
-    public void OnIngredientAdded()
-    {
-        _currentCount++;
-        liquidGO.transform.localPosition = Vector3.up * (liquidHeight * _currentCount);
-        IsCooked = false;
-        IsBurned = false;
-        FryingTimer = 0f;
-        BurningTimer = 0f;
-        if (progressBarUI != null)
+        public void HideEffects()
         {
-            progressBarUI.Hide();
-            progressBarUI.UpdateProgress(0f);
+            if (steamCookingEffect != null) steamCookingEffect.Stop();
+            if (burnedCookingEffect != null) burnedCookingEffect.Stop();
         }
-    }
 
-    public bool IsFull()
-    {
-        return _currentCount >= MaxCapacity;
-    }
-
-    public bool HasIngredients()
-    {
-        return _currentCount > 0;
-    }
-
-
-    public void EmptyPot()
-    {
-        _currentCount = 0;
-        IsCooked = false;
-        IsBurned = false;
-        FryingTimer = 0f;
-        BurningTimer = 0f;
-        liquidGO.transform.localPosition = Vector3.zero;
-        if (progressBarUI != null)
+        public bool CanAddIngredient()
         {
-            progressBarUI.UpdateProgress(0f);
-            progressBarUI.Hide();
+            return _currentCount < MaxCapacity && !IsBurned;
         }
+
+        public void OnIngredientAdded()
+        {
+            _currentCount++;
+            liquidGO.transform.localPosition = Vector3.up * (liquidHeight * _currentCount);
+            IsCooked = false;
+            IsBurned = false;
+            FryingTimer = 0f;
+            BurningTimer = 0f;
+            if (progressBarUI != null)
+            {
+                progressBarUI.Hide();
+                progressBarUI.UpdateProgress(0f);
+            }
+        }
+
+        public bool IsFull()
+        {
+            return _currentCount >= MaxCapacity;
+        }
+
+        public bool HasIngredients()
+        {
+            return _currentCount > 0;
+        }
+
+
+        public void EmptyPot()
+        {
+            _currentCount = 0;
+            IsCooked = false;
+            IsBurned = false;
+            FryingTimer = 0f;
+            BurningTimer = 0f;
+            liquidGO.transform.localPosition = Vector3.zero;
+            if (progressBarUI != null)
+            {
+                progressBarUI.UpdateProgress(0f);
+                progressBarUI.Hide();
+            }
+        }
+
+        #region IKitchenObjectParent
+
+        public Transform GetKitchenObjectToTransform()
+        {
+            return topPoint;
+        }
+
+        public void SetKitchenObject(KitchenObject kitchenObject)
+        {
+            this._kitchenObject = kitchenObject;
+        }
+
+        public KitchenObject GetKitchenObject()
+        {
+            return this._kitchenObject;
+        }
+
+        public void ClearKitchenObject()
+        {
+            this._kitchenObject = null;
+        }
+
+        public bool HasKitchenObject()
+        {
+            return this._kitchenObject != null;
+        }
+
+        #endregion
     }
-
-    #region IKitchenObjectParent
-
-    public Transform GetKitchenObjectToTransform()
-    {
-        return topPoint;
-    }
-
-    public void SetKitchenObject(KitchenObject kitchenObject)
-    {
-        this._kitchenObject = kitchenObject;
-    }
-
-    public KitchenObject GetKitchenObject()
-    {
-        return this._kitchenObject;
-    }
-
-    public void ClearKitchenObject()
-    {
-        this._kitchenObject = null;
-    }
-
-    public bool HasKitchenObject()
-    {
-        return this._kitchenObject != null;
-    }
-
-    #endregion
 }

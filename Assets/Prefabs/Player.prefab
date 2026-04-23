@@ -101,11 +101,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 6
   rotateSpeed: 10
+  interactDistance: 1
+  sphereRadius: 0.5
   _handPoint: {fileID: 6957290034226936634}
   interactPoint: {fileID: 3369580444840670666}
   animator: {fileID: 8387740328982470546}
   _rb: {fileID: 926398963344026295}
-  coll: {fileID: 8694843197381486123}
 --- !u!1 &7730821694910580315
 GameObject:
   m_ObjectHideFlags: 0

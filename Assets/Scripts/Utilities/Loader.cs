@@ -1,15 +1,17 @@
-﻿
-using UnityEngine.SceneManagement;
-
-public static class Loader
+namespace GameCore
 {
-    public enum Scene
+    public static class Loader
     {
-        MainMenuScene, GameScene, Loading
-    }
+        public enum Scene
+        {
+            MainMenuScene,
+            GameScene,
+            LoadingScene
+        }
 
-    public static void LoadScene(Scene scene)
-    {
-        SceneManager.LoadScene(scene.ToString());
+        public static void Load(Scene targetScene)
+        {
+            // Implementation
+        }
     }
 }

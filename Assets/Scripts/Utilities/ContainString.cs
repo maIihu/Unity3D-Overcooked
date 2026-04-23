@@ -1,13 +1,10 @@
-﻿
-public static class ContainString
+namespace GameCore
 {
-    // Player anim
-    public const string IsWalking = "IsWalking";
-    
-    // Container Counter anim
-    public const string OpenClose = "OpenClose";
-    
-    // Cutting Counter anim
-    public const string Cut = "Cut";
-    
+    public static class ContainString
+    {
+        public const string IS_COOKING = "IsCooking";
+        public const string IS_BURNED = "IsBurned";
+        public const string FRYING_TIMER = "FryingTimer";
+        public const string BURNING_TIMER = "BurningTimer";
+    }
 }
