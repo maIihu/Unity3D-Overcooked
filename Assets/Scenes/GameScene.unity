@@ -2187,9 +2187,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14a6069085fd0b942bf581e5393f61b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dontDestroyOnLoad: 0
-  gamePlayingTimerMax: 360
-  deliveryControl: {fileID: 1131503893}
 --- !u!1001 &726400390
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3048,8 +3045,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 148bfd668e529da4892df20ff741ad91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnRecipeTimerMax: 4
-  waitingRecipesMax: 4
 --- !u!4 &1131503894
 Transform:
   m_ObjectHideFlags: 0
@@ -3509,6 +3504,67 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1288251396}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1303151091
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1303151092}
+  - component: {fileID: 1303151093}
+  m_Layer: 0
+  m_Name: Pool_Kitchen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1303151092
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303151091}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1489911854}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1303151093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303151091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9331db160817c04790cbac9ccda8959, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kitchenPrewarmPools:
+  - prefab: {fileID: 7388250531353371702, guid: dd26e63db74aef9419c28626eee1e7c3,
+      type: 3}
+    kitchenType: 2
+    defaultCapacity: 5
+    maxSize: 20
+  - prefab: {fileID: 4133019759459701955, guid: db3fa1e9ad9ecdc479a8cc57cb0f73b3,
+      type: 3}
+    kitchenType: 1
+    defaultCapacity: 5
+    maxSize: 20
+  foodPrewarmPools:
+  - prefab: {fileID: 2805479275731452759, guid: 9169157c329eca84ca7a51824183ff7e,
+      type: 3}
+    foodType: 2
+    defaultCapacity: 5
+    maxSize: 20
 --- !u!1001 &1345109947
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4324,6 +4380,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1489911854}
+  - component: {fileID: 1489911855}
   m_Layer: 0
   m_Name: PoolManager
   m_TagString: Untagged
@@ -4343,9 +4400,26 @@ Transform:
   m_LocalPosition: {x: 6.4025764, y: 16.519594, z: 0.16216931}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1303151092}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1489911855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489911853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cef86a52d2009441b1d137d2995e9c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 0
+  kitchen: {fileID: 1303151093}
+  counter: {fileID: 0}
+  genericPrewarmPools: []
 --- !u!1 &1521180843
 GameObject:
   m_ObjectHideFlags: 0
@@ -4433,7 +4507,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68e37852088560b48bb185d6ee6ba674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dontDestroyOnLoad: 1
 --- !u!1 &1766570354
 GameObject:
   m_ObjectHideFlags: 0

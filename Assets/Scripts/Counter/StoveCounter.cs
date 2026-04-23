@@ -54,9 +54,8 @@ namespace Counter
             CurrentState = State.Idle;
             if (imageUI != null) imageUI.enabled = false;
 
-            // Use the new pooling helper from BaseCounter
             var pot = SpawnKitchenObject(KitchenType.Pot);
-            pot.transform.position = potPoint.position;
+            //pot.transform.localPosition = potPoint.position;
         }
 
         private void Update()

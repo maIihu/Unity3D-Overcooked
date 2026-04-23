@@ -33,9 +33,12 @@ namespace Counter
 
                     // Use the new pooling helper from BaseCounter
                     var food = SpawnKitchenObject(containerFoodType) as FoodObject;
-                    if (food != null) food.SetState(FoodState.Normal);
-
-                    food.SetKitchenObjectParent(player);
+                    Debug.Log("food", food.gameObject);
+                    if (food != null)
+                    {
+                        food.SetState(FoodState.Normal);
+                        food.SetKitchenObjectParent(player);
+                    }
                 }
             }
         }

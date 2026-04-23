@@ -30,7 +30,6 @@ namespace Kitchen
 
         public virtual void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent)
         {
-            // ... (rest of the method remains the same)
             if (this.KitchenObjectParent != null) KitchenObjectParent.ClearKitchenObject();
 
             this.KitchenObjectParent = kitchenObjectParent;
