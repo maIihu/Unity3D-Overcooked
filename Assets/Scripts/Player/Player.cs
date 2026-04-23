@@ -9,14 +9,17 @@ namespace Player
 {
     public class Player : MonoBehaviour, IKitchenObjectParent
     {
+        [Header("Player Stats")]
         [SerializeField] private float moveSpeed = 7f;
         [SerializeField] private float rotateSpeed = 10f;
         [SerializeField] private float interactDistance = 1f;
         [SerializeField] private float sphereRadius = 0.5f;
 
+        [Header("References")]
         [SerializeField] private Transform _handPoint;
         [SerializeField] private Transform interactPoint;
 
+        [Header("Components")]
         [SerializeField] private Animator animator;
         [SerializeField] private Rigidbody _rb;
 
