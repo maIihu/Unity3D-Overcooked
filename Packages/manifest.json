@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.antigravity.ide": "https://github.com/prithvi-bharadwaj/Antigravity-IDE.git",
+    "com.antigravity.ide": "https://github.com/billythekidz/UnityAntigravityIDE.git",
     "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.collab-proxy": "2.8.2",

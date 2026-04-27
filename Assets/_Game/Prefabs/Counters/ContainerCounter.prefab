@@ -153,10 +153,12 @@ MonoBehaviour:
   counterTopPoint: {fileID: 7855923016644956000}
   selectedCounter: {fileID: 3037402833241246544}
   anim: {fileID: 1009410843137429269}
-  containerFoodType: 0
-  foodObjects:
-  - {fileID: 367040949537793641, guid: f8d4e2d83c731cf4f83b78b2a086315e, type: 3}
-  - {fileID: 2805479275731452759, guid: 9169157c329eca84ca7a51824183ff7e, type: 3}
+  containerDataArr:
+  - foodType: 1
+    material: {fileID: 2100000, guid: 021b804224b74474295704f758f93611, type: 2}
+  - foodType: 2
+    material: {fileID: 2100000, guid: 05f778e278610a04fa64629d10a8d8b1, type: 2}
+  decalRenderer: {fileID: 8563336377923434635}
 --- !u!1001 &1555702091940458490
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -390,6 +392,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9a9137fa2b035d34e881701d2c178192, type: 3}
+--- !u!23 &8563336377923434635 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3501971017668967100, guid: 9a9137fa2b035d34e881701d2c178192,
+    type: 3}
+  m_PrefabInstance: {fileID: 5066150486719152695}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8790857154261952156 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4589716710238282923, guid: 9a9137fa2b035d34e881701d2c178192,

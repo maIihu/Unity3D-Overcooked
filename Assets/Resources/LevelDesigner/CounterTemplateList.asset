@@ -13,21 +13,24 @@ MonoBehaviour:
   m_Name: CounterTemplateList
   m_EditorClassIdentifier: 
   templates:
-  - counterType: 0
+  - counterType: 1
     prefab: {fileID: 9026034541025303468, guid: bd3e8175b683f7b4d9b0dd8cf7f4d58b,
       type: 3}
-  - counterType: 0
+  - counterType: 2
     prefab: {fileID: 5498409353710322713, guid: b635bd3d1d5dc6942a4fd8bde0811f16,
       type: 3}
-  - counterType: 0
-    prefab: {fileID: 5498409353710322713, guid: b635bd3d1d5dc6942a4fd8bde0811f16,
-      type: 3}
-  - counterType: 0
-    prefab: {fileID: 5498409353710322713, guid: ff319b93ebba1af4b87b1894cdff506f,
-      type: 3}
-  - counterType: 0
+  - counterType: 3
     prefab: {fileID: 5498409353710322713, guid: 0066b7dcb7e59134e9d84c08ea50ac62,
       type: 3}
-  - counterType: 0
+  - counterType: 4
+    prefab: {fileID: 5498409353710322713, guid: ff319b93ebba1af4b87b1894cdff506f,
+      type: 3}
+  - counterType: 5
     prefab: {fileID: 5498409353710322713, guid: ceb2aaf7c593efa4885fea05ca34aa26,
+      type: 3}
+  - counterType: 6
+    prefab: {fileID: 5498409353710322713, guid: e0fb059d654c059418d4b832a6c9dd76,
+      type: 3}
+  - counterType: 7
+    prefab: {fileID: 5498409353710322713, guid: 99cb029ea35fbf94db16341c042878f7,
       type: 3}

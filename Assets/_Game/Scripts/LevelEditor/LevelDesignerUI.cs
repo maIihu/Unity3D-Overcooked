@@ -14,6 +14,8 @@ public class LevelDesignerUI : MonoBehaviour
     [Header("Sub-Type Dropdown")]
     [SerializeField] private TMP_Dropdown subTypeDropdown;
     [SerializeField] private GameObject dropdownContainer;
+    [SerializeField] private Button spawnSubTypeButton;
+    [SerializeField] private Button closeButton;
 
     [Header("Level IO")]
     [SerializeField] private TMP_InputField levelNameInput;
@@ -31,6 +33,12 @@ public class LevelDesignerUI : MonoBehaviour
         saveButton.onClick.AddListener(() => LevelDesignerManager.Instance.SaveLevel(levelNameInput.text));
         loadButton.onClick.AddListener(() => LevelDesignerManager.Instance.LoadLevel(levelNameInput.text));
         clearButton.onClick.AddListener(() => LevelDesignerManager.Instance.ClearLevel());
+        closeButton.onClick.AddListener(HideSubTypeDropdown);
+        
+        if (spawnSubTypeButton != null)
+        {
+            spawnSubTypeButton.onClick.AddListener(OnSpawnSubTypeClicked);
+        }
     }
 
     private void GeneratePalette()
@@ -75,17 +83,15 @@ public class LevelDesignerUI : MonoBehaviour
 
     private void ShowSubTypeDropdown(System.Type enumType)
     {
-        if (subTypeDropdown == null) return;
-
         if (dropdownContainer != null) dropdownContainer.SetActive(true);
 
-        subTypeDropdown.ClearOptions();
-        var names = System.Enum.GetNames(enumType);
-        subTypeDropdown.AddOptions(new List<string>(names));
-        subTypeDropdown.value = 0;
-
-        subTypeDropdown.onValueChanged.RemoveAllListeners();
-        subTypeDropdown.onValueChanged.AddListener(OnSubTypeSelected);
+        if (subTypeDropdown != null)
+        {
+            subTypeDropdown.ClearOptions();
+            var names = System.Enum.GetNames(enumType);
+            subTypeDropdown.AddOptions(new List<string>(names));
+            subTypeDropdown.value = 0;
+        }
     }
 
     private void HideSubTypeDropdown()
@@ -93,10 +99,11 @@ public class LevelDesignerUI : MonoBehaviour
         if (dropdownContainer != null) dropdownContainer.SetActive(false);
     }
 
-    private void OnSubTypeSelected(int index)
+    private void OnSpawnSubTypeClicked()
     {
-        if (_selectedTemplate == null) return;
+        if (_selectedTemplate == null || subTypeDropdown == null) return;
 
+        int index = subTypeDropdown.value;
         int counterId = CounterIdConverter.ToId(_selectedTemplate.counterType, index);
         LevelDesignerManager.Instance.SpawnCounter(counterId, Vector3.zero, Vector3.zero);
     }
