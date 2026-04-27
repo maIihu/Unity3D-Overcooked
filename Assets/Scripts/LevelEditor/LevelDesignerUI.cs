@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Counter;
+using Kitchen;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -7,16 +10,24 @@ public class LevelDesignerUI : MonoBehaviour
     [SerializeField] private CounterTemplateListSO templateList;
     [SerializeField] private Transform paletteContainer;
     [SerializeField] private GameObject paletteButtonPrefab;
-    
+
+    [Header("Sub-Type Dropdown")]
+    [SerializeField] private TMP_Dropdown subTypeDropdown;
+    [SerializeField] private GameObject dropdownContainer;
+
+    [Header("Level IO")]
     [SerializeField] private TMP_InputField levelNameInput;
     [SerializeField] private Button saveButton;
     [SerializeField] private Button loadButton;
     [SerializeField] private Button clearButton;
 
+    private CounterTemplate _selectedTemplate;
+
     private void Start()
     {
         GeneratePalette();
-        
+        HideSubTypeDropdown();
+
         saveButton.onClick.AddListener(() => LevelDesignerManager.Instance.SaveLevel(levelNameInput.text));
         loadButton.onClick.AddListener(() => LevelDesignerManager.Instance.LoadLevel(levelNameInput.text));
         clearButton.onClick.AddListener(() => LevelDesignerManager.Instance.ClearLevel());
@@ -24,7 +35,6 @@ public class LevelDesignerUI : MonoBehaviour
 
     private void GeneratePalette()
     {
-        // Clear existing buttons
         foreach (Transform child in paletteContainer) Destroy(child.gameObject);
 
         foreach (var template in templateList.templates)
@@ -34,12 +44,60 @@ public class LevelDesignerUI : MonoBehaviour
             Button btn = btnGO.GetComponent<Button>();
             TMP_Text txt = btnGO.GetComponentInChildren<TMP_Text>();
 
-            if (txt != null) txt.text = template.displayName;
-            
-            btn.onClick.AddListener(() => {
-                // Spawn at center of screen/world for now
-                LevelDesignerManager.Instance.SpawnCounter(template.counterId, Vector3.zero, Vector3.zero);
-            });
+            if (txt != null) txt.text = template.counterType.ToString();
+
+            btn.onClick.AddListener(() => OnPaletteButtonClicked(template));
         }
+    }
+
+    private void OnPaletteButtonClicked(CounterTemplate template)
+    {
+        _selectedTemplate = template;
+
+        switch (template.counterType)
+        {
+            case CounterType.ContainerCounter:
+                ShowSubTypeDropdown(typeof(FoodType));
+                break;
+
+            case CounterType.StoveCounter:
+                ShowSubTypeDropdown(typeof(KitchenType));
+                break;
+
+            default:
+                // No sub-type needed, spawn immediately
+                HideSubTypeDropdown();
+                int counterId = CounterIdConverter.ToId(template.counterType);
+                LevelDesignerManager.Instance.SpawnCounter(counterId, Vector3.zero, Vector3.zero);
+                break;
+        }
+    }
+
+    private void ShowSubTypeDropdown(System.Type enumType)
+    {
+        if (subTypeDropdown == null) return;
+
+        if (dropdownContainer != null) dropdownContainer.SetActive(true);
+
+        subTypeDropdown.ClearOptions();
+        var names = System.Enum.GetNames(enumType);
+        subTypeDropdown.AddOptions(new List<string>(names));
+        subTypeDropdown.value = 0;
+
+        subTypeDropdown.onValueChanged.RemoveAllListeners();
+        subTypeDropdown.onValueChanged.AddListener(OnSubTypeSelected);
+    }
+
+    private void HideSubTypeDropdown()
+    {
+        if (dropdownContainer != null) dropdownContainer.SetActive(false);
+    }
+
+    private void OnSubTypeSelected(int index)
+    {
+        if (_selectedTemplate == null) return;
+
+        int counterId = CounterIdConverter.ToId(_selectedTemplate.counterType, index);
+        LevelDesignerManager.Instance.SpawnCounter(counterId, Vector3.zero, Vector3.zero);
     }
 }

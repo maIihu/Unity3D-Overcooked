@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Counter;
+using Kitchen;
 using UnityEngine;
 
 public class LevelDesignerManager : MonoBehaviour
@@ -10,7 +11,7 @@ public class LevelDesignerManager : MonoBehaviour
     [SerializeField] private CounterTemplateListSO templateList;
     [SerializeField] private Transform counterParent;
     [SerializeField] private ObjectPlacementController placementController;
-    
+
     private Dictionary<BaseCounter, CounterData> _placedCountersMap = new Dictionary<BaseCounter, CounterData>();
 
     private void Awake()
@@ -19,30 +20,34 @@ public class LevelDesignerManager : MonoBehaviour
         if (counterParent == null) counterParent = new GameObject("PlacedCounters").transform;
     }
 
-    public void SpawnCounter(string templateId, Vector3 position, Vector3 rotation)
+    /// <summary>
+    /// Spawn a counter using the encoded counterId (e.g. 201 = ContainerCounter + Tomato).
+    /// </summary>
+    public void SpawnCounter(int counterId, Vector3 position, Vector3 rotation)
     {
-        CounterTemplate template = templateList.GetTemplateById(templateId);
+        CounterType counterType = CounterIdConverter.GetCounterType(counterId);
+        CounterTemplate template = templateList.GetTemplateByType(counterType);
+
         if (template == null)
         {
-            Debug.LogError($"Template ID {templateId} not found!");
+            Debug.LogError($"No template found for CounterType {counterType} (id={counterId})!");
             return;
         }
 
         GameObject go = Instantiate(template.prefab, position, Quaternion.Euler(rotation), counterParent);
         BaseCounter counter = go.GetComponent<BaseCounter>();
-        
+
         if (counter != null)
         {
-            // Create data immediately
             CounterData data = new CounterData
             {
-                counterId = templateId,
+                counterId = counterId,
                 position = position,
                 rotation = rotation
             };
-            
+
             _placedCountersMap.Add(counter, data);
-            ApplyConfiguration(counter, template);
+            ApplyConfiguration(counter, counterId);
         }
     }
 
@@ -54,45 +59,49 @@ public class LevelDesignerManager : MonoBehaviour
         }
     }
 
-    private void ApplyConfiguration(BaseCounter counter, CounterTemplate template)
+    private void ApplyConfiguration(BaseCounter counter, int counterId)
     {
-        // Apply special settings based on type
-        if (counter is ContainerCounter container)
+        CounterType counterType = CounterIdConverter.GetCounterType(counterId);
+
+        switch (counterType)
         {
-            // Use reflection or a public field if available to set the food type
-            // In this project, ContainerCounter has a private serializable field containerFoodType
-            // For now, we manually set it.
-            var field = typeof(ContainerCounter).GetField("containerFoodType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (field != null) field.SetValue(container, template.foodType);
-        }
-        else if (counter is StoveCounter stove)
-        {
-            var field = typeof(StoveCounter).GetField("potObjectPrefab", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (field != null) field.SetValue(stove, template.vesselPrefab);
+            case CounterType.ContainerCounter:
+                if (counter is ContainerCounter container)
+                {
+                    container.SetContainer(CounterIdConverter.GetFoodType(counterId));
+                }
+                break;
+
+            case CounterType.StoveCounter:
+                if (counter is StoveCounter stove)
+                {
+                    stove.SetStoveData(CounterIdConverter.GetKitchenType(counterId));
+                }
+                break;
         }
     }
 
     public void SaveLevel(string levelName)
     {
         LevelData data = new LevelData();
-        
+
         foreach (var pair in _placedCountersMap)
         {
             BaseCounter counter = pair.Key;
             CounterData cData = pair.Value;
-            
+
             if (counter == null) continue;
-            
+
             // Sync current transform to data
             cData.position = counter.transform.position;
             cData.rotation = counter.transform.eulerAngles;
-            
+
             data.counterList.Add(cData);
         }
 
         string json = JsonUtility.ToJson(data, true);
         string path = Path.Combine(Application.dataPath, "Resources/Levels", levelName + ".json");
-        
+
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, json);
         Debug.Log($"Level saved to: {path}");
@@ -101,7 +110,7 @@ public class LevelDesignerManager : MonoBehaviour
     public void LoadLevel(string levelName)
     {
         ClearLevel();
-        
+
         string path = Path.Combine(Application.dataPath, "Resources/Levels", levelName + ".json");
         if (!File.Exists(path))
         {

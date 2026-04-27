@@ -4,13 +4,31 @@ using UnityEngine;
 using Pooling;
 using Kitchen;
 using Player;
+using System;
 
 namespace Counter
 {
     public class ContainerCounter : BaseCounter
     {
         [SerializeField] private Animation anim;
-        [SerializeField] private FoodType containerFoodType;
+        [SerializeField] private ContainerData[] containerDataArr;
+        [SerializeField] private Renderer decalRenderer;
+
+        private FoodType _containerFoodType;
+
+
+        public void SetContainer(FoodType foodType)
+        {
+            _containerFoodType = foodType;
+            foreach (var data in containerDataArr)
+            {
+                if (data.foodType == foodType)
+                {
+                    decalRenderer.material = data.material;
+                    break;
+                }
+            }
+        }
 
         public override void Interact(Player.Player player)
         {
@@ -31,9 +49,7 @@ namespace Counter
                 {
                     if (anim != null) anim.Play("OpenClose");
 
-                    // Use the new pooling helper from BaseCounter
-                    var food = SpawnKitchenObject(containerFoodType) as FoodObject;
-                    Debug.Log("food", food.gameObject);
+                    var food = SpawnKitchenObject(_containerFoodType) as FoodObject;
                     if (food != null)
                     {
                         food.SetState(FoodState.Normal);
@@ -42,5 +58,12 @@ namespace Counter
                 }
             }
         }
+    }
+
+    [Serializable]
+    public struct ContainerData
+    {
+        public FoodType foodType;
+        public Material material;
     }
 }

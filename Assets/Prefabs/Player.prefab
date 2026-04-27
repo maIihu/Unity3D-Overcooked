@@ -102,7 +102,7 @@ MonoBehaviour:
   moveSpeed: 6
   rotateSpeed: 10
   interactDistance: 1
-  sphereRadius: 0.5
+  sphereRadius: 0.4
   _handPoint: {fileID: 6957290034226936634}
   interactPoint: {fileID: 3369580444840670666}
   animator: {fileID: 8387740328982470546}
@@ -299,7 +299,7 @@ PrefabInstance:
     - target: {fileID: 3294758251327466532, guid: 1c5dda3c7cd3cf742afcade5419faeab,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.131
       objectReference: {fileID: 0}
     - target: {fileID: 3294758251327466532, guid: 1c5dda3c7cd3cf742afcade5419faeab,
         type: 3}

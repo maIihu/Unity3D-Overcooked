@@ -1,18 +1,13 @@
 using System;
 using System.Collections.Generic;
-using Kitchen;
 using UnityEngine;
+using Counter;
 
 [Serializable]
 public class CounterTemplate
 {
-    public string counterId;
-    public string displayName;
+    public CounterType counterType;
     public GameObject prefab;
-    
-    [Header("Special Configurations")]
-    public FoodType foodType; // For ContainerCounter
-    public PotObject vesselPrefab; // For StoveCounter
 }
 
 [CreateAssetMenu(fileName = "CounterTemplateList", menuName = "LevelDesigner/TemplateList")]
@@ -20,11 +15,11 @@ public class CounterTemplateListSO : ScriptableObject
 {
     public List<CounterTemplate> templates = new List<CounterTemplate>();
 
-    public CounterTemplate GetTemplateById(string id)
+    public CounterTemplate GetTemplateByType(CounterType type)
     {
         foreach (var t in templates)
         {
-            if (t.counterId == id) return t;
+            if (t.counterType == type) return t;
         }
         return null;
     }

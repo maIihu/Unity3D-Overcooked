@@ -2008,6 +2008,8 @@ MonoBehaviour:
   templateList: {fileID: 11400000, guid: 7c20a2a91e21a62469a8697551454c82, type: 2}
   paletteContainer: {fileID: 423359711}
   paletteButtonPrefab: {fileID: 1994797723}
+  subTypeDropdown: {fileID: 0}
+  dropdownContainer: {fileID: 0}
   levelNameInput: {fileID: 1276122276}
   saveButton: {fileID: 448936283}
   loadButton: {fileID: 590886638}

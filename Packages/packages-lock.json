@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.antigravity.ide": {
+      "version": "https://github.com/prithvi-bharadwaj/Antigravity-IDE.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "052001cf62c44b1af3d8bd6339939f5f2c34966d"
+    },
     "com.autodesk.fbx": {
       "version": "4.2.1",
       "depth": 2,
@@ -16,13 +23,6 @@
         "com.unity.test-framework": "1.1.31"
       },
       "hash": "73eb27aeccfa8e0676eaf3304136e9b85953d913"
-    },
-    "com.termway.ide.antigravity": {
-      "version": "https://github.com/TermWay/unity-ide-antigravity.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "e5e981edf16a5c85f2c1a00209deee6626544bc5"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",

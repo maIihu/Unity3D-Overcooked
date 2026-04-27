@@ -13,11 +13,6 @@ namespace Counter
 {
     public class StoveCounter : BaseCounter
     {
-        private enum State
-        {
-            Idle, Frying, Fried, Burned
-        }
-
         [SerializeField] private Transform potPoint;
 
         [SerializeField] private float fryingTimerMax = 4f;
@@ -28,18 +23,20 @@ namespace Counter
 
         [SerializeField] private Image imageUI;
 
-        private PotObject _currentPot;
+        private KitchenObject _currentKitchenObject;
         private bool _isCompleteUIShown;
         private Tween _imageFadeTween;
 
-        private State _state;
-        private State CurrentState
+        private KitchenType _kitchenType = KitchenType.Pot;
+
+        private StoveState _StoveState;
+        private StoveState CurrentStoveState
         {
-            get => _state;
+            get => _StoveState;
             set
             {
-                _state = value;
-                UpdateUIState();
+                _StoveState = value;
+                UpdateUIStoveState();
             }
         }
 
@@ -48,75 +45,81 @@ namespace Counter
             _imageFadeTween?.Kill();
         }
 
+        public void SetStoveData(KitchenType kitchenType)
+        {
+            _kitchenType = kitchenType;
+        }
+
         protected override void Start()
         {
             base.Start();
-            CurrentState = State.Idle;
+            CurrentStoveState = StoveState.Idle;
             if (imageUI != null) imageUI.enabled = false;
 
-            var pot = SpawnKitchenObject(KitchenType.Pot);
-            //pot.transform.localPosition = potPoint.position;
+            SpawnKitchenObject(_kitchenType);
         }
 
         private void Update()
         {
-            if (_currentPot != null)
+            if (_currentKitchenObject != null)
             {
-                switch (_state)
-                {
-                    case State.Idle:
-                        if (_currentPot.HasIngredients())
-                        {
-                            if (_currentPot.IsBurned) CurrentState = State.Burned;
-                            else if (_currentPot.IsCooked) CurrentState = State.Fried;
-                            else CurrentState = State.Frying;
-                        }
-                        break;
-
-                    case State.Frying:
-                        _currentPot.FryingTimer += Time.deltaTime;
-                        _currentPot.UpdateCookingProgress(_currentPot.FryingTimer / fryingTimerMax);
-
-                        if (_currentPot.FryingTimer >= fryingTimerMax)
-                        {
-                            _currentPot.IsCooked = true;
-                            CurrentState = State.Fried;
-
-                            if (_currentPot.HasKitchenObject() && _currentPot.GetKitchenObject() is FoodObject food)
+                PotObject pot = _currentKitchenObject as PotObject;
+                if (pot)
+                    switch (_StoveState)
+                    {
+                        case StoveState.Idle:
+                            if (pot.HasIngredients())
                             {
-                                food.SetState(FoodState.Fried);
+                                if (pot.IsBurned) CurrentStoveState = StoveState.Burned;
+                                else if (pot.IsCooked) CurrentStoveState = StoveState.Fried;
+                                else CurrentStoveState = StoveState.Frying;
                             }
-                        }
-                        break;
+                            break;
 
-                    case State.Fried:
-                        _currentPot.BurningTimer += Time.deltaTime;
-                        _currentPot.UpdateCookingProgress(_currentPot.BurningTimer / burningTimerMax);
+                        case StoveState.Frying:
+                            pot.FryingTimer += Time.deltaTime;
+                            pot.UpdateCookingProgress(pot.FryingTimer / fryingTimerMax);
 
-                        HandleFriedUI();
-
-                        if (_currentPot.BurningTimer >= burningTimerMax)
-                        {
-                            _currentPot.IsBurned = true;
-                            CurrentState = State.Burned;
-
-                            if (_currentPot.HasKitchenObject() && _currentPot.GetKitchenObject() is FoodObject food)
+                            if (pot.FryingTimer >= fryingTimerMax)
                             {
-                                food.SetState(FoodState.Burned);
-                            }
-                        }
-                        break;
+                                pot.IsCooked = true;
+                                CurrentStoveState = StoveState.Fried;
 
-                    case State.Burned:
-                        if (_currentPot != null) _currentPot.UpdateCookingProgress(0f);
-                        break;
-                }
+                                if (pot.HasKitchenObject() && pot.GetKitchenObject() is FoodObject food)
+                                {
+                                    food.SetState(FoodState.Fried);
+                                }
+                            }
+                            break;
+
+                        case StoveState.Fried:
+                            pot.BurningTimer += Time.deltaTime;
+                            pot.UpdateCookingProgress(pot.BurningTimer / burningTimerMax);
+
+                            HandleFriedUI();
+
+                            if (pot.BurningTimer >= burningTimerMax)
+                            {
+                                pot.IsBurned = true;
+                                CurrentStoveState = StoveState.Burned;
+
+                                if (pot.HasKitchenObject() && pot.GetKitchenObject() is FoodObject food)
+                                {
+                                    food.SetState(FoodState.Burned);
+                                }
+                            }
+                            break;
+
+                        case StoveState.Burned:
+                            if (pot != null) pot.UpdateCookingProgress(0f);
+                            break;
+                    }
             }
             else
             {
-                if (_state != State.Idle)
+                if (_StoveState != StoveState.Idle)
                 {
-                    CurrentState = State.Idle;
+                    CurrentStoveState = StoveState.Idle;
                 }
             }
         }
@@ -125,7 +128,10 @@ namespace Counter
         {
             if (imageUI == null) return;
 
-            float burnProgress = _currentPot.BurningTimer / burningTimerMax;
+            PotObject pot = _currentKitchenObject as PotObject;
+            if (pot == null) return;
+
+            float burnProgress = pot.BurningTimer / burningTimerMax;
 
             if (burnProgress >= 0.5f)
             {
@@ -167,11 +173,11 @@ namespace Counter
             }
         }
 
-        private void UpdateUIState()
+        private void UpdateUIStoveState()
         {
             if (imageUI == null) return;
 
-            if (_state != State.Fried)
+            if (_StoveState != StoveState.Fried)
             {
                 _imageFadeTween?.Kill();
                 imageUI.enabled = false;
@@ -189,32 +195,34 @@ namespace Counter
                 }
                 else
                 {
-                    if (_currentPot != null)
+                    if (_currentKitchenObject != null)
                     {
-                        if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && _currentPot.CanAddIngredient())
+                        PotObject pot = _currentKitchenObject as PotObject;
+
+                        if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && pot.CanAddIngredient())
                         {
-                            if (!_currentPot.HasKitchenObject())
+                            if (!pot.HasKitchenObject())
                             {
-                                food.SetKitchenObjectParent(_currentPot);
+                                food.SetKitchenObjectParent(pot);
                             }
                             else
                             {
                                 food.DestroySelf();
                             }
 
-                            _currentPot.OnIngredientAdded();
+                            pot.OnIngredientAdded();
                             food.SetState(FoodState.Soup);
 
-                            CurrentState = State.Frying;
+                            CurrentStoveState = StoveState.Frying;
                         }
-                        else if (player.GetKitchenObject() is PlateObject plate && _currentPot.IsCooked && !_currentPot.IsBurned && _currentPot.IsFull())
+                        else if (player.GetKitchenObject() is PlateObject plate && pot.IsCooked && !pot.IsBurned && pot.IsFull())
                         {
-                            if (_currentPot.HasKitchenObject() && !plate.HasKitchenObject())
+                            if (pot.HasKitchenObject() && !plate.HasKitchenObject())
                             {
-                                KitchenObject potFood = _currentPot.GetKitchenObject();
+                                KitchenObject potFood = pot.GetKitchenObject();
                                 potFood.SetKitchenObjectParent(plate);
-                                _currentPot.EmptyPot();
-                                CurrentState = State.Idle;
+                                pot.EmptyPot();
+                                CurrentStoveState = StoveState.Idle;
                             }
                         }
                     }
@@ -232,37 +240,43 @@ namespace Counter
         public override void SetKitchenObject(KitchenObject kitchenObject)
         {
             base.SetKitchenObject(kitchenObject);
-            this._currentPot = kitchenObject as PotObject;
+            this._currentKitchenObject = kitchenObject as PotObject;
 
             _isCompleteUIShown = false;
             _imageFadeTween?.Kill();
 
-            if (_currentPot != null)
+            if (_currentKitchenObject != null)
             {
-                _currentPot.BurningTimerMax = burningTimerMax;
-                if (_currentPot.HasIngredients())
+                PotObject pot = _currentKitchenObject as PotObject;
+                pot.BurningTimerMax = burningTimerMax;
+                if (pot.HasIngredients())
                 {
-                    if (_currentPot.IsBurned) CurrentState = State.Burned;
-                    else if (_currentPot.IsCooked) CurrentState = State.Fried;
-                    else CurrentState = State.Frying;
+                    if (pot.IsBurned) CurrentStoveState = StoveState.Burned;
+                    else if (pot.IsCooked) CurrentStoveState = StoveState.Fried;
+                    else CurrentStoveState = StoveState.Frying;
                 }
                 else
                 {
-                    CurrentState = State.Idle;
+                    CurrentStoveState = StoveState.Idle;
                 }
             }
             else
             {
-                CurrentState = State.Idle;
+                CurrentStoveState = StoveState.Idle;
             }
         }
 
         public override void ClearKitchenObject()
         {
             base.ClearKitchenObject();
-            this._currentPot = null;
+            this._currentKitchenObject = null;
             _imageFadeTween?.Kill();
-            CurrentState = State.Idle;
+            CurrentStoveState = StoveState.Idle;
         }
+    }
+
+    public enum StoveState
+    {
+        Idle, Frying, Fried, Burned
     }
 }

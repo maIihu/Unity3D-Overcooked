@@ -3504,67 +3504,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1288251396}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1303151091
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1303151092}
-  - component: {fileID: 1303151093}
-  m_Layer: 0
-  m_Name: Pool_Kitchen
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1303151092
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1303151091}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1489911854}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1303151093
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1303151091}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9331db160817c04790cbac9ccda8959, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  kitchenPrewarmPools:
-  - prefab: {fileID: 7388250531353371702, guid: dd26e63db74aef9419c28626eee1e7c3,
-      type: 3}
-    kitchenType: 2
-    defaultCapacity: 5
-    maxSize: 20
-  - prefab: {fileID: 4133019759459701955, guid: db3fa1e9ad9ecdc479a8cc57cb0f73b3,
-      type: 3}
-    kitchenType: 1
-    defaultCapacity: 5
-    maxSize: 20
-  foodPrewarmPools:
-  - prefab: {fileID: 2805479275731452759, guid: 9169157c329eca84ca7a51824183ff7e,
-      type: 3}
-    foodType: 2
-    defaultCapacity: 5
-    maxSize: 20
 --- !u!1001 &1345109947
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4371,55 +4310,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1481036515}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1489911853
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1489911854}
-  - component: {fileID: 1489911855}
-  m_Layer: 0
-  m_Name: PoolManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1489911854
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489911853}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.4025764, y: 16.519594, z: 0.16216931}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1303151092}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1489911855
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489911853}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cef86a52d2009441b1d137d2995e9c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _dontDestroyOnLoad: 0
-  kitchen: {fileID: 1303151093}
-  counter: {fileID: 0}
-  genericPrewarmPools: []
 --- !u!1 &1521180843
 GameObject:
   m_ObjectHideFlags: 0
@@ -5296,6 +5186,74 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 2065233497}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2745943797001947770
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 6.4025764
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 16.519594
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.16216931
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 720609601438346109, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8995482822060492012, guid: f36b01b1623063b45904da68157dce38,
+        type: 3}
+      propertyPath: m_Name
+      value: PoolManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f36b01b1623063b45904da68157dce38, type: 3}
 --- !u!1001 &3228238282765976803
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5358,16 +5316,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 3582725316073197151, guid: ed5339d695d8eda4597c0d7875bfc9f0,
-        type: 3}
-      propertyPath: sphereRadius
-      value: 0.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 6719812133387749044, guid: ed5339d695d8eda4597c0d7875bfc9f0,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.131
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5470,4 +5418,4 @@ SceneRoots:
   - {fileID: 718905939}
   - {fileID: 1131503894}
   - {fileID: 1766570355}
-  - {fileID: 1489911854}
+  - {fileID: 2745943797001947770}
