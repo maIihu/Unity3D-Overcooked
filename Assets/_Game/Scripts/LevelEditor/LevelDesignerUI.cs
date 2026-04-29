@@ -23,12 +23,26 @@ public class LevelDesignerUI : MonoBehaviour
     [SerializeField] private Button loadButton;
     [SerializeField] private Button clearButton;
 
+    [Header("Counter Info Panel")]
+    [SerializeField] private GameObject counterInfoPanel;
+    [SerializeField] private TMP_Text counterInfoText;
+    [SerializeField] private Button deleteCounterButton;
+
     private CounterTemplate _selectedTemplate;
+    private ObjectPlacementController _placementController;
 
     private void Start()
     {
         GeneratePalette();
         HideSubTypeDropdown();
+        if (counterInfoPanel != null) counterInfoPanel.SetActive(false);
+
+        _placementController = FindObjectOfType<ObjectPlacementController>();
+        if (_placementController != null)
+        {
+            _placementController.OnCounterSelected += HandleCounterSelected;
+            _placementController.OnCounterDeselected += HandleCounterDeselected;
+        }
 
         saveButton.onClick.AddListener(() => LevelDesignerManager.Instance.SaveLevel(levelNameInput.text));
         loadButton.onClick.AddListener(() => LevelDesignerManager.Instance.LoadLevel(levelNameInput.text));
@@ -38,6 +52,13 @@ public class LevelDesignerUI : MonoBehaviour
         if (spawnSubTypeButton != null)
         {
             spawnSubTypeButton.onClick.AddListener(OnSpawnSubTypeClicked);
+        }
+
+        if (deleteCounterButton != null)
+        {
+            deleteCounterButton.onClick.AddListener(() => {
+                if (_placementController != null) _placementController.DeleteCurrentSelection();
+            });
         }
     }
 
@@ -54,7 +75,10 @@ public class LevelDesignerUI : MonoBehaviour
 
             if (txt != null) txt.text = template.counterType.ToString();
 
-            btn.onClick.AddListener(() => OnPaletteButtonClicked(template));
+            btn.onClick.AddListener(() =>
+                {
+                    OnPaletteButtonClicked(template);
+                });
         }
     }
 
@@ -65,20 +89,20 @@ public class LevelDesignerUI : MonoBehaviour
         switch (template.counterType)
         {
             case CounterType.ContainerCounter:
-                ShowSubTypeDropdown(typeof(FoodType));
+                ShowSubTypeDropdown(typeof(EFoodType));
                 break;
 
             case CounterType.StoveCounter:
-                ShowSubTypeDropdown(typeof(KitchenType));
+                ShowSubTypeDropdown(typeof(EKitchenStoveType));
                 break;
 
             default:
-                // No sub-type needed, spawn immediately
                 HideSubTypeDropdown();
                 int counterId = CounterIdConverter.ToId(template.counterType);
                 LevelDesignerManager.Instance.SpawnCounter(counterId, Vector3.zero, Vector3.zero);
                 break;
         }
+        
     }
 
     private void ShowSubTypeDropdown(System.Type enumType)
@@ -106,5 +130,36 @@ public class LevelDesignerUI : MonoBehaviour
         int index = subTypeDropdown.value;
         int counterId = CounterIdConverter.ToId(_selectedTemplate.counterType, index);
         LevelDesignerManager.Instance.SpawnCounter(counterId, Vector3.zero, Vector3.zero);
+        HideSubTypeDropdown();
+
+    }
+
+    private void HandleCounterSelected(BaseCounter counter)
+    {
+        if (counterInfoPanel == null || counterInfoText == null) return;
+        
+        if (LevelDesignerManager.Instance.TryGetCounterData(counter, out CounterData data))
+        {
+            CounterType type = CounterIdConverter.GetCounterType(data.counterId);
+            string subTypeStr = "";
+            
+            if (type == CounterType.ContainerCounter)
+            {
+                subTypeStr = $"\n<b>Sub-Type:</b> {CounterIdConverter.GetFoodType(data.counterId)}";
+            }
+            else if (type == CounterType.StoveCounter)
+            {
+                subTypeStr = $"\n<b>Sub-Type:</b> {CounterIdConverter.GetStoveKitchenType(data.counterId)}";
+            }
+            
+            string cName = counter.gameObject.name.Replace("(Clone)", "");
+            counterInfoText.text = $"<b>Name:</b> {cName}\n<b>ID:</b> {data.counterId}\n<b>Pos:</b> {data.position}{subTypeStr}";
+            counterInfoPanel.SetActive(true);
+        }
+    }
+
+    private void HandleCounterDeselected()
+    {
+        if (counterInfoPanel != null) counterInfoPanel.SetActive(false);
     }
 }

@@ -1,9 +1,13 @@
 using Counter;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System;
 
 public class ObjectPlacementController : MonoBehaviour
 {
+    public event Action<BaseCounter> OnCounterSelected;
+    public event Action OnCounterDeselected;
+
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float snapValue = 1f;
     
@@ -39,14 +43,22 @@ public class ObjectPlacementController : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace))
             {
-                 if (LevelDesignerManager.Instance != null)
-                 {
-                     LevelDesignerManager.Instance.RemoveCounter(_currentSelection.GetComponent<BaseCounter>());
-                 }
-                 Destroy(_currentSelection);
-                 _currentSelection = null;
+                 DeleteCurrentSelection();
             }
         }
+    }
+
+    public void DeleteCurrentSelection()
+    {
+        if (_currentSelection == null) return;
+
+        if (LevelDesignerManager.Instance != null)
+        {
+            LevelDesignerManager.Instance.RemoveCounter(_currentSelection.GetComponent<BaseCounter>());
+        }
+        Destroy(_currentSelection);
+        _currentSelection = null;
+        OnCounterDeselected?.Invoke();
     }
 
     private void HandleSelection()
@@ -65,16 +77,19 @@ public class ObjectPlacementController : MonoBehaviour
                 _currentSelection = counter.gameObject;
                 _isDragging = true;
                 _dragOffset = _currentSelection.transform.position - GetMousePosOnPlane();
+                OnCounterSelected?.Invoke(counter);
             }
             else
             {
                 Debug.Log("Hit something, but it's not a counter.");
+                if (_currentSelection != null) OnCounterDeselected?.Invoke();
                 _currentSelection = null;
             }
         }
         else
         {
             Debug.Log("Raycast hit nothing.");
+            if (_currentSelection != null) OnCounterDeselected?.Invoke();
             _currentSelection = null;
         }
     }

@@ -4,36 +4,24 @@ using UnityEngine;
 
 namespace Counter
 {
-    /// <summary>
-    /// Base class for all counters in the kitchen.
-    /// Handles IKitchenObjectParent logic and integrates with the Pooling system.
-    /// </summary>
     public class BaseCounter : MonoBehaviour, IKitchenObjectParent, IPoolable
     {
         [SerializeField] private Transform counterTopPoint;
         [SerializeField] private GameObject selectedCounter;
 
         private KitchenObject _kitchenObject;
+        
+        #region Public Methods
 
-        #region Unity Methods
-
-        protected virtual void Awake() { }
-
-        protected virtual void Start()
+        public virtual void Init()
         {
             Hide();
         }
-        #endregion
-
-        #region Public Methods
-
-        public virtual void Init() { }
 
         public virtual void OnSpawn() { }
 
         public virtual void OnDespawn()
         {
-            // When the counter is released to the pool, make sure it doesn't leave a "ghost" kitchen object
             if (HasKitchenObject())
             {
                 _kitchenObject.DestroySelf();
@@ -77,30 +65,21 @@ namespace Counter
         #endregion
 
         #region Pooling Helpers
-
-        /// <summary>
-        /// Spawns a KitchenObject from the pool and places it on this counter.
-        /// </summary>
+        
         protected T SpawnKitchenObject<T>(T prefab) where T : KitchenObject
         {
             T instance = PoolManager.Instance.Kitchen.Get(prefab);
             instance.SetKitchenObjectParent(this);
             return instance;
         }
-
-        /// <summary>
-        /// Spawns a KitchenObject by FoodType and places it on this counter.
-        /// </summary>
-        protected KitchenObject SpawnKitchenObject(FoodType type)
+        
+        protected KitchenObject SpawnKitchenObject(EFoodType type)
         {
             KitchenObject instance = PoolManager.Instance.Kitchen.Get(type);
             instance.SetKitchenObjectParent(this);
             return instance;
         }
-
-        /// <summary>
-        /// Spawns a KitchenObject by KitchenType and places it on this counter.
-        /// </summary>
+        
         protected KitchenObject SpawnKitchenObject(KitchenType type)
         {
             KitchenObject instance = PoolManager.Instance.Kitchen.Get(type);

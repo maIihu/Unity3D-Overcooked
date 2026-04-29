@@ -27,7 +27,7 @@ namespace Counter
         private bool _isCompleteUIShown;
         private Tween _imageFadeTween;
 
-        private KitchenType _kitchenType = KitchenType.Pot;
+        private EKitchenStoveType _kitchenType;
 
         private StoveState _StoveState;
         private StoveState CurrentStoveState
@@ -45,18 +45,19 @@ namespace Counter
             _imageFadeTween?.Kill();
         }
 
-        public void SetStoveData(KitchenType kitchenType)
+        public void SetStoveData(EKitchenStoveType kitchenType)
         {
             _kitchenType = kitchenType;
         }
 
-        protected override void Start()
+        public override void Init()
         {
-            base.Start();
+            base.Init();
             CurrentStoveState = StoveState.Idle;
             if (imageUI != null) imageUI.enabled = false;
-
-            SpawnKitchenObject(_kitchenType);
+            
+            if(_kitchenType == EKitchenStoveType.Pot)
+                SpawnKitchenObject(KitchenType.Pot);
         }
 
         private void Update()
@@ -278,5 +279,10 @@ namespace Counter
     public enum StoveState
     {
         Idle, Frying, Fried, Burned
+    }
+
+    public enum EKitchenStoveType
+    {
+        Pot = 0,
     }
 }

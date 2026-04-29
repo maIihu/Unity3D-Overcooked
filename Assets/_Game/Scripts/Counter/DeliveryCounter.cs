@@ -11,11 +11,6 @@ namespace Counter
 {
     public class DeliveryCounter : BaseCounter
     {
-        protected override void Start()
-        {
-            base.Start();
-        }
-
         public override void Interact(Player.Player player)
         {
             base.Interact(player);

@@ -116,7 +116,6 @@ namespace Kitchen
     }
     public enum KitchenType
     {
-        None,
         Plate,
         Pot,
     }

@@ -5,6 +5,7 @@ using Pooling;
 using Kitchen;
 using Player;
 using System;
+using UnityEngine.Serialization;
 
 namespace Counter
 {
@@ -14,15 +15,15 @@ namespace Counter
         [SerializeField] private ContainerData[] containerDataArr;
         [SerializeField] private Renderer decalRenderer;
 
-        private FoodType _containerFoodType;
+        private EFoodType _containerEFoodType;
 
 
-        public void SetContainer(FoodType foodType)
+        public void SetContainer(EFoodType eFoodType)
         {
-            _containerFoodType = foodType;
+            _containerEFoodType = eFoodType;
             foreach (var data in containerDataArr)
             {
-                if (data.foodType == foodType)
+                if (data.eFoodType == eFoodType)
                 {
                     decalRenderer.material = data.material;
                     break;
@@ -49,7 +50,7 @@ namespace Counter
                 {
                     if (anim != null) anim.Play("OpenClose");
 
-                    var food = SpawnKitchenObject(_containerFoodType) as FoodObject;
+                    var food = SpawnKitchenObject(_containerEFoodType) as FoodObject;
                     if (food != null)
                     {
                         food.SetState(FoodState.Normal);
@@ -63,7 +64,7 @@ namespace Counter
     [Serializable]
     public struct ContainerData
     {
-        public FoodType foodType;
+        [FormerlySerializedAs("foodType")] public EFoodType eFoodType;
         public Material material;
     }
 }

@@ -11,6 +11,7 @@ public class LevelDesignerManager : MonoBehaviour
     [SerializeField] private CounterTemplateListSO templateList;
     [SerializeField] private Transform counterParent;
     [SerializeField] private ObjectPlacementController placementController;
+    [SerializeField] private Camera levelPreviewCamera;
 
     private Dictionary<BaseCounter, CounterData> _placedCountersMap = new Dictionary<BaseCounter, CounterData>();
 
@@ -19,10 +20,7 @@ public class LevelDesignerManager : MonoBehaviour
         Instance = this;
         if (counterParent == null) counterParent = new GameObject("PlacedCounters").transform;
     }
-
-    /// <summary>
-    /// Spawn a counter using the encoded counterId (e.g. 201 = ContainerCounter + Tomato).
-    /// </summary>
+    
     public void SpawnCounter(int counterId, Vector3 position, Vector3 rotation)
     {
         CounterType counterType = CounterIdConverter.GetCounterType(counterId);
@@ -59,6 +57,17 @@ public class LevelDesignerManager : MonoBehaviour
         }
     }
 
+    public bool TryGetCounterData(BaseCounter counter, out CounterData data)
+    {
+        if (counter != null && _placedCountersMap.TryGetValue(counter, out data))
+        {
+            return true;
+        }
+        
+        data = default;
+        return false;
+    }
+
     private void ApplyConfiguration(BaseCounter counter, int counterId)
     {
         CounterType counterType = CounterIdConverter.GetCounterType(counterId);
@@ -75,7 +84,7 @@ public class LevelDesignerManager : MonoBehaviour
             case CounterType.StoveCounter:
                 if (counter is StoveCounter stove)
                 {
-                    stove.SetStoveData(CounterIdConverter.GetKitchenType(counterId));
+                    stove.SetStoveData(CounterIdConverter.GetStoveKitchenType(counterId));
                 }
                 break;
         }
@@ -84,6 +93,12 @@ public class LevelDesignerManager : MonoBehaviour
     public void SaveLevel(string levelName)
     {
         LevelData data = new LevelData();
+
+        if (levelPreviewCamera != null)
+        {
+            data.cameraPosition = levelPreviewCamera.transform.position;
+            data.cameraEulerAngles = levelPreviewCamera.transform.eulerAngles;
+        }
 
         foreach (var pair in _placedCountersMap)
         {
@@ -98,9 +113,9 @@ public class LevelDesignerManager : MonoBehaviour
 
             data.counterList.Add(cData);
         }
-
+        
         string json = JsonUtility.ToJson(data, true);
-        string path = Path.Combine(Application.dataPath, "Resources/Levels", levelName + ".json");
+        string path = Path.Combine(Application.dataPath, "Resources/Levels", "Level_" + levelName + ".json");
 
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, json);
@@ -111,7 +126,7 @@ public class LevelDesignerManager : MonoBehaviour
     {
         ClearLevel();
 
-        string path = Path.Combine(Application.dataPath, "Resources/Levels", levelName + ".json");
+        string path = Path.Combine(Application.dataPath, "Resources/Levels", "Level_"+ levelName + ".json");
         if (!File.Exists(path))
         {
             Debug.LogError($"Level file not found at: {path}");
@@ -120,6 +135,12 @@ public class LevelDesignerManager : MonoBehaviour
 
         string json = File.ReadAllText(path);
         LevelData data = JsonUtility.FromJson<LevelData>(json);
+
+        if (levelPreviewCamera != null && data.cameraPosition != Vector3.zero)
+        {
+            levelPreviewCamera.transform.position = data.cameraPosition;
+            levelPreviewCamera.transform.eulerAngles = data.cameraEulerAngles;
+        }
 
         foreach (var cData in data.counterList)
         {

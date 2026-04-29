@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Kitchen;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Pooling
 {
@@ -10,7 +11,7 @@ namespace Pooling
         public class KitchenPoolConfig
         {
             public KitchenObject prefab;
-            public KitchenType kitchenType = KitchenType.None;
+            public KitchenType kitchenType;
             public int defaultCapacity = 10;
             public int maxSize = 50;
         }
@@ -19,7 +20,7 @@ namespace Pooling
         public class FoodPoolConfig
         {
             public KitchenObject prefab;
-            public FoodType foodType = FoodType.None;
+            [FormerlySerializedAs("foodType")] public EFoodType eFoodType;
             public int defaultCapacity = 10;
             public int maxSize = 50;
         }
@@ -28,7 +29,7 @@ namespace Pooling
         [SerializeField] private List<FoodPoolConfig> foodPrewarmPools;
 
         private readonly Dictionary<KitchenType, KitchenObject> _kitchenTypeToPrefab = new();
-        private readonly Dictionary<FoodType, KitchenObject> _foodTypeToPrefab = new();
+        private readonly Dictionary<EFoodType, KitchenObject> _foodTypeToPrefab = new();
 
         protected override void Prewarm()
         {
@@ -39,11 +40,7 @@ namespace Pooling
                 if (config.prefab == null) continue;
 
                 GetOrCreatePool(config.prefab, config.defaultCapacity, config.maxSize);
-
-                if (config.kitchenType != KitchenType.None)
-                {
-                    _kitchenTypeToPrefab[config.kitchenType] = config.prefab;
-                }
+                _kitchenTypeToPrefab[config.kitchenType] = config.prefab;
             }
 
             if (foodPrewarmPools == null) return;
@@ -53,11 +50,7 @@ namespace Pooling
                 if (config.prefab == null) continue;
 
                 GetOrCreatePool(config.prefab, config.defaultCapacity, config.maxSize);
-
-                if (config.foodType != FoodType.None)
-                {
-                    _foodTypeToPrefab[config.foodType] = config.prefab;
-                }
+                _foodTypeToPrefab[config.eFoodType] = config.prefab;
             }
         }
 
@@ -71,7 +64,7 @@ namespace Pooling
             return null;
         }
 
-        public KitchenObject Get(FoodType type)
+        public KitchenObject Get(EFoodType type)
         {
             if (_foodTypeToPrefab.TryGetValue(type, out var prefab))
             {
@@ -82,7 +75,7 @@ namespace Pooling
         }
 
         public T Get<T>(KitchenType type) where T : KitchenObject => Get(type) as T;
-        public T Get<T>(FoodType type) where T : KitchenObject => Get(type) as T;
+        public T Get<T>(EFoodType type) where T : KitchenObject => Get(type) as T;
 
         public KitchenObject Get(KitchenType type, Vector3 position, Quaternion rotation, Transform parent = null)
         {
@@ -93,7 +86,7 @@ namespace Pooling
             return null;
         }
 
-        public KitchenObject Get(FoodType type, Vector3 position, Quaternion rotation, Transform parent = null)
+        public KitchenObject Get(EFoodType type, Vector3 position, Quaternion rotation, Transform parent = null)
         {
             if (_foodTypeToPrefab.TryGetValue(type, out var prefab))
             {
@@ -104,7 +97,7 @@ namespace Pooling
 
         public T Get<T>(KitchenType type, Vector3 position, Quaternion rotation, Transform parent = null) where T : KitchenObject
             => Get(type, position, rotation, parent) as T;
-        public T Get<T>(FoodType type, Vector3 position, Quaternion rotation, Transform parent = null) where T : KitchenObject
+        public T Get<T>(EFoodType type, Vector3 position, Quaternion rotation, Transform parent = null) where T : KitchenObject
             => Get(type, position, rotation, parent) as T;
     }
 }

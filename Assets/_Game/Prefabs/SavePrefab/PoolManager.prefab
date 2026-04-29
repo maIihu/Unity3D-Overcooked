@@ -47,18 +47,90 @@ MonoBehaviour:
   kitchenPrewarmPools:
   - prefab: {fileID: 7388250531353371702, guid: dd26e63db74aef9419c28626eee1e7c3,
       type: 3}
-    kitchenType: 2
+    kitchenType: 1
     defaultCapacity: 5
     maxSize: 20
   - prefab: {fileID: 4133019759459701955, guid: db3fa1e9ad9ecdc479a8cc57cb0f73b3,
       type: 3}
-    kitchenType: 1
+    kitchenType: 0
     defaultCapacity: 5
     maxSize: 20
   foodPrewarmPools:
   - prefab: {fileID: 2805479275731452759, guid: 9169157c329eca84ca7a51824183ff7e,
       type: 3}
-    foodType: 2
+    eFoodType: 1
+    defaultCapacity: 5
+    maxSize: 20
+--- !u!1 &8594347746037252807
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5936133146785885060}
+  - component: {fileID: 4363362019865892623}
+  m_Layer: 0
+  m_Name: Pool_Counterr
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5936133146785885060
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8594347746037252807}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 720609601438346109}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4363362019865892623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8594347746037252807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92cae46305116364eba2e0d5c8ae18de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  counterPrewarmPools:
+  - prefab: {fileID: 5589205383086742405, guid: bd3e8175b683f7b4d9b0dd8cf7f4d58b,
+      type: 3}
+    defaultCapacity: 5
+    maxSize: 20
+  - prefab: {fileID: 7082521471990096122, guid: b635bd3d1d5dc6942a4fd8bde0811f16,
+      type: 3}
+    defaultCapacity: 5
+    maxSize: 20
+  - prefab: {fileID: 7928788374509784080, guid: 0066b7dcb7e59134e9d84c08ea50ac62,
+      type: 3}
+    defaultCapacity: 5
+    maxSize: 20
+  - prefab: {fileID: 2238836658218716048, guid: 99cb029ea35fbf94db16341c042878f7,
+      type: 3}
+    defaultCapacity: 5
+    maxSize: 20
+  - prefab: {fileID: 5323506810671723263, guid: e0fb059d654c059418d4b832a6c9dd76,
+      type: 3}
+    defaultCapacity: 5
+    maxSize: 20
+  - prefab: {fileID: 5464922795783465971, guid: ff319b93ebba1af4b87b1894cdff506f,
+      type: 3}
+    defaultCapacity: 5
+    maxSize: 20
+  - prefab: {fileID: 144790671173188002, guid: ceb2aaf7c593efa4885fea05ca34aa26, type: 3}
     defaultCapacity: 5
     maxSize: 20
 --- !u!1 &8995482822060492012
@@ -92,6 +164,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5574556054675459356}
+  - {fileID: 5936133146785885060}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2130254316757726329
@@ -108,5 +181,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 0
   kitchen: {fileID: 4034182592592131325}
-  counter: {fileID: 0}
+  counter: {fileID: 4363362019865892623}
   genericPrewarmPools: []

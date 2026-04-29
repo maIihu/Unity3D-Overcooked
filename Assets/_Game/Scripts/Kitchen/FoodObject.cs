@@ -4,7 +4,7 @@ namespace Kitchen
 {
     public class FoodObject : KitchenObject
     {
-        [SerializeField] private FoodType foodType;
+        [SerializeField] private EFoodType eFoodType;
         [SerializeField] private GameObject normalVisual;
         [SerializeField] private GameObject cuttingVisual;
         [SerializeField] private GameObject soupVisual;
@@ -17,7 +17,7 @@ namespace Kitchen
         }
 
         public FoodState FoodState { get; private set; }
-        public FoodType FoodType => foodType;
+        public EFoodType EFoodType => eFoodType;
 
         public void SetState(FoodState newState)
         {
@@ -53,10 +53,9 @@ namespace Kitchen
         Burned
     }
 
-    public enum FoodType
+    public enum EFoodType
     {
-        None,
-        Tomato,
-        Onion
+        Tomato = 0,
+        Onion = 1
     }
 }

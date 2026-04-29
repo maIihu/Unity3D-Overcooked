@@ -154,9 +154,9 @@ MonoBehaviour:
   selectedCounter: {fileID: 3037402833241246544}
   anim: {fileID: 1009410843137429269}
   containerDataArr:
-  - foodType: 1
+  - eFoodType: 0
     material: {fileID: 2100000, guid: 021b804224b74474295704f758f93611, type: 2}
-  - foodType: 2
+  - eFoodType: 1
     material: {fileID: 2100000, guid: 05f778e278610a04fa64629d10a8d8b1, type: 2}
   decalRenderer: {fileID: 8563336377923434635}
 --- !u!1001 &1555702091940458490

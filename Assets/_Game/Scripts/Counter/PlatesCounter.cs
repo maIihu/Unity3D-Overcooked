@@ -3,6 +3,7 @@ using UnityEngine;
 using Pooling;
 using Kitchen;
 using Player;
+using UnityEngine.SceneManagement;
 
 namespace Counter
 {
@@ -56,7 +57,8 @@ namespace Counter
 
         private void SpawnPlate()
         {
-            // Use the new pooling helper from BaseCounter
+            var scene = SceneManager.GetSceneByName("LevelDesigner");
+            if (scene.IsValid() && scene.isLoaded && SceneManager.GetActiveScene() == scene) return;
             SpawnKitchenObject(KitchenType.Plate);
         }
     }
