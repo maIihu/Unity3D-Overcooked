@@ -37,7 +37,6 @@ namespace Kitchen
         public float FryingTimer { get; set; }
         public float BurningTimer { get; set; }
 
-        // Lưu lại bộ đếm thời gian tối đa để kiểm tra % tiến độ khi cầm trên tay
         public float BurningTimerMax { get; set; }
 
         private const int MaxCapacity = 3;
@@ -58,14 +57,11 @@ namespace Kitchen
 
         private void Update()
         {
-            // Tự động điều khiển VFX dựa trên trạng thái của nồi
             bool isOnStove = GetKitchenObjectParent() is StoveCounter;
 
-            // Hiệu ứng khói: Chỉ hiển thị khi đã nấu chín nhưng chưa cháy, và phải đang ở trên bếp
             bool shouldShowSteam = isOnStove && HasIngredients() && !IsBurned && IsCooked;
             PlayFryingEffect(shouldShowSteam);
 
-            // Hiệu ứng cháy: Khi đã bị cháy (vẫn hiện kể cả khi nhấc ra khỏi bếp)
             bool shouldShowBurned = IsBurned;
             PlayBurnedEffect(shouldShowBurned);
         }

@@ -23,9 +23,8 @@ namespace Kitchen
 
         public virtual void OnDespawn()
         {
-            // Clear state when returned to pool
             if (KitchenObjectParent != null) KitchenObjectParent.ClearKitchenObject();
-            transform.DOKill(); // Stop any active DOTween animations
+            transform.DOKill();
         }
 
         public virtual void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent)
@@ -116,8 +115,9 @@ namespace Kitchen
     }
     public enum KitchenType
     {
-        Plate,
-        Pot,
+        Plate = 0,
+        Pot = 1,
+        Pan = 2,
     }
 
 }

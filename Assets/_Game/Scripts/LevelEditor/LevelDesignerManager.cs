@@ -84,7 +84,7 @@ public class LevelDesignerManager : MonoBehaviour
             case CounterType.StoveCounter:
                 if (counter is StoveCounter stove)
                 {
-                    stove.SetStoveData(CounterIdConverter.GetStoveKitchenType(counterId));
+                    stove.SetStoveData(CounterIdConverter.GetKitchenType(counterId));
                 }
                 break;
         }

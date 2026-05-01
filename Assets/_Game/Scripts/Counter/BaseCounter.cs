@@ -9,7 +9,7 @@ namespace Counter
         [SerializeField] private Transform counterTopPoint;
         [SerializeField] private GameObject selectedCounter;
 
-        private KitchenObject _kitchenObject;
+        protected KitchenObject _kitchenObject;
         
         #region Public Methods
 
@@ -65,13 +65,6 @@ namespace Counter
         #endregion
 
         #region Pooling Helpers
-        
-        protected T SpawnKitchenObject<T>(T prefab) where T : KitchenObject
-        {
-            T instance = PoolManager.Instance.Kitchen.Get(prefab);
-            instance.SetKitchenObjectParent(this);
-            return instance;
-        }
         
         protected KitchenObject SpawnKitchenObject(EFoodType type)
         {

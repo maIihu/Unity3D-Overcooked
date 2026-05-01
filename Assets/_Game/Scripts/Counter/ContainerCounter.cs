@@ -64,7 +64,7 @@ namespace Counter
     [Serializable]
     public struct ContainerData
     {
-        [FormerlySerializedAs("foodType")] public EFoodType eFoodType;
+        public EFoodType eFoodType;
         public Material material;
     }
 }

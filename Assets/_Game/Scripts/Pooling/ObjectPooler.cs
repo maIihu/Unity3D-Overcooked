@@ -32,7 +32,7 @@ namespace Pooling
             T instance = UnityEngine.Object.Instantiate(_prefab, _parent);
             if (instance.TryGetComponent(out IPoolable poolable))
             {
-                poolable.Init();
+                //poolable.Init();
             }
             return instance;
         }

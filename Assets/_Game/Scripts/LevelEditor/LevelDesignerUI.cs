@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Counter;
 using Kitchen;
 using UnityEngine;
@@ -91,9 +92,12 @@ public class LevelDesignerUI : MonoBehaviour
             case CounterType.ContainerCounter:
                 ShowSubTypeDropdown(typeof(EFoodType));
                 break;
-
             case CounterType.StoveCounter:
-                ShowSubTypeDropdown(typeof(EKitchenStoveType));
+                ShowSubTypeDropdown(new KitchenType[]
+                {
+                    KitchenType.Pot,
+                    KitchenType.Pan
+                });
                 break;
 
             default:
@@ -104,7 +108,7 @@ public class LevelDesignerUI : MonoBehaviour
         }
         
     }
-
+    
     private void ShowSubTypeDropdown(System.Type enumType)
     {
         if (dropdownContainer != null) dropdownContainer.SetActive(true);
@@ -112,12 +116,29 @@ public class LevelDesignerUI : MonoBehaviour
         if (subTypeDropdown != null)
         {
             subTypeDropdown.ClearOptions();
-            var names = System.Enum.GetNames(enumType);
-            subTypeDropdown.AddOptions(new List<string>(names));
+
+            var names = System.Enum.GetNames(enumType).ToList();
+
+            subTypeDropdown.AddOptions(names);
             subTypeDropdown.value = 0;
         }
     }
 
+    private void ShowSubTypeDropdown<T>(IEnumerable<T> values) where T : System.Enum
+    {
+        if (dropdownContainer != null) dropdownContainer.SetActive(true);
+
+        if (subTypeDropdown != null)
+        {
+            subTypeDropdown.ClearOptions();
+
+            var names = values.Select(v => v.ToString()).ToList();
+
+            subTypeDropdown.AddOptions(names);
+            subTypeDropdown.value = 0;
+        }
+    }
+    
     private void HideSubTypeDropdown()
     {
         if (dropdownContainer != null) dropdownContainer.SetActive(false);
@@ -127,11 +148,28 @@ public class LevelDesignerUI : MonoBehaviour
     {
         if (_selectedTemplate == null || subTypeDropdown == null) return;
 
-        int index = subTypeDropdown.value;
-        int counterId = CounterIdConverter.ToId(_selectedTemplate.counterType, index);
+        string selectedName = subTypeDropdown.options[subTypeDropdown.value].text;
+        int subTypeInt = 0;
+
+        switch (_selectedTemplate.counterType)
+        {
+            case CounterType.ContainerCounter:
+                if (System.Enum.TryParse(typeof(EFoodType), selectedName, out object foodResult))
+                {
+                    subTypeInt = (int)foodResult;
+                }
+                break;
+            case CounterType.StoveCounter:
+                if (System.Enum.TryParse(typeof(KitchenType), selectedName, out object kitchenResult))
+                {
+                    subTypeInt = (int)kitchenResult;
+                }
+                break;
+        }
+
+        int counterId = CounterIdConverter.ToId(_selectedTemplate.counterType, subTypeInt);
         LevelDesignerManager.Instance.SpawnCounter(counterId, Vector3.zero, Vector3.zero);
         HideSubTypeDropdown();
-
     }
 
     private void HandleCounterSelected(BaseCounter counter)
@@ -149,7 +187,7 @@ public class LevelDesignerUI : MonoBehaviour
             }
             else if (type == CounterType.StoveCounter)
             {
-                subTypeStr = $"\n<b>Sub-Type:</b> {CounterIdConverter.GetStoveKitchenType(data.counterId)}";
+                subTypeStr = $"\n<b>Sub-Type:</b> {CounterIdConverter.GetKitchenType(data.counterId)}";
             }
             
             string cName = counter.gameObject.name.Replace("(Clone)", "");

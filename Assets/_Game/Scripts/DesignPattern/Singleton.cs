@@ -61,7 +61,7 @@ namespace DesignPattern
                 }
             }
             _instance = instance;
-            OnRegistration ();
+            OnRegistration();
         }
     }
 }

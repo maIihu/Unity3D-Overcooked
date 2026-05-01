@@ -48,9 +48,4 @@ public static class CounterIdConverter
     {
         return (KitchenType)GetSubType(counterId);
     }
-    
-    public static EKitchenStoveType GetStoveKitchenType(int counterId)
-    {
-        return (EKitchenStoveType)GetSubType(counterId);
-    }
 }

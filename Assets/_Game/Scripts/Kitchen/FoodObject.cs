@@ -56,6 +56,10 @@ namespace Kitchen
     public enum EFoodType
     {
         Tomato = 0,
-        Onion = 1
+        Onion = 1,
+        Bread = 2,
+        Meat = 3,
+        Cabbage = 4,
+        
     }
 }

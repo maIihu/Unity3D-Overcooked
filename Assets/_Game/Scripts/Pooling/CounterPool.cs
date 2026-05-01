@@ -9,6 +9,7 @@ namespace Pooling
         [System.Serializable]
         public class CounterPoolConfig
         {
+            public CounterType type;
             public BaseCounter prefab;
             public int defaultCapacity = 5;
             public int maxSize = 20;
@@ -25,6 +26,19 @@ namespace Pooling
                 if (config.prefab != null)
                     GetOrCreatePool(config.prefab, config.defaultCapacity, config.maxSize);
             }
+        }
+        
+        public BaseCounter Get(CounterType type)
+        {
+            foreach (var counter in counterPrewarmPools)
+            {
+                if (counter.type == type)
+                {
+                    return Get(counter.prefab);
+                }
+            }
+            Debug.LogError($"[KitchenObjectPool] No prefab found for KitchenType: {type}");
+            return null;
         }
     }
 }

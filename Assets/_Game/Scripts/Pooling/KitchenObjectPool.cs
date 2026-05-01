@@ -20,7 +20,7 @@ namespace Pooling
         public class FoodPoolConfig
         {
             public KitchenObject prefab;
-            [FormerlySerializedAs("foodType")] public EFoodType eFoodType;
+            public EFoodType eFoodType;
             public int defaultCapacity = 10;
             public int maxSize = 50;
         }
@@ -74,30 +74,8 @@ namespace Pooling
             return null;
         }
 
-        public T Get<T>(KitchenType type) where T : KitchenObject => Get(type) as T;
-        public T Get<T>(EFoodType type) where T : KitchenObject => Get(type) as T;
 
-        public KitchenObject Get(KitchenType type, Vector3 position, Quaternion rotation, Transform parent = null)
-        {
-            if (_kitchenTypeToPrefab.TryGetValue(type, out var prefab))
-            {
-                return Get(prefab, position, rotation, parent);
-            }
-            return null;
-        }
 
-        public KitchenObject Get(EFoodType type, Vector3 position, Quaternion rotation, Transform parent = null)
-        {
-            if (_foodTypeToPrefab.TryGetValue(type, out var prefab))
-            {
-                return Get(prefab, position, rotation, parent);
-            }
-            return null;
-        }
 
-        public T Get<T>(KitchenType type, Vector3 position, Quaternion rotation, Transform parent = null) where T : KitchenObject
-            => Get(type, position, rotation, parent) as T;
-        public T Get<T>(EFoodType type, Vector3 position, Quaternion rotation, Transform parent = null) where T : KitchenObject
-            => Get(type, position, rotation, parent) as T;
     }
 }

@@ -9,7 +9,6 @@ public enum AnimShowPopUp
 }
 public abstract class PopupUI : MonoBehaviour
 {
-
     protected UIManager uiManager;
     protected Action onClose;
     protected Action onHide;
