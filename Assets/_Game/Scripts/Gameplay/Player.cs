@@ -1,11 +1,9 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Kitchen;
 using Counter;
+using Kitchen;
+using UnityEngine;
 
-namespace Player
+namespace _Game.Scripts.Gameplay
 {
     public class Player : MonoBehaviour, IKitchenObjectParent
     {

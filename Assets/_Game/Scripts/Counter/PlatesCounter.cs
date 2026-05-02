@@ -1,8 +1,8 @@
 using System;
+using _Game.Scripts.Gameplay;
 using UnityEngine;
 using Pooling;
 using Kitchen;
-using Player;
 using UnityEngine.SceneManagement;
 
 namespace Counter
@@ -25,7 +25,7 @@ namespace Counter
             }
         }
 
-        public override void Interact(Player.Player player)
+        public override void Interact(Player player)
         {
             base.Interact(player);
             if (HasKitchenObject())

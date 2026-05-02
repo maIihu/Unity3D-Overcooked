@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using _Game.Scripts.Gameplay;
 using UnityEngine;
 using Kitchen;
-using Player;
 using GameUI;
 
 namespace Counter
@@ -17,7 +17,7 @@ namespace Counter
 
         private float _cuttingProgress;
 
-        public override void Interact(Player.Player player)
+        public override void Interact(Player player)
         {
             base.Interact(player);
             if (HasKitchenObject())
@@ -41,7 +41,7 @@ namespace Counter
             }
         }
 
-        public override void InteractAlternate(Player.Player player)
+        public override void InteractAlternate(Player player)
         {
             base.InteractAlternate(player);
             if (HasKitchenObject() && GetKitchenObject() is FoodObject food)

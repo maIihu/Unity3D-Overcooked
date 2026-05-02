@@ -1,12 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using _Game.Scripts.Gameplay;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using Pooling;
 using Kitchen;
-using Player;
 using GameUI;
 
 namespace Counter
@@ -174,7 +174,7 @@ namespace Counter
             }
         }
 
-        public override void Interact(Player.Player player)
+        public override void Interact(Player player)
         {
             if (HasKitchenObject())
             {

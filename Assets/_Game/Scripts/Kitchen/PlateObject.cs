@@ -9,6 +9,7 @@ namespace Kitchen
     {
         [SerializeField] private Transform topPoint;
         [SerializeField] private List<EFoodType> validIngredientList;
+        [SerializeField] private GameObject liquidGO;
         
         private List<EFoodType> _ingredientList = new List<EFoodType>();
         
@@ -16,6 +17,12 @@ namespace Kitchen
         public class OnIngredientAddedEventArgs : EventArgs
         {
             public EFoodType eFoodType;
+        }
+
+        public override void OnSpawn()
+        {
+            base.OnSpawn();
+            liquidGO.SetActive(false);
         }
 
         public override void OnDespawn()
@@ -32,6 +39,7 @@ namespace Kitchen
             }
 
             _ingredientList.Add(foodObject.EFoodType);
+            if(foodObject.EFoodType == EFoodType.Onion) liquidGO.SetActive(true);
 
             OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
             {
@@ -49,6 +57,8 @@ namespace Kitchen
             }
 
             _ingredientList.Add(foodType);
+            if(foodType == EFoodType.Onion) liquidGO.SetActive(true);
+
 
             OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
             {

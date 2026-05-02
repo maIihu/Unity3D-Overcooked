@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pooling;
 using Kitchen;
-using Player;
 using System;
+using _Game.Scripts.Gameplay;
 using UnityEngine.Serialization;
 
 namespace Counter
@@ -31,7 +31,7 @@ namespace Counter
             }
         }
 
-        public override void Interact(Player.Player player)
+        public override void Interact(Player player)
         {
             if (HasKitchenObject())
             {

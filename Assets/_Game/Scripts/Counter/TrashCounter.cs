@@ -1,14 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using _Game.Scripts.Gameplay;
 using UnityEngine;
 using Kitchen;
-using Player;
 
 namespace Counter
 {
     public class TrashCounter : BaseCounter
     {
-        public override void Interact(Player.Player player)
+        public override void Interact(Player player)
         {
             base.Interact(player);
             if (player.HasKitchenObject())

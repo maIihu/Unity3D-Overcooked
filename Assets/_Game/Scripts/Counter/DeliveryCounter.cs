@@ -1,17 +1,16 @@
 
 using System;
 using System.Collections.Generic;
+using _Game.Scripts.Gameplay;
 using GameCore;
 using UnityEngine;
 using Kitchen;
-using Player;
-
 using Random = UnityEngine.Random;
 namespace Counter
 {
     public class DeliveryCounter : BaseCounter
     {
-        public override void Interact(Player.Player player)
+        public override void Interact(Player player)
         {
             base.Interact(player);
             if (player.HasKitchenObject())

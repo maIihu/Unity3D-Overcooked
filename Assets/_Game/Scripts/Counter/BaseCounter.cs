@@ -1,3 +1,4 @@
+using _Game.Scripts.Gameplay;
 using Kitchen;
 using Pooling;
 using UnityEngine;
@@ -42,9 +43,9 @@ namespace Counter
         #endregion
 
         #region Interaction
-        public virtual void Interact(Player.Player player) { }
+        public virtual void Interact(Player player) { }
 
-        public virtual void InteractAlternate(Player.Player player) { }
+        public virtual void InteractAlternate(Player player) { }
         #endregion
 
         #region IKitchenObjectParent Implementation
