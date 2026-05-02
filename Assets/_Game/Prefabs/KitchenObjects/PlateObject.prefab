@@ -99,6 +99,7 @@ MonoBehaviour:
   rb: {fileID: 2288304409815527160}
   col: {fileID: 4754606328650493023}
   topPoint: {fileID: 8148707808569584337}
+  validIngredientList: 01000000
 --- !u!1 &5446889920001328143
 GameObject:
   m_ObjectHideFlags: 0

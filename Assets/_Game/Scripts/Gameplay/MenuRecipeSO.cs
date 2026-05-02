@@ -6,6 +6,11 @@ using UnityEngine.UI;
 
 namespace _Game.Scripts.Gameplay
 {
+    public enum EMenuType
+    {
+        OnionSoup = 0,
+        TomatoSoup = 1,
+    }
     [Serializable]
     public struct MenuItem
     {
@@ -16,6 +21,7 @@ namespace _Game.Scripts.Gameplay
     [CreateAssetMenu(fileName = "Recipe", menuName = "Gameplay/MenuRecipeSO")]
     public class MenuRecipeSO : ScriptableObject
     {
+        public EMenuType menuType;
         public Sprite icon;
         public List<MenuItem> foodObjectMenu;
         public float timeRemaining;

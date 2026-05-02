@@ -3358,7 +3358,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   menuRecipeList:
   - {fileID: 11400000, guid: 52777661360d1714a90c65edbf5a04dc, type: 2}
-  spawnInterval: 3
+  spawnInterval: 20
 --- !u!4 &1131503894
 Transform:
   m_ObjectHideFlags: 0
@@ -4500,6 +4500,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68e37852088560b48bb185d6ee6ba674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 0
 --- !u!1001 &1819638183
 PrefabInstance:
   m_ObjectHideFlags: 0

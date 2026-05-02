@@ -83,11 +83,6 @@ namespace Counter
                             {
                                 pot.IsCooked = true;
                                 CurrentStoveState = StoveState.Fried;
-
-                                if (pot.HasKitchenObject() && pot.GetKitchenObject() is FoodObject food)
-                                {
-                                    food.SetState(FoodState.Fried);
-                                }
                             }
                             break;
 
@@ -101,11 +96,6 @@ namespace Counter
                             {
                                 pot.IsBurned = true;
                                 CurrentStoveState = StoveState.Burned;
-
-                                if (pot.HasKitchenObject() && pot.GetKitchenObject() is FoodObject food)
-                                {
-                                    food.SetState(FoodState.Burned);
-                                }
                             }
                             break;
 
@@ -198,28 +188,28 @@ namespace Counter
                     {
                         PotObject pot = _kitchenObject as PotObject;
 
-                        if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && pot.CanAddIngredient())
+                        if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && pot.CanAddIngredient(food))
                         {
-                            if (!pot.HasKitchenObject())
-                            {
-                                food.SetKitchenObjectParent(pot);
-                            }
-                            else
-                            {
-                                food.DestroySelf();
-                            }
-
-                            pot.OnIngredientAdded();
-                            food.SetState(FoodState.Soup);
-
+                            pot.OnIngredientAdded(food);
                             CurrentStoveState = StoveState.Frying;
+                            food.DestroySelf();
                         }
                         else if (player.GetKitchenObject() is PlateObject plate && pot.IsCooked && !pot.IsBurned && pot.IsFull())
                         {
-                            if (pot.HasKitchenObject() && !plate.HasKitchenObject())
+                            List<EFoodType> potIngredients = pot.GetIngredientTypeList();
+                            bool transferSuccess = true;
+
+                            foreach (var ingredientType in potIngredients)
                             {
-                                KitchenObject potFood = pot.GetKitchenObject();
-                                potFood.SetKitchenObjectParent(plate);
+                                if (!plate.TryAddIngredient(ingredientType))
+                                {
+                                    transferSuccess = false;
+                                    break;
+                                }
+                            }
+
+                            if (transferSuccess)
+                            {
                                 pot.EmptyPot();
                                 CurrentStoveState = StoveState.Idle;
                             }

@@ -1,50 +1,64 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Kitchen
 {
-    public class PlateObject : KitchenObject, IKitchenObjectParent
+    public class PlateObject : KitchenObject
     {
         [SerializeField] private Transform topPoint;
-        private KitchenObject _kitchenObject;
+        [SerializeField] private List<EFoodType> validIngredientList;
+        
+        private List<EFoodType> _ingredientList = new List<EFoodType>();
+        
+        public event EventHandler<OnIngredientAddedEventArgs> OnIngredientAdded;
+        public class OnIngredientAddedEventArgs : EventArgs
+        {
+            public EFoodType eFoodType;
+        }
 
         public override void OnDespawn()
         {
             base.OnDespawn();
-            if (HasKitchenObject())
+            _ingredientList.Clear();
+        }
+
+        public bool TryAddIngredient(FoodObject foodObject)
+        {
+            if (!validIngredientList.Contains(foodObject.EFoodType))
             {
-                _kitchenObject.DestroySelf();
+                return false;
             }
+
+            _ingredientList.Add(foodObject.EFoodType);
+
+            OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
+            {
+                eFoodType = foodObject.EFoodType
+            });
+            
+            return true;
         }
 
-        #region IKitchenObjectParent
-
-        public Transform GetKitchenObjectToTransform()
+        public bool TryAddIngredient(EFoodType foodType)
         {
-            return topPoint;
+            if (!validIngredientList.Contains(foodType))
+            {
+                return false;
+            }
+
+            _ingredientList.Add(foodType);
+
+            OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
+            {
+                eFoodType = foodType
+            });
+            
+            return true;
         }
 
-        public void SetKitchenObject(KitchenObject kitchenObject)
-        {
-            this._kitchenObject = kitchenObject;
-        }
+        public List<EFoodType> GetIngredientList() => _ingredientList;
 
-        public KitchenObject GetKitchenObject()
-        {
-            return this._kitchenObject;
-        }
-
-        public void ClearKitchenObject()
-        {
-            this._kitchenObject = null;
-        }
-
-        public bool HasKitchenObject()
-        {
-            return this._kitchenObject != null;
-        }
-
-        #endregion
     }
 }

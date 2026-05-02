@@ -1,11 +1,14 @@
+
+
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Counter;
 using GameUI;
 
 namespace Kitchen
 {
-    public class PotObject : KitchenObject, IKitchenObjectParent
+    public class PotObject : KitchenObject
     {
         [SerializeField] private float liquidHeight;
         [SerializeField] private GameObject liquidGO;
@@ -41,10 +44,7 @@ namespace Kitchen
 
         private const int MaxCapacity = 3;
 
-        private int _currentCount;
-
-        [SerializeField] private Transform topPoint;
-        private KitchenObject _kitchenObject;
+        private List<EFoodType> _ingredientList = new List<EFoodType>();
 
         private void Awake()
         {
@@ -64,6 +64,12 @@ namespace Kitchen
 
             bool shouldShowBurned = IsBurned;
             PlayBurnedEffect(shouldShowBurned);
+        }
+
+        public override void OnSpawn()
+        {
+            base.OnSpawn();
+            EmptyPot();
         }
 
         public void UpdateCookingProgress(float progress)
@@ -105,19 +111,27 @@ namespace Kitchen
             if (burnedCookingEffect != null) burnedCookingEffect.Stop();
         }
 
-        public bool CanAddIngredient()
+        public bool CanAddIngredient(FoodObject food)
         {
-            return _currentCount < MaxCapacity && !IsBurned;
+            if (_ingredientList.Count >= MaxCapacity || IsBurned) return false;
+            
+            // In Overcooked soup, usually all ingredients must be the same
+            if (_ingredientList.Count > 0 && _ingredientList[0] != food.EFoodType) return false;
+
+            return true;
         }
 
-        public void OnIngredientAdded()
+        public void OnIngredientAdded(FoodObject food)
         {
-            _currentCount++;
-            liquidGO.transform.localPosition = Vector3.up * (liquidHeight * _currentCount);
+            _ingredientList.Add(food.EFoodType);
+
+            liquidGO.transform.localPosition = Vector3.up * (liquidHeight * _ingredientList.Count);
+            
             IsCooked = false;
             IsBurned = false;
             FryingTimer = 0f;
             BurningTimer = 0f;
+            
             if (progressBarUI != null)
             {
                 progressBarUI.Hide();
@@ -127,18 +141,19 @@ namespace Kitchen
 
         public bool IsFull()
         {
-            return _currentCount >= MaxCapacity;
+            return _ingredientList.Count >= MaxCapacity;
         }
 
         public bool HasIngredients()
         {
-            return _currentCount > 0;
+            return _ingredientList.Count > 0;
         }
 
+        public List<EFoodType> GetIngredientTypeList() => _ingredientList;
 
         public void EmptyPot()
         {
-            _currentCount = 0;
+            _ingredientList.Clear();
             IsCooked = false;
             IsBurned = false;
             FryingTimer = 0f;
@@ -150,34 +165,5 @@ namespace Kitchen
                 progressBarUI.Hide();
             }
         }
-
-        #region IKitchenObjectParent
-
-        public Transform GetKitchenObjectToTransform()
-        {
-            return topPoint;
-        }
-
-        public void SetKitchenObject(KitchenObject kitchenObject)
-        {
-            this._kitchenObject = kitchenObject;
-        }
-
-        public KitchenObject GetKitchenObject()
-        {
-            return this._kitchenObject;
-        }
-
-        public void ClearKitchenObject()
-        {
-            this._kitchenObject = null;
-        }
-
-        public bool HasKitchenObject()
-        {
-            return this._kitchenObject != null;
-        }
-
-        #endregion
     }
 }

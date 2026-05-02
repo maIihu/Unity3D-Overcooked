@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Kitchen;
 using Player;
+using Pooling;
 
 namespace Counter
 {
@@ -20,40 +21,69 @@ namespace Counter
                 {
                     if (GetKitchenObject() is PotObject pot)
                     { // put pot has cooked food on plate
-                        if (player.GetKitchenObject() is PlateObject playerPlate && pot.IsCooked && !pot.IsBurned && pot.IsFull() && pot.HasKitchenObject() && !playerPlate.HasKitchenObject())
+                        if (player.GetKitchenObject() is PlateObject playerPlate && pot.IsCooked && !pot.IsBurned && pot.IsFull())
                         {
-                            KitchenObject potFood = pot.GetKitchenObject();
-                            potFood.SetKitchenObjectParent(playerPlate);
-                            pot.EmptyPot();
+                            List<EFoodType> potIngredients = pot.GetIngredientTypeList();
+                            bool transferSuccess = true;
+
+                            foreach (var ingredientType in potIngredients)
+                            {
+                                if (!playerPlate.TryAddIngredient(ingredientType))
+                                {
+                                    transferSuccess = false;
+                                    break;
+                                }
+                            }
+
+                            if (transferSuccess)
+                            {
+                                pot.EmptyPot();
+                            }
                         }
 
                         if (!pot.IsBurned && !pot.IsFull() && player.HasKitchenObject())
                         {
-                            if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && pot.CanAddIngredient())
+                            if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && pot.CanAddIngredient(food))
                             {
-
-                                if (!pot.HasKitchenObject())
-                                {
-                                    food.SetKitchenObjectParent(pot);
-                                }
-                                else
-                                {
-                                    food.DestroySelf();
-                                }
-
-                                pot.OnIngredientAdded();
-                                food.SetState(FoodState.Soup);
+                                pot.OnIngredientAdded(food);
+                                food.DestroySelf();
                             }
-
+                        }
+                    }
+                    else if (GetKitchenObject() is FoodObject counterFood && player.GetKitchenObject() is PlateObject playerPlate)
+                    {
+                        if (playerPlate.TryAddIngredient(counterFood))
+                        {
+                            counterFood.DestroySelf();
+                        }
+                    }
+                    else if (GetKitchenObject() is PlateObject counterPlate && player.GetKitchenObject() is FoodObject playerFood)
+                    {
+                        if (counterPlate.TryAddIngredient(playerFood))
+                        {
+                            playerFood.DestroySelf();
                         }
                     }
                     else if (GetKitchenObject() is PlateObject plate && player.GetKitchenObject() is PotObject playerPot)
                     { // take cooked food from pot to plate
-                        if (playerPot.IsCooked && !playerPot.IsBurned && playerPot.IsFull() && playerPot.HasKitchenObject() && !plate.HasKitchenObject())
+                        if (playerPot.IsCooked && !playerPot.IsBurned && playerPot.IsFull())
                         {
-                            KitchenObject potFood = playerPot.GetKitchenObject();
-                            potFood.SetKitchenObjectParent(plate);
-                            playerPot.EmptyPot();
+                            List<EFoodType> potIngredients = playerPot.GetIngredientTypeList();
+                            bool transferSuccess = true;
+
+                            foreach (var ingredientType in potIngredients)
+                            {
+                                if (!plate.TryAddIngredient(ingredientType))
+                                {
+                                    transferSuccess = false;
+                                    break;
+                                }
+                            }
+
+                            if (transferSuccess)
+                            {
+                                playerPot.EmptyPot();
+                            }
                         }
                     }
 

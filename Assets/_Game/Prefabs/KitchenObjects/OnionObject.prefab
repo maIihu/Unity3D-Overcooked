@@ -161,7 +161,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 1093464399993333062}
   col: {fileID: 554072304356249899}
-  foodType: 2
+  eFoodType: 1
   normalVisual: {fileID: 3829224531693267387}
   cuttingVisual: {fileID: 394788406785576440}
   soupVisual: {fileID: 3774670205689977737}

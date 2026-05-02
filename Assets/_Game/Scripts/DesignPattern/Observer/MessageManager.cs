@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using DesignPattern;
 using UnityEngine;
@@ -8,7 +8,8 @@ namespace _Game.Scripts.DesignPattern.Observer
     public enum ProjectMessageType
     {
         OnSpawnNewRecipe,
-        OnRejectRecipe
+        OnRejectRecipe,
+        OnRecipeSuccess
 	}
     public class Message
     {

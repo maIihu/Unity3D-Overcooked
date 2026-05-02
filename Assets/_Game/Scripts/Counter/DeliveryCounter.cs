@@ -19,7 +19,7 @@ namespace Counter
                 if (player.GetKitchenObject() is PlateObject plate)
                 {
                     // Chỉ nhận đĩa có đồ ăn
-                    if (plate.HasKitchenObject())
+                    if (plate.GetIngredientList().Count > 0)
                     {
                         if (DeliveryController.Instance != null)
                         {

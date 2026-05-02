@@ -17,17 +17,13 @@ namespace Counter
 
                 if (playerObject is PlateObject plate)
                 {
-                    if (plate.HasKitchenObject())
-                    {
-                        plate.GetKitchenObject().DestroySelf();
-                    }
+                    // if (plate.HasKitchenObject())
+                    // {
+                    //     plate.GetKitchenObject().DestroySelf();
+                    // }
                 }
                 else if (playerObject is PotObject pot)
                 {
-                    if (pot.HasKitchenObject())
-                    {
-                        pot.GetKitchenObject().DestroySelf();
-                    }
                     pot.EmptyPot();
                 }
                 else

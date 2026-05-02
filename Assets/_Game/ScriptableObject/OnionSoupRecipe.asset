@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18771228df9144468fa351592ab36367, type: 3}
   m_Name: OnionSoupRecipe
   m_EditorClassIdentifier: 
+  menuType: 0
   icon: {fileID: 72429075, guid: c9ee23f792db63642a2c3c37556299f3, type: 3}
   foodObjectMenu:
   - foodType: 1
@@ -20,4 +21,4 @@ MonoBehaviour:
     sprite: {fileID: -1674569101, guid: c9ee23f792db63642a2c3c37556299f3, type: 3}
   - foodType: 1
     sprite: {fileID: -1674569101, guid: c9ee23f792db63642a2c3c37556299f3, type: 3}
-  timeRemaining: 10
+  timeRemaining: 50

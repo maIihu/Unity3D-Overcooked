@@ -87,7 +87,47 @@ namespace GameCore
 
         public void DeliverPlate(PlateObject plate)
         {
-            // Implementation
+            List<EFoodType> plateIngredients = plate.GetIngredientList();
+            ActiveRecipe matchedRecipe = null;
+
+            foreach (var activeRecipe in currentRecipes)
+            {
+                MenuRecipeSO recipeSO = activeRecipe.Data;
+
+                if (recipeSO.foodObjectMenu.Count != plateIngredients.Count) continue;
+
+                bool isMatch = true;
+                foreach (var menuItem in recipeSO.foodObjectMenu)
+                {
+                    if (!plateIngredients.Contains(menuItem.foodType))
+                    {
+                        isMatch = false;
+                        break;
+                    }
+                }
+
+                if (isMatch)
+                {
+                    matchedRecipe = activeRecipe;
+                    break;
+                }
+            }
+
+            if (matchedRecipe != null)
+            {
+                Debug.Log("Recipe Matched: " + matchedRecipe.Data.menuType);
+                currentRecipes.Remove(matchedRecipe);
+                
+                MessageManager.Instance.SendMessage(
+                    new Message(ProjectMessageType.OnRecipeSuccess, 
+                        new object[] { matchedRecipe })
+                );
+            }
+            else
+            {
+                Debug.Log("No Recipe Matched");
+                // Optional: Penalty or message for wrong delivery
+            }
         }
     }
 }

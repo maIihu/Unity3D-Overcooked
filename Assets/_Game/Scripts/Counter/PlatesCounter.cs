@@ -39,9 +39,9 @@ namespace Counter
                     if (player.GetKitchenObject() is FoodObject food)
                     {
                         PlateObject plate = GetKitchenObject() as PlateObject;
-                        if (food.FoodState == FoodState.Cut)
+                        if (plate.TryAddIngredient(food))
                         {
-                            food.SetKitchenObjectParent(plate);
+                            food.DestroySelf();
                         }
                     }
                 }
