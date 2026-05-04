@@ -1391,7 +1391,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 35
+  field of view: 40
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1909,33 +1909,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &568563177 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1569148104918303626, guid: ed5339d695d8eda4597c0d7875bfc9f0,
-    type: 3}
-  m_PrefabInstance: {fileID: 3228238282765976803}
-  m_PrefabAsset: {fileID: 0}
---- !u!65 &568563182
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 568563177}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.79761434, y: 1.7758486, z: 0.8062983}
-  m_Center: {x: -0.0021849275, y: 0.8669368, z: 0.09685084}
 --- !u!1001 &587502304
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5702,19 +5675,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 8694843197381486123, guid: ed5339d695d8eda4597c0d7875bfc9f0,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1569148104918303626, guid: ed5339d695d8eda4597c0d7875bfc9f0,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 568563182}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ed5339d695d8eda4597c0d7875bfc9f0, type: 3}
 --- !u!1001 &5548562051748089270
 PrefabInstance:

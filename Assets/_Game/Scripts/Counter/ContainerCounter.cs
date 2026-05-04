@@ -13,7 +13,7 @@ namespace Counter
     {
         [SerializeField] private Animation anim;
         [SerializeField] private ContainerData[] containerDataArr;
-        [SerializeField] private Renderer decalRenderer;
+        [SerializeField] private Renderer[] decalRendererArr;
 
         private EFoodType _containerEFoodType;
 
@@ -25,7 +25,10 @@ namespace Counter
             {
                 if (data.eFoodType == eFoodType)
                 {
-                    decalRenderer.material = data.material;
+                    foreach (var ren in decalRendererArr)
+                    {
+                        ren.material = data.material;
+                    }
                     break;
                 }
             }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -54,6 +55,27 @@ namespace _Game.Scripts.UI
                     duration
                 )
                 .SetEase(Ease.Linear);
+        }
+
+        public void PlaySuccessAnimation(Action onComplete)
+        {
+            timerTween?.Kill();
+
+            // Punch scale để tạo cảm giác "pop"
+            transform
+                .DOPunchScale(Vector3.one * 0.4f, 0.3f, 6, 0.5f)
+                .OnComplete(() =>
+                {
+                    // Fade out toàn bộ CanvasGroup hoặc scale về 0
+                    transform
+                        .DOScale(0f, 0.25f)
+                        .SetEase(Ease.InBack)
+                        .OnComplete(() =>
+                        {
+                            transform.localScale = Vector3.one; // reset cho lần dùng sau
+                            onComplete?.Invoke();
+                        });
+                });
         }
 
         private void OnDisable()

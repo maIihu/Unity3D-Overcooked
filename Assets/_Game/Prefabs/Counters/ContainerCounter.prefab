@@ -162,7 +162,9 @@ MonoBehaviour:
     material: {fileID: 2100000, guid: 5a864149b5ba1444a9431e45e25e0ad2, type: 2}
   - eFoodType: 2
     material: {fileID: 2100000, guid: 434a3e876431f4341828765c5cb1d646, type: 2}
-  decalRenderer: {fileID: 8563336377923434635}
+  decalRendererArr:
+  - {fileID: 8563336377923434635}
+  - {fileID: 2670483780576105798}
 --- !u!1001 &1555702091940458490
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -316,6 +318,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9a9137fa2b035d34e881701d2c178192, type: 3}
+--- !u!23 &2670483780576105798 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3501971017668967100, guid: 9a9137fa2b035d34e881701d2c178192,
+    type: 3}
+  m_PrefabInstance: {fileID: 1555702091940458490}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &3037402833241246544 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4589716710238282922, guid: 9a9137fa2b035d34e881701d2c178192,

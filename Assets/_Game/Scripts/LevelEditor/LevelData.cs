@@ -10,6 +10,8 @@ public class CounterData
     public int counterId;
     public Vector3 position;
     public Vector3 rotation;
+    /// <summary>EFoodType cast to int. -1 = no item.</summary>
+    public int kitchenObjectFoodType = -1;
 }
 
 [Serializable]

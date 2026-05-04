@@ -29,8 +29,15 @@ public class LevelDesignerUI : MonoBehaviour
     [SerializeField] private TMP_Text counterInfoText;
     [SerializeField] private Button deleteCounterButton;
 
+    [Header("Kitchen Object Panel (ClearCounter)")]
+    [SerializeField] private GameObject kitchenObjectPanel;
+    [SerializeField] private TMP_Dropdown foodTypeDropdown;
+    [SerializeField] private Button setItemButton;
+    [SerializeField] private Button clearItemButton;
+
     private CounterTemplate _selectedTemplate;
     private ObjectPlacementController _placementController;
+    private BaseCounter _currentSelectedCounter;
 
     private void Start()
     {
@@ -57,10 +64,33 @@ public class LevelDesignerUI : MonoBehaviour
 
         if (deleteCounterButton != null)
         {
-            deleteCounterButton.onClick.AddListener(() => {
+            deleteCounterButton.onClick.AddListener(() =>
+            {
                 if (_placementController != null) _placementController.DeleteCurrentSelection();
             });
         }
+
+        // Wire up KitchenObject panel
+        if (foodTypeDropdown != null)
+        {
+            foodTypeDropdown.ClearOptions();
+            foodTypeDropdown.AddOptions(
+                System.Enum.GetNames(typeof(KitchenType)).ToList()
+            );
+            foodTypeDropdown.value = 0;
+        }
+
+        if (setItemButton != null)
+        {
+            setItemButton.onClick.AddListener(OnSetItemClicked);
+        }
+
+        if (clearItemButton != null)
+        {
+            clearItemButton.onClick.AddListener(OnClearItemClicked);
+        }
+
+        if (kitchenObjectPanel != null) kitchenObjectPanel.SetActive(false);
     }
 
     private void GeneratePalette()
@@ -174,30 +204,65 @@ public class LevelDesignerUI : MonoBehaviour
 
     private void HandleCounterSelected(BaseCounter counter)
     {
+        // Ẩn counter cũ nếu khác với counter mới được chọn
+        if (_currentSelectedCounter != null && _currentSelectedCounter != counter)
+            _currentSelectedCounter.Hide();
+
+        _currentSelectedCounter = counter;
+        counter.Show();
+
         if (counterInfoPanel == null || counterInfoText == null) return;
-        
+
         if (LevelDesignerManager.Instance.TryGetCounterData(counter, out CounterData data))
         {
             CounterType type = CounterIdConverter.GetCounterType(data.counterId);
             string subTypeStr = "";
-            
+
             if (type == CounterType.ContainerCounter)
-            {
                 subTypeStr = $"\n<b>Sub-Type:</b> {CounterIdConverter.GetFoodType(data.counterId)}";
-            }
             else if (type == CounterType.StoveCounter)
-            {
                 subTypeStr = $"\n<b>Sub-Type:</b> {CounterIdConverter.GetKitchenType(data.counterId)}";
-            }
-            
+
             string cName = counter.gameObject.name.Replace("(Clone)", "");
             counterInfoText.text = $"<b>Name:</b> {cName}\n<b>ID:</b> {data.counterId}\n<b>Pos:</b> {data.position}{subTypeStr}";
             counterInfoPanel.SetActive(true);
+
+            // Show KitchenObject panel only for ClearCounter
+            bool isClearCounter = counter is ClearCounter;
+            if (kitchenObjectPanel != null)
+                kitchenObjectPanel.SetActive(isClearCounter);
+
+            // Sync dropdown to current saved food type
+            if (isClearCounter && foodTypeDropdown != null && data.kitchenObjectFoodType >= 0)
+                foodTypeDropdown.value = data.kitchenObjectFoodType;
         }
     }
 
     private void HandleCounterDeselected()
     {
+        // Ẩn highlight counter đang chọn
+        if (_currentSelectedCounter != null)
+        {
+            _currentSelectedCounter.Hide();
+            _currentSelectedCounter = null;
+        }
+
         if (counterInfoPanel != null) counterInfoPanel.SetActive(false);
+        if (kitchenObjectPanel != null) kitchenObjectPanel.SetActive(false);
+    }
+
+    private void OnSetItemClicked()
+    {
+        if (_currentSelectedCounter == null || foodTypeDropdown == null) return;
+
+        int foodType = foodTypeDropdown.value; // index == EFoodType int value
+        LevelDesignerManager.Instance.SetKitchenObjectOnCounter(_currentSelectedCounter, foodType);
+    }
+
+    private void OnClearItemClicked()
+    {
+        if (_currentSelectedCounter == null) return;
+
+        LevelDesignerManager.Instance.SetKitchenObjectOnCounter(_currentSelectedCounter, -1);
     }
 }

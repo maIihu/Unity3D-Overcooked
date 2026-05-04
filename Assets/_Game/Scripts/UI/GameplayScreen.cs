@@ -67,6 +67,19 @@ namespace _Game.Scripts.UI
             }
         }
 
+        public void RemoveMenuItemWithEffect(ActiveRecipe activeRecipe)
+        {
+            if (activeItems.TryGetValue(activeRecipe.Id, out var uiItem))
+            {
+                activeItems.Remove(activeRecipe.Id);
+
+                uiItem.PlaySuccessAnimation(() =>
+                {
+                    uiItem.gameObject.SetActive(false);
+                });
+            }
+        }
+
         protected override void OnScreenDestroyed()
         {
         }

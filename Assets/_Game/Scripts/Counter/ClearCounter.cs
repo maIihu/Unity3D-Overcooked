@@ -26,6 +26,7 @@ namespace Counter
             }
         }
 
+
         private void HandleCounterHasObject(Player player)
         {
             if (!player.HasKitchenObject()) 

@@ -22,12 +22,14 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
     {
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnSpawnNewRecipe, this);
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnRejectRecipe, this);
+        MessageManager.Instance.AddSubscriber(ProjectMessageType.OnRecipeSuccess, this);
     }
 
     private void OnDisable()
     {
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnSpawnNewRecipe, this);
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnRejectRecipe, this);
+        MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnRecipeSuccess, this);
     }
     
     public void Initialize()
@@ -61,6 +63,9 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
                 break;
             case ProjectMessageType.OnRejectRecipe:
                 GetScreen<GameplayScreen>().RemoveMenuItem((ActiveRecipe)data[0]);
+                break;
+            case ProjectMessageType.OnRecipeSuccess:
+                GetScreen<GameplayScreen>().RemoveMenuItemWithEffect((ActiveRecipe)data[0]);
                 break;
         }
     }
