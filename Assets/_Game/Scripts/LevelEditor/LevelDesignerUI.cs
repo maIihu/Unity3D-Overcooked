@@ -254,7 +254,7 @@ public class LevelDesignerUI : MonoBehaviour
     private void OnSetItemClicked()
     {
         if (_currentSelectedCounter == null || foodTypeDropdown == null) return;
-
+        Debug.Log("Set");
         int foodType = foodTypeDropdown.value; // index == EFoodType int value
         LevelDesignerManager.Instance.SetKitchenObjectOnCounter(_currentSelectedCounter, foodType);
     }

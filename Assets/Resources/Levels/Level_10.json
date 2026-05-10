@@ -1,0 +1,42 @@
+{
+    "counterList": [
+        {
+            "counterId": 100,
+            "position": {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "kitchenObjectFoodType": 0
+        },
+        {
+            "counterId": 100,
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "kitchenObjectFoodType": -1
+        }
+    ],
+    "cameraPosition": {
+        "x": 0.0,
+        "y": 12.0,
+        "z": -10.0
+    },
+    "cameraEulerAngles": {
+        "x": 65.00003051757813,
+        "y": 0.0,
+        "z": 0.0
+    }
+}

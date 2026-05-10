@@ -11,7 +11,10 @@ namespace Kitchen
         [SerializeField] private List<EFoodType> validIngredientList;
         [SerializeField] private GameObject liquidGO;
         
+        [SerializeField] private GameObject dirtyVisual;
+        
         private List<EFoodType> _ingredientList = new List<EFoodType>();
+        private bool _isDirty;
         
         public event EventHandler<OnIngredientAddedEventArgs> OnIngredientAdded;
         public class OnIngredientAddedEventArgs : EventArgs
@@ -23,6 +26,7 @@ namespace Kitchen
         {
             base.OnSpawn();
             liquidGO.SetActive(false);
+            SetDirty(false);
         }
 
         public override void OnDespawn()
@@ -33,7 +37,7 @@ namespace Kitchen
 
         public bool TryAddIngredient(FoodObject foodObject)
         {
-            if (!validIngredientList.Contains(foodObject.EFoodType))
+            if (_isDirty || !validIngredientList.Contains(foodObject.EFoodType))
             {
                 return false;
             }
@@ -51,7 +55,7 @@ namespace Kitchen
 
         public bool TryAddIngredient(EFoodType foodType)
         {
-            if (!validIngredientList.Contains(foodType))
+            if (_isDirty || !validIngredientList.Contains(foodType))
             {
                 return false;
             }
@@ -70,5 +74,12 @@ namespace Kitchen
 
         public List<EFoodType> GetIngredientList() => _ingredientList;
 
+        public bool IsDirty() => _isDirty;
+
+        public void SetDirty(bool dirty)
+        {
+            _isDirty = dirty;
+            if (dirtyVisual != null) dirtyVisual.SetActive(dirty);
+        }
     }
 }

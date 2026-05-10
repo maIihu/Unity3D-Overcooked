@@ -1533,8 +1533,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14a6069085fd0b942bf581e5393f61b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelJson: {fileID: 4900000, guid: 77f05bde1b0284240b483e0871727276, type: 3}
   templateList: {fileID: 11400000, guid: 7c20a2a91e21a62469a8697551454c82, type: 2}
+  kitchenObjectLibrary: {fileID: 11400000, guid: 10e3ba6b4bfe6b3419433eca1fcac76d,
+    type: 2}
   counterParent: {fileID: 388465762}
 --- !u!4 &388465762
 Transform:
@@ -1544,12 +1545,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388465760}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1686412885}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &410087039
 GameObject:
@@ -2393,8 +2394,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14a6069085fd0b942bf581e5393f61b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelJson: {fileID: 0}
   templateList: {fileID: 0}
+  kitchenObjectLibrary: {fileID: 0}
   counterParent: {fileID: 0}
 --- !u!1001 &726400390
 PrefabInstance:
@@ -3331,7 +3332,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   menuRecipeList:
   - {fileID: 11400000, guid: 52777661360d1714a90c65edbf5a04dc, type: 2}
+  maxActiveRecipes: 4
   spawnInterval: 20
+  returnPlateDelay: 3
 --- !u!4 &1131503894
 Transform:
   m_ObjectHideFlags: 0
@@ -3340,12 +3343,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131503892}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1686412885}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1150133700
 PrefabInstance:
@@ -4458,7 +4461,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 388465762}
+  - {fileID: 1131503894}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1686412886
@@ -4473,7 +4478,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68e37852088560b48bb185d6ee6ba674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dontDestroyOnLoad: 0
+  _dontDestroyOnLoad: 1
+  deliveryController: {fileID: 1131503893}
+  levelController: {fileID: 388465761}
+  levelData: 1
 --- !u!1001 &1819638183
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5775,6 +5783,4 @@ SceneRoots:
   - {fileID: 518764713}
   - {fileID: 2041249344}
   - {fileID: 718905939}
-  - {fileID: 1131503894}
   - {fileID: 2745943797001947770}
-  - {fileID: 388465762}

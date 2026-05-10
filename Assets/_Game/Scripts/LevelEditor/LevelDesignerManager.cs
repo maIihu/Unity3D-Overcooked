@@ -15,6 +15,8 @@ public class LevelDesignerManager : MonoBehaviour
     [SerializeField] private KitchenObjectLibrarySO kitchenObjectLibrary;
     [SerializeField] private Camera levelPreviewCamera;
 
+    public KitchenObjectLibrarySO GetKitchenObjectLibrary() => kitchenObjectLibrary;
+
     private Dictionary<BaseCounter, CounterData> _placedCountersMap = new Dictionary<BaseCounter, CounterData>();
 
     private void Awake()

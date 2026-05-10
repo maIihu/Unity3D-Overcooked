@@ -20,13 +20,13 @@ namespace Counter
                     // Chỉ nhận đĩa có đồ ăn
                     if (plate.GetIngredientList().Count > 0)
                     {
-                        if (DeliveryController.Instance != null)
+                        if (GameManager.Instance != null && GameManager.Instance.DeliveryController != null)
                         {
-                            DeliveryController.Instance.DeliverPlate(plate);
+                            GameManager.Instance.DeliveryController.DeliverPlate(plate);
                         }
                         else
                         {
-                            Debug.LogWarning("[DeliveryCounter] Mất DeliveryController instance! Kéo file vào inspector đi kìa.");
+                            Debug.LogWarning("[DeliveryCounter] Mất GameManager hoặc DeliveryController! Kiểm tra lại scene.");
                         }
 
                         // Người chơi giao đĩa => Hủy cái đĩa (và các món trên đĩa)
