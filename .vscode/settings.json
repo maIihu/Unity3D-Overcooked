@@ -1,5 +1,6 @@
 {
     "dotnet.defaultSolution": "Unity3D-Overcooked.sln",
+    "dotnet.dotnetPath": "C:/Program Files/dotnet/dotnet.exe",
     "dotrush.roslyn.dotnetSdkDirectory": "C:/Program Files/dotnet/sdk/9.0.305",
     "dotrush.msbuildProperties": {
         "DefineConstants": "UNITY_EDITOR"
@@ -59,6 +60,5 @@
         "Temp/": true,
         "**/*.csproj": true,
         "**/*.sln": true
-    },
-    "omnisharp.dotnetPath": "C:/Program Files/dotnet/dotnet.exe"
+    }
 }

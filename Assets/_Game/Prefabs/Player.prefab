@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 926398963344026295}
   - component: {fileID: 3582725316073197151}
   - component: {fileID: 6756487189995824916}
+  - component: {fileID: 3745120596762801842}
+  - component: {fileID: 2566056774708828968}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -84,6 +86,7 @@ MonoBehaviour:
   interactPoint: {fileID: 3369580444840670666}
   animator: {fileID: 8387740328982470546}
   _rb: {fileID: 926398963344026295}
+  _NetworkMoveInput: {x: 0, y: 0}
 --- !u!65 &6756487189995824916
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -105,6 +108,43 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.79761434, y: 1.7758486, z: 0.8062983}
   m_Center: {x: -0.0021849275, y: 0.8669368, z: 0.09685084}
+--- !u!114 &3745120596762801842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1569148104918303626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 2299224893
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 3582725316073197151}
+  - {fileID: 2566056774708828968}
+  ForceRemoteRenderTimeframe: 0
+--- !u!114 &2566056774708828968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1569148104918303626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
 --- !u!1 &7730821694910580315
 GameObject:
   m_ObjectHideFlags: 0

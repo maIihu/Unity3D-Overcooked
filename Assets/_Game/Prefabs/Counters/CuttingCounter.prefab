@@ -177,6 +177,7 @@ GameObject:
   - component: {fileID: 1130317772440694930}
   - component: {fileID: 4891514115967128645}
   - component: {fileID: 7928788374509784080}
+  - component: {fileID: 5452486565278825198}
   m_Layer: 0
   m_Name: CuttingCounter
   m_TagString: Untagged
@@ -239,6 +240,25 @@ MonoBehaviour:
   selectedCounter: {fileID: 2657872876056575645}
   cuttingTime: 3
   progressBarUI: {fileID: 5607542507448383397}
+--- !u!114 &5452486565278825198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5498409353710322713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 623154946
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 7928788374509784080}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1001 &1969016743180507703
 PrefabInstance:
   m_ObjectHideFlags: 0

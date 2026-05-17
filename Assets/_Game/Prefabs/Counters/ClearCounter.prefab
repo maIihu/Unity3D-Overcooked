@@ -42,6 +42,7 @@ GameObject:
   - component: {fileID: 5925789996392010323}
   - component: {fileID: 7961825410466944286}
   - component: {fileID: 5589205383086742405}
+  - component: {fileID: 8441159138923503637}
   m_Layer: 0
   m_Name: ClearCounter
   m_TagString: Untagged
@@ -102,6 +103,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 5629024019981519430}
   selectedCounter: {fileID: 1953117061465033627}
+--- !u!114 &8441159138923503637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9026034541025303468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 1858263948
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 5589205383086742405}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1001 &482795892460856765
 PrefabInstance:
   m_ObjectHideFlags: 0

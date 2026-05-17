@@ -95,6 +95,8 @@ GameObject:
   - component: {fileID: 1093464399993333062}
   - component: {fileID: 2805479275731452759}
   - component: {fileID: 554072304356249899}
+  - component: {fileID: 958363519116385854}
+  - component: {fileID: 6804057956584865449}
   m_Layer: 0
   m_Name: OnionObject
   m_TagString: Untagged
@@ -187,6 +189,43 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.4
   m_Center: {x: 0, y: 0.35, z: 0}
+--- !u!114 &958363519116385854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7528604630934436202}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 2566084335
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 2805479275731452759}
+  - {fileID: 6804057956584865449}
+  ForceRemoteRenderTimeframe: 0
+--- !u!114 &6804057956584865449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7528604630934436202}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
 --- !u!1001 &701427014445871273
 PrefabInstance:
   m_ObjectHideFlags: 0

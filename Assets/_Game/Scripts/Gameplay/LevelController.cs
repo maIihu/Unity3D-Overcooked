@@ -95,7 +95,7 @@ namespace GameCore
             BaseCounter counter = go.GetComponent<BaseCounter>();
 
             if (counter == null) return;
-
+            counter.Init();
             _spawnedCounters.Add(counter);
             if (counter is PlatesCounter platesCounter)
             {

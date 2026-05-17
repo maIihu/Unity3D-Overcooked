@@ -252,6 +252,7 @@ GameObject:
   - component: {fileID: 1130317772440694930}
   - component: {fileID: 4891514115967128645}
   - component: {fileID: 5464922795783465971}
+  - component: {fileID: 7043005168475393459}
   m_Layer: 0
   m_Name: StoveCounter
   m_TagString: Untagged
@@ -313,14 +314,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 7855923016644956000}
   selectedCounter: {fileID: 7914324331464937705}
-  potObjectPrefab: {fileID: 7388250531353371702, guid: dd26e63db74aef9419c28626eee1e7c3,
-    type: 3}
   potPoint: {fileID: 7445141532680819052}
   fryingTimerMax: 4
   burningTimerMax: 5
   completeSprite: {fileID: 572477956, guid: c9ee23f792db63642a2c3c37556299f3, type: 3}
   warningSprite: {fileID: -2014618199, guid: c9ee23f792db63642a2c3c37556299f3, type: 3}
   imageUI: {fileID: 1471879935748960255}
+--- !u!114 &7043005168475393459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5498409353710322713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 2445481955
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 5464922795783465971}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1 &6084091839250338669
 GameObject:
   m_ObjectHideFlags: 0

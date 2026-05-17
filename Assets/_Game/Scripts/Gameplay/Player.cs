@@ -2,10 +2,11 @@ using System.Collections;
 using Counter;
 using Kitchen;
 using UnityEngine;
+using Fusion;
 
 namespace _Game.Scripts.Gameplay
 {
-    public class Player : MonoBehaviour, IKitchenObjectParent
+    public class Player : NetworkBehaviour, IKitchenObjectParent
     {
         [Header("Player Stats")]
         [SerializeField] private float moveSpeed = 7f;
@@ -30,20 +31,38 @@ namespace _Game.Scripts.Gameplay
         private bool _isCutting;
         private Coroutine _cutCoroutine;
 
+        [Networked] public Vector2 NetworkMoveInput { get; set; }
+
         private void Update()
         {
-            InputHandler();
-            UpdateAnimation();
-            HandleInteractions();
-            if (_moveInput != Vector2.zero && _isCutting)
+            if (Object == null || !Object.IsValid) return;
+
+            if (HasStateAuthority)
             {
-                StopCutting();
+                InputHandler();
+                HandleInteractions();
+                Move(); // Move here for smoothness
+                if (_moveInput != Vector2.zero && _isCutting)
+                {
+                    StopCutting();
+                }
+            }
+            
+            UpdateAnimation();
+        }
+
+        public override void Spawned()
+        {
+            if (!HasStateAuthority)
+            {
+                if (_rb != null) _rb.isKinematic = true;
             }
         }
 
-        private void FixedUpdate()
+        public override void FixedUpdateNetwork()
         {
-            Move();
+            // Movement is handled in Update for the owner in Shared Mode
+            // to match frame rate and avoid jitter.
         }
 
         #region Move
@@ -56,11 +75,16 @@ namespace _Game.Scripts.Gameplay
             if (Input.GetKey(KeyCode.S)) _moveInput.y -= 1;
             if (Input.GetKey(KeyCode.D)) _moveInput.x += 1;
             _moveInput.Normalize();
+
+            // Sync to network for animations on other clients
+            NetworkMoveInput = _moveInput;
         }
 
         private void UpdateAnimation()
         {
-            animator.SetFloat("MovingValue", _moveInput.magnitude);
+            // Use networked input to animate all players correctly
+            Vector2 inputToUse = HasStateAuthority ? _moveInput : NetworkMoveInput;
+            animator.SetFloat("MovingValue", inputToUse.magnitude);
         }
 
         private void Move()
@@ -77,7 +101,9 @@ namespace _Game.Scripts.Gameplay
 
             if (moveDir != Vector3.zero)
             {
-                transform.forward = Vector3.Slerp(transform.forward, moveDir.normalized, Time.fixedDeltaTime * rotateSpeed);
+                // Use Time.deltaTime in Update
+                float delta = HasStateAuthority ? Time.deltaTime : Runner.DeltaTime;
+                transform.forward = Vector3.Slerp(transform.forward, moveDir.normalized, delta * rotateSpeed);
             }
         }
 

@@ -3,10 +3,11 @@ using Counter;
 using UnityEngine;
 using DG.Tweening;
 using Pooling;
+using Fusion;
 
 namespace Kitchen
 {
-    public class KitchenObject : MonoBehaviour, IPoolable
+    public class KitchenObject : NetworkBehaviour, IPoolable
     {
         protected IKitchenObjectParent KitchenObjectParent;
         [SerializeField] private Rigidbody rb;
@@ -29,6 +30,12 @@ namespace Kitchen
 
         public virtual void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent)
         {
+            // Request State Authority if we don't have it (Shared Mode)
+            if (Object != null && !HasStateAuthority)
+            {
+                Object.RequestStateAuthority();
+            }
+
             if (this.KitchenObjectParent != null) KitchenObjectParent.ClearKitchenObject();
 
             this.KitchenObjectParent = kitchenObjectParent;

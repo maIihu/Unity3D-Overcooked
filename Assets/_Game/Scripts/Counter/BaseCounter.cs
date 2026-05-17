@@ -2,10 +2,11 @@ using _Game.Scripts.Gameplay;
 using Kitchen;
 using Pooling;
 using UnityEngine;
+using Fusion;
 
 namespace Counter
 {
-    public class BaseCounter : MonoBehaviour, IKitchenObjectParent, IPoolable
+    public class BaseCounter : NetworkBehaviour, IKitchenObjectParent, IPoolable
     {
         [SerializeField] private Transform counterTopPoint;
         [SerializeField] private GameObject selectedCounter;
