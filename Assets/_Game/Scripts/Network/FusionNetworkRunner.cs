@@ -3,6 +3,8 @@ using Fusion.Sockets;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using _Game.Scripts.DesignPattern.Observer;
+using _Game.Scripts.UI;
 
 namespace GameCore.Network
 {
@@ -10,6 +12,18 @@ namespace GameCore.Network
     {
         [SerializeField] private NetworkObject playerPrefab;
         private NetworkRunner _runner;
+        private static FusionNetworkRunner _instance;
+
+        private void Awake()
+        {
+            if (_instance != null && _instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
 
         public async void StartSharedGame(string sessionName)
         {
@@ -64,7 +78,16 @@ namespace GameCore.Network
         public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
         public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
         public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
-        public void OnSceneLoadDone(NetworkRunner runner) { }
+        public void OnSceneLoadDone(NetworkRunner runner)
+        {
+            Debug.Log("Fusion OnSceneLoadDone: Gameplay scene loaded. Loading level...");
+            MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnLoadLevel));
+            
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.ShowScreen<GameplayScreen>();
+            }
+        }
         public void OnSceneLoadStart(NetworkRunner runner) { }
         public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
         public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }

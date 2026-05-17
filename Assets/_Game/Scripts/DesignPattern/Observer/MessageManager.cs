@@ -7,6 +7,7 @@ namespace _Game.Scripts.DesignPattern.Observer
 {
     public enum ProjectMessageType
     {
+        OnLoadLevel,
         OnSpawnNewRecipe,
         OnRejectRecipe,
         OnRecipeSuccess

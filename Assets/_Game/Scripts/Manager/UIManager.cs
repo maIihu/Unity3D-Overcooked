@@ -17,7 +17,18 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
     
     [SerializeField] List<ScreenUI> listScreen;
     [SerializeField] List<PopupUI> listPopup;
-    
+
+    private void Awake()
+    {
+        Initialize(this);
+    }
+
+    private void Start()
+    {
+        InitializeUI();
+        ShowScreen<MainMenuUI_Multiplayer>();
+    }
+
     private void OnEnable()
     {
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnSpawnNewRecipe, this);
@@ -32,12 +43,30 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnRecipeSuccess, this);
     }
     
-    public void Initialize()
+    public void InitializeUI()
     {
         foreach (var screen in listScreen)
+        {
             screen.Initialize(this);
+            screen.Deactive();
+        }
         foreach (var popup in listPopup)
+        {
             popup.Initialize(this);
+           // popup.Deactive();
+        }
+    }
+
+    public void ShowScreen<T>() where T : ScreenUI
+    {
+        // Deactive all screens first
+        foreach (var screen in listScreen)
+            screen.Deactive();
+
+        // Active the target screen
+        var target = GetScreen<T>();
+        if (target != null)
+            target.Active();
     }
     
     private T GetScreen<T>() where T : ScreenUI
@@ -70,3 +99,4 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
         }
     }
 }
+
