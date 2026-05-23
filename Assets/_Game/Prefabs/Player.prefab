@@ -65,7 +65,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &3582725316073197151
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,6 +87,9 @@ MonoBehaviour:
   animator: {fileID: 8387740328982470546}
   _rb: {fileID: 926398963344026295}
   _NetworkMoveInput: {x: 0, y: 0}
+  _IsReady:
+    _value: 0
+  _NetworkTargetForward: {x: 0, y: 0, z: 0}
 --- !u!65 &6756487189995824916
 BoxCollider:
   m_ObjectHideFlags: 0

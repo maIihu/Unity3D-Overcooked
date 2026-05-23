@@ -26,7 +26,7 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
     private void Start()
     {
         InitializeUI();
-        ShowScreen<MainMenuUI_Multiplayer>();
+        ShowScreen<_Game.Scripts.UI.MainMenuScreen>();
     }
 
     private void OnEnable()

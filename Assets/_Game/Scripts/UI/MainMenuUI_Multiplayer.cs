@@ -25,7 +25,7 @@ namespace _Game.Scripts.UI
                     {
                         playButton.interactable = false;
                         Debug.Log("Play Button Clicked: Starting Fusion Lobby");
-                        _networkRunner.StartSharedGame("OvercookedRoom");
+                        _networkRunner.StartGameSession(Fusion.GameMode.Shared, "OvercookedRoom");
                         this.Deactive();
                     }
                     else

@@ -22,6 +22,7 @@ namespace _Game.Scripts.Gameplay
         [SerializeField] private Animator animator;
         [SerializeField] private Rigidbody _rb;
 
+        // Local-only (chỉ dùng trên client sở hữu)
         private Vector2 _moveInput;
         private Vector3 _lastInteractDir;
         private BaseCounter _selectedCounter;
@@ -31,164 +32,199 @@ namespace _Game.Scripts.Gameplay
         private bool _isCutting;
         private Coroutine _cutCoroutine;
 
+        // --- Networked properties ---
         [Networked] public Vector2 NetworkMoveInput { get; set; }
+        [Networked] public NetworkBool IsReady { get; set; }  // Fix: dùng NetworkBool
 
-        private void Update()
+        // -------------------------------------------------------
+        #region Ready System
+
+        public void ToggleReady()
         {
-            if (Object == null || !Object.IsValid) return;
-
-            if (HasStateAuthority)
-            {
-                InputHandler();
-                HandleInteractions();
-                Move(); // Move here for smoothness
-                if (_moveInput != Vector2.zero && _isCutting)
-                {
-                    StopCutting();
-                }
-            }
-            
-            UpdateAnimation();
+            // HasInputAuthority: đúng owner của object này mới gọi
+            if (!HasInputAuthority) return;
+            RPC_SetReady(!IsReady);
         }
+
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        private void RPC_SetReady(NetworkBool ready)
+        {
+            IsReady = ready;
+            Debug.Log($"[Player] Player {Object.InputAuthority.PlayerId} IsReady = {ready}");
+        }
+
+        #endregion
+
+        // -------------------------------------------------------
+        #region Fusion Lifecycle
+
+// Thêm field
+        private Vector3 _targetForward;
+        [Networked] public Vector3 NetworkTargetForward { get; set; } // Sync rotation cho remote
 
         public override void Spawned()
         {
-            if (!HasStateAuthority)
-            {
-                if (_rb != null) _rb.isKinematic = true;
-            }
+            if (_rb != null)
+                _rb.isKinematic = !(HasStateAuthority || HasInputAuthority);
+
+            _targetForward = transform.forward;
         }
 
         public override void FixedUpdateNetwork()
         {
-            // Movement is handled in Update for the owner in Shared Mode
-            // to match frame rate and avoid jitter.
+            // Cho phép cả StateAuthority (Host) và InputAuthority (Client điều khiển) chạy logic di chuyển để hỗ trợ Client-Side Prediction
+            if (!HasStateAuthority && !HasInputAuthority) return;
+
+            if (GetInput(out NetworkInputData inputData))
+            {
+                _moveInput = new Vector2(inputData.MoveX, inputData.MoveY);
+                
+                if (HasStateAuthority)
+                {
+                    NetworkMoveInput = _moveInput;
+                }
+
+                Move();
+                
+                // Chỉ StateAuthority mới xử lý tương tác vật lý và logic game quan trọng để tránh cheat/desync
+                if (HasStateAuthority)
+                {
+                    HandleInteractions(inputData);
+
+                    if (_moveInput != Vector2.zero && _isCutting)
+                        StopCutting();
+                }
+            }
+        }
+        
+        private void Update()
+        {
+            if (Object == null || !Object.IsValid) return;
+
+            // Đã loại bỏ logic xoay thủ công Slerp tại đây để tránh tranh chấp với nội suy (Interpolation)
+            // của component NetworkTransform trên Remote Clients. NetworkTransform sẽ tự động đồng bộ
+            // và nội suy vị trí/rotation của Player cực kỳ mượt mà.
+
+            UpdateAnimation();
         }
 
+        #endregion
+
+        // -------------------------------------------------------
         #region Move
-
-        private void InputHandler()
-        {
-            _moveInput = Vector2.zero;
-            if (Input.GetKey(KeyCode.W)) _moveInput.y += 1;
-            if (Input.GetKey(KeyCode.A)) _moveInput.x -= 1;
-            if (Input.GetKey(KeyCode.S)) _moveInput.y -= 1;
-            if (Input.GetKey(KeyCode.D)) _moveInput.x += 1;
-            _moveInput.Normalize();
-
-            // Sync to network for animations on other clients
-            NetworkMoveInput = _moveInput;
-        }
-
-        private void UpdateAnimation()
-        {
-            // Use networked input to animate all players correctly
-            Vector2 inputToUse = HasStateAuthority ? _moveInput : NetworkMoveInput;
-            animator.SetFloat("MovingValue", inputToUse.magnitude);
-        }
-
+        
         private void Move()
         {
             Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
 
-            // Áp dụng vận tốc cho Rigidbody
-            Vector3 targetVelocity = moveDir * moveSpeed;
             if (_rb != null)
             {
-                targetVelocity.y = _rb.velocity.y; // Giữ nguyên trọng lực
+                Vector3 targetVelocity = moveDir * moveSpeed;
+                targetVelocity.y = _rb.velocity.y;
                 _rb.velocity = targetVelocity;
             }
 
             if (moveDir != Vector3.zero)
             {
-                // Use Time.deltaTime in Update
-                float delta = HasStateAuthority ? Time.deltaTime : Runner.DeltaTime;
-                transform.forward = Vector3.Slerp(transform.forward, moveDir.normalized, delta * rotateSpeed);
+                _targetForward = moveDir.normalized;
+                
+                if (HasStateAuthority)
+                {
+                    NetworkTargetForward = _targetForward;
+                }
+
+                transform.rotation = Quaternion.LookRotation(_targetForward);
             }
+        }
+
+        // private void Move()
+        // {
+        //     Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
+        //
+        //     if (_rb != null)
+        //     {
+        //         Vector3 targetVelocity = moveDir * moveSpeed;
+        //         targetVelocity.y = _rb.velocity.y; // Giữ trọng lực
+        //         _rb.velocity = targetVelocity;
+        //     }
+        //
+        //     if (moveDir != Vector3.zero)
+        //     {
+        //         // Dùng Runner.DeltaTime trong FixedUpdateNetwork
+        //         transform.forward = Vector3.Slerp(
+        //             transform.forward,
+        //             moveDir.normalized,
+        //             Runner.DeltaTime * rotateSpeed
+        //         );
+        //     }
+        // }
+
+        private void UpdateAnimation()
+        {
+            // Remote clients dùng NetworkMoveInput để animate
+            Vector2 inputToUse = HasStateAuthority ? _moveInput : NetworkMoveInput;
+            animator.SetFloat("MovingValue", inputToUse.magnitude);
         }
 
         #endregion
 
-        private void OnDrawGizmos()
-        {
-            Vector3 origin = interactPoint.position;
-            Vector3 dir = _lastInteractDir == Vector3.zero ? transform.forward : _lastInteractDir.normalized;
-
-            Vector3 endPoint = origin + dir * interactDistance;
-
-            Gizmos.color = Color.yellow;
-
-            Gizmos.DrawWireSphere(origin, sphereRadius);
-
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(endPoint, sphereRadius);
-
-            Gizmos.color = Color.black;
-            Gizmos.DrawLine(origin, endPoint);
-
-        }
-
-        private void DrawCapsule(Vector3 point1, Vector3 point2, float radius)
-        {
-            Gizmos.DrawWireSphere(point1, radius);
-            Gizmos.DrawWireSphere(point2, radius);
-
-            Vector3 up = (point2 - point1).normalized;
-            Vector3 right = Vector3.Cross(up, Vector3.forward).normalized * radius;
-            Vector3 forward = Vector3.Cross(up, right).normalized * radius;
-
-            Gizmos.DrawLine(point1 + right, point2 + right);
-            Gizmos.DrawLine(point1 - right, point2 - right);
-            Gizmos.DrawLine(point1 + forward, point2 + forward);
-            Gizmos.DrawLine(point1 - forward, point2 - forward);
-        }
-
+        // -------------------------------------------------------
         #region Interactions
 
-        private void HandleInteractions()
+        private void HandleInteractions(NetworkInputData inputData)
         {
             Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
             if (moveDir != Vector3.zero)
                 _lastInteractDir = moveDir;
 
-            if (Physics.SphereCast(interactPoint.position, sphereRadius, _lastInteractDir, out RaycastHit hit, interactDistance))
+            if (_lastInteractDir == Vector3.zero)
+                _lastInteractDir = transform.forward;
+
+            if (Physics.SphereCast(
+                    interactPoint.position,
+                    sphereRadius,
+                    _lastInteractDir,
+                    out RaycastHit hit,
+                    interactDistance))
             {
                 if (hit.collider.TryGetComponent(out BaseCounter baseCounter))
                 {
                     if (_selectedCounter != baseCounter)
-                    {
                         SetSelectedCounter(baseCounter);
-                    }
 
-                    if (Input.GetKeyDown(KeyCode.Space))
+                    // Interact (Space)
+                    if (inputData.IsInteractPressed)
                     {
                         if ((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||
-                           (HasKitchenObject() && _selectedCounter is ClearCounter))
+                            (HasKitchenObject() && _selectedCounter is ClearCounter))
                             animator.SetTrigger("IsPicked");
 
                         baseCounter.Interact(this);
-                        animator.SetBool("HasObject", this.HasKitchenObject());
+                        animator.SetBool("HasObject", HasKitchenObject());
                     }
 
-                    if (_selectedCounter == baseCounter && Input.GetKeyDown(KeyCode.R) && _moveInput == Vector2.zero)
+                    // Alternate interact / Cut (R)
+                    if (inputData.IsAlternatePressed && _moveInput == Vector2.zero)
                     {
-                        if (baseCounter is CuttingCounter cuttingCounter && cuttingCounter.HasKitchenObject())
+                        if (baseCounter is CuttingCounter cuttingCounter &&
+                            cuttingCounter.HasKitchenObject() &&
+                            cuttingCounter.GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
                         {
-                            if (cuttingCounter.GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
-                                StartCutting(cuttingCounter);
+                            StartCutting(cuttingCounter);
                         }
                     }
                     return;
                 }
 
-                // Kiểm tra vật phẩm dưới đất
+                // Nhặt vật phẩm dưới đất
                 if (hit.collider.TryGetComponent(out KitchenObject kitchenObject))
                 {
-                    // Chỉ xử lý nếu không phải là vật phẩm đang cầm trên tay
                     if (kitchenObject != GetKitchenObject())
                     {
                         SetSelectedCounter(null);
-                        if (Input.GetKeyDown(KeyCode.Space) && !HasKitchenObject() && kitchenObject.GetKitchenObjectParent() == null)
+                        if (inputData.IsInteractPressed &&
+                            !HasKitchenObject() &&
+                            kitchenObject.GetKitchenObjectParent() == null)
                         {
                             kitchenObject.SetKitchenObjectParent(this);
                             animator.SetBool("HasObject", true);
@@ -201,26 +237,16 @@ namespace _Game.Scripts.Gameplay
 
             SetSelectedCounter(null);
 
-            // Logic thả đồ xuống đất khi không nhìn vào bàn
-            if (Input.GetKeyDown(KeyCode.Space) && HasKitchenObject())
-            {
+            // Thả đồ khi không nhìn vào bàn
+            if (inputData.IsInteractPressed && HasKitchenObject())
                 DropKitchenObject();
-            }
         }
 
         private void SetSelectedCounter(BaseCounter baseCounter)
         {
-            if (_selectedCounter != null)
-            {
-                _selectedCounter.Hide();
-            }
-
+            _selectedCounter?.Hide();
             _selectedCounter = baseCounter;
-
-            if (_selectedCounter != null)
-            {
-                _selectedCounter.Show();
-            }
+            _selectedCounter?.Show();
         }
 
         private void DropKitchenObject()
@@ -228,17 +254,15 @@ namespace _Game.Scripts.Gameplay
             KitchenObject kitchenObject = GetKitchenObject();
             if (kitchenObject == null) return;
 
-            // Thả vật phẩm từ vị trí ngang tay (chest height) và để nó tự rơi theo trọng lực
             Vector3 dropPosition = transform.position + transform.forward * 1f + Vector3.up * 0.5f;
-
             kitchenObject.SetKitchenObjectParent(null);
             kitchenObject.transform.position = dropPosition;
-
             animator.SetBool("HasObject", false);
         }
 
         #endregion
 
+        // -------------------------------------------------------
         #region Cutting
 
         private IEnumerator CutRoutine()
@@ -284,34 +308,35 @@ namespace _Game.Scripts.Gameplay
 
         #endregion
 
+        // -------------------------------------------------------
         #region IKitchenObjectParent
 
-        public Transform GetKitchenObjectToTransform()
-        {
-            return this._handPoint;
-        }
-
-        public void SetKitchenObject(KitchenObject kitchenObject)
-        {
-            this._kitchenObject = kitchenObject;
-        }
-
-        public KitchenObject GetKitchenObject()
-        {
-            return this._kitchenObject;
-        }
-
-        public void ClearKitchenObject()
-        {
-            this._kitchenObject = null;
-        }
-
-        public bool HasKitchenObject()
-        {
-            return this._kitchenObject != null;
-        }
+        public Transform GetKitchenObjectToTransform() => _handPoint;
+        public void SetKitchenObject(KitchenObject kitchenObject) => _kitchenObject = kitchenObject;
+        public KitchenObject GetKitchenObject() => _kitchenObject;
+        public void ClearKitchenObject() => _kitchenObject = null;
+        public bool HasKitchenObject() => _kitchenObject != null;
 
         #endregion
 
+        // -------------------------------------------------------
+        #region Gizmos
+
+        private void OnDrawGizmos()
+        {
+            if (interactPoint == null) return;
+            Vector3 origin = interactPoint.position;
+            Vector3 dir = _lastInteractDir == Vector3.zero ? transform.forward : _lastInteractDir.normalized;
+            Vector3 endPoint = origin + dir * interactDistance;
+
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(origin, sphereRadius);
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(endPoint, sphereRadius);
+            Gizmos.color = Color.black;
+            Gizmos.DrawLine(origin, endPoint);
+        }
+
+        #endregion
     }
 }

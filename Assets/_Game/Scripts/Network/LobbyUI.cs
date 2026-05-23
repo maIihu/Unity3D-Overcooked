@@ -27,7 +27,7 @@ namespace GameCore.Network
             {
                 if (_networkRunner != null)
                 {
-                    _networkRunner.StartSharedGame(_roomName);
+                    _networkRunner.StartGameSession(Fusion.GameMode.Shared, _roomName);
                     // Hide UI while loading
                     this.enabled = false; 
                 }
