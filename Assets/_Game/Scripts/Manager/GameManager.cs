@@ -50,6 +50,7 @@ namespace GameCore
         private void LoadLevel()
         {
             levelController.LoadLevel(levelData);
+            deliveryController.StartSpawning();
         }
 
         protected override void OnRegistration()

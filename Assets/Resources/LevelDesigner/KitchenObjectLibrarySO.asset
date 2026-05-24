@@ -16,3 +16,9 @@ MonoBehaviour:
   - kitchenType: 0
     prefab: {fileID: 4133019759459701955, guid: db3fa1e9ad9ecdc479a8cc57cb0f73b3,
       type: 3}
+  - kitchenType: 1
+    prefab: {fileID: 7388250531353371702, guid: dd26e63db74aef9419c28626eee1e7c3,
+      type: 3}
+  - kitchenType: 2
+    prefab: {fileID: 1399963938874432488, guid: ee582fd1e33a41b4e96d61322437d52c,
+      type: 3}

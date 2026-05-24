@@ -191,7 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cef86a52d2009441b1d137d2995e9c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dontDestroyOnLoad: 0
+  _dontDestroyOnLoad: 1
   kitchen: {fileID: 4034182592592131325}
   counter: {fileID: 4363362019865892623}
   genericPrewarmPools: []

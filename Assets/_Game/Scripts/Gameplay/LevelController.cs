@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Counter;
 using Kitchen;
+using Pooling;
 using UnityEngine;
 
 namespace GameCore
@@ -12,8 +13,6 @@ namespace GameCore
     public class LevelController : MonoBehaviour
     {
         [Header("Level Config")]
-        [SerializeField] private CounterTemplateListSO templateList;
-        [SerializeField] private KitchenObjectLibrarySO kitchenObjectLibrary;
         [SerializeField] private Transform counterParent;
 
         private readonly List<BaseCounter> _spawnedCounters = new List<BaseCounter>();
@@ -27,7 +26,7 @@ namespace GameCore
         public void LoadLevel(string levelName)
         {
             ClearLevel();
-
+            Debug.Log("Load Level");
             TextAsset jsonAsset = Resources.Load<TextAsset>("Levels/Level_" + levelName);
             if (jsonAsset == null)
             {
@@ -80,43 +79,33 @@ namespace GameCore
         private void SpawnCounter(CounterData cData)
         {
             CounterType counterType = CounterIdConverter.GetCounterType(cData.counterId);
-            CounterTemplate template = templateList.GetTemplateByType(counterType);
-
-            if (template == null)
-            {
-                Debug.LogError($"[LevelController] No template for CounterType {counterType} (id={cData.counterId})");
-                return;
-            }
-
+            //CounterTemplate template = templateList.GetTemplateByType(counterType);
+            
             if (counterParent == null)
                 counterParent = new GameObject("LevelCounters").transform;
-
-            GameObject go = Instantiate(template.prefab, cData.position, Quaternion.Euler(cData.rotation), counterParent);
-            BaseCounter counter = go.GetComponent<BaseCounter>();
-
+            
+            BaseCounter counter = PoolManager.Instance.Counter.Get(counterType);
             if (counter == null) return;
+            counter.transform.SetParent(counterParent);
+            counter.transform.SetPositionAndRotation(cData.position, Quaternion.Euler(cData.rotation));
+            ApplyConfiguration(counter, cData.counterId);
             counter.Init();
             _spawnedCounters.Add(counter);
             if (counter is PlatesCounter platesCounter)
             {
                 _platesCounters.Add(platesCounter);
             }
-            
-            ApplyConfiguration(counter, cData.counterId);
 
             // Restore pre-placed KitchenObject
             if (cData.kitchenObjectFoodType >= 0 && counter is ClearCounter clearCounter)
             {
-                if (kitchenObjectLibrary != null)
+                // KitchenObject prefab = kitchenObjectLibrary.GetPrefab((KitchenType)cData.kitchenObjectFoodType);
+                KitchenObject kitchenGO = PoolManager.Instance.Kitchen.Get((KitchenType)cData.kitchenObjectFoodType);
+                if (kitchenGO != null)
                 {
-                    KitchenObject prefab = kitchenObjectLibrary.GetPrefab((KitchenType)cData.kitchenObjectFoodType);
-                    if (prefab != null)
-                    {
-                        KitchenObject instance = Instantiate(prefab, clearCounter.GetKitchenObjectToTransform());
-                        instance.transform.localPosition = Vector3.zero;
-                        instance.transform.localRotation = Quaternion.identity;
-                        clearCounter.SetKitchenObject(instance);
-                    }
+                    kitchenGO.transform.localPosition = Vector3.zero;
+                    kitchenGO.transform.localRotation = Quaternion.identity;
+                    clearCounter.SetKitchenObject(kitchenGO);
                 }
             }
         }

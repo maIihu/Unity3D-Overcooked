@@ -54,7 +54,6 @@ namespace Counter
             base.Init();
             CurrentStoveState = StoveState.Idle;
             if (imageUI != null) imageUI.enabled = false;
-            
             _kitchenObject = SpawnKitchenObject(_kitchenType);
         }
 

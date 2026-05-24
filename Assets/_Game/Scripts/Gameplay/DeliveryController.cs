@@ -87,9 +87,7 @@ namespace GameCore
                 {
                     // Success!
                     _activeRecipes.RemoveAt(i);
-                    MessageManager.Instance.SendMessage(
-                        new Message(ProjectMessageType.OnRecipeSuccess,
-                            new object[] { recipe }));
+                    MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnRecipeSuccess, new object[] { recipe }));
                     Debug.Log($"[DeliveryController] Recipe delivered: {recipe.Data.menuType}");
                     
                     // Return dirty plate
@@ -104,9 +102,7 @@ namespace GameCore
             {
                 ActiveRecipe rejected = _activeRecipes[0];
                 _activeRecipes.RemoveAt(0);
-                MessageManager.Instance.SendMessage(
-                    new Message(ProjectMessageType.OnRejectRecipe,
-                        new object[] { rejected }));
+                MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnRejectRecipe, new object[] { rejected }));
             }
             
             // Return dirty plate even if wrong recipe
