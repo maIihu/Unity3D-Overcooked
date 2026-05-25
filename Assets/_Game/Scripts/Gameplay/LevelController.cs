@@ -6,10 +6,6 @@ using UnityEngine;
 
 namespace GameCore
 {
-    /// <summary>
-    /// Loads and spawns level data at runtime.
-    /// NOT a Singleton — accessed via GameManager.Instance.LevelController.
-    /// </summary>
     public class LevelController : MonoBehaviour
     {
         [Header("Level Config")]
@@ -17,16 +13,11 @@ namespace GameCore
 
         private readonly List<BaseCounter> _spawnedCounters = new List<BaseCounter>();
         private readonly List<PlatesCounter> _platesCounters = new List<PlatesCounter>();
-
-        // ── Public API ─────────────────────────────────────────
-
-        /// <summary>
-        /// Load a level from Resources/Levels by name and spawn all counters.
-        /// </summary>
+        
         public void LoadLevel(string levelName)
         {
             ClearLevel();
-            Debug.Log("Load Level");
+            //Debug.Log("Load Level");
             TextAsset jsonAsset = Resources.Load<TextAsset>("Levels/Level_" + levelName);
             if (jsonAsset == null)
             {
@@ -36,14 +27,12 @@ namespace GameCore
 
             LevelData data = JsonUtility.FromJson<LevelData>(jsonAsset.text);
 
-            // Apply camera
             if (data.cameraPosition != Vector3.zero && Camera.main != null)
             {
-                Camera.main.transform.position = data.cameraPosition;
-                Camera.main.transform.eulerAngles = data.cameraEulerAngles;
+                CameraManager.Instance.GetMainCam.transform.position = data.cameraPosition;
+                CameraManager.Instance.GetMainCam.transform.eulerAngles = data.cameraEulerAngles;
             }
 
-            // Spawn counters
             foreach (var cData in data.counterList)
             {
                 SpawnCounter(cData);
@@ -51,15 +40,13 @@ namespace GameCore
 
             Debug.Log($"[LevelController] Loaded level: {levelName} ({data.counterList.Count} counters)");
         }
-
-        /// <summary>
-        /// Destroy all spawned counters.
-        /// </summary>
+        
         public void ClearLevel()
         {
             foreach (var counter in _spawnedCounters)
             {
-                if (counter != null) Destroy(counter.gameObject);
+                if (counter != null) 
+                    PoolManager.Instance.Counter.Release(counter);
             }
             _spawnedCounters.Clear();
             _platesCounters.Clear();
@@ -79,10 +66,9 @@ namespace GameCore
         private void SpawnCounter(CounterData cData)
         {
             CounterType counterType = CounterIdConverter.GetCounterType(cData.counterId);
-            //CounterTemplate template = templateList.GetTemplateByType(counterType);
             
-            if (counterParent == null)
-                counterParent = new GameObject("LevelCounters").transform;
+            // if (counterParent == null)
+            //     counterParent = new GameObject("LevelCounters").transform;
             
             BaseCounter counter = PoolManager.Instance.Counter.Get(counterType);
             if (counter == null) return;
@@ -96,10 +82,8 @@ namespace GameCore
                 _platesCounters.Add(platesCounter);
             }
 
-            // Restore pre-placed KitchenObject
             if (cData.kitchenObjectFoodType >= 0 && counter is ClearCounter clearCounter)
             {
-                // KitchenObject prefab = kitchenObjectLibrary.GetPrefab((KitchenType)cData.kitchenObjectFoodType);
                 KitchenObject kitchenGO = PoolManager.Instance.Kitchen.Get((KitchenType)cData.kitchenObjectFoodType);
                 if (kitchenGO != null)
                 {

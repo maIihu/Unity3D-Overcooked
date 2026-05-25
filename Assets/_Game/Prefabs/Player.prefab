@@ -79,7 +79,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 6
-  rotateSpeed: 10
+  rotateSpeed: 20
   interactDistance: 1
   sphereRadius: 0.4
   _handPoint: {fileID: 6957290034226936634}

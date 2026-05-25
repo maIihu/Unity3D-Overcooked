@@ -100,11 +100,7 @@ namespace _Game.Scripts.Gameplay
         private void Update()
         {
             if (Object == null || !Object.IsValid) return;
-
-            // Đã loại bỏ logic xoay thủ công Slerp tại đây để tránh tranh chấp với nội suy (Interpolation)
-            // của component NetworkTransform trên Remote Clients. NetworkTransform sẽ tự động đồng bộ
-            // và nội suy vị trí/rotation của Player cực kỳ mượt mà.
-
+            
             UpdateAnimation();
         }
 
@@ -133,7 +129,15 @@ namespace _Game.Scripts.Gameplay
                     NetworkTargetForward = _targetForward;
                 }
 
-                transform.rotation = Quaternion.LookRotation(_targetForward);
+                Quaternion targetRot = Quaternion.LookRotation(_targetForward);
+
+                _rb.MoveRotation(
+                    Quaternion.Slerp(
+                        _rb.rotation,
+                        targetRot,
+                        Runner.DeltaTime * rotateSpeed
+                    )
+                );
             }
         }
 

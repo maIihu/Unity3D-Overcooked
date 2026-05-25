@@ -26,9 +26,7 @@ namespace Counter
                 if (data.eFoodType == eFoodType)
                 {
                     foreach (var ren in decalRendererArr)
-                    {
-                        ren.material = data.material;
-                    }
+                        ren.sharedMaterial = data.material;
                     break;
                 }
             }

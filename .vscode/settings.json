@@ -1,12 +1,12 @@
 {
     "dotnet.defaultSolution": "Unity3D-Overcooked.sln",
     "dotnet.dotnetPath": "C:/Program Files/dotnet/dotnet.exe",
-    "dotrush.roslyn.dotnetSdkDirectory": "C:/Program Files/dotnet/sdk/9.0.305",
+    "dotrush.roslyn.dotnetSdkDirectory": "C:/Program Files/dotnet/sdk/9.0.310",
     "dotrush.msbuildProperties": {
         "DefineConstants": "UNITY_EDITOR"
     },
     "dotrush.roslyn.projectOrSolutionFiles": [
-        "D:/GameProject/Unity3D-Overcooked/Unity3D-Overcooked.sln"
+        "D:/New folder/Unity3D-Overcooked/Unity3D-Overcooked.sln"
     ],
     "dotrush.roslyn.restoreProjectsBeforeLoading": false,
     "files.exclude": {
