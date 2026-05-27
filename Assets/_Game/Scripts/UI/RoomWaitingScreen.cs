@@ -23,6 +23,7 @@ namespace _Game.Scripts.UI
         [SerializeField] private TextMeshProUGUI readyButtonText;
         [SerializeField] private Button startGameButton;
         [SerializeField] private Button leaveButton;
+        [SerializeField] private Button changeColorButton;
 
         private List<GameObject> _instantiatedPlayerItems = new List<GameObject>();
         private float _refreshTimer = 0f;
@@ -48,6 +49,12 @@ namespace _Game.Scripts.UI
             {
                 leaveButton.onClick.RemoveAllListeners();
                 leaveButton.onClick.AddListener(OnLeaveClicked);
+            }
+
+            if (changeColorButton != null)
+            {
+                changeColorButton.onClick.RemoveAllListeners();
+                changeColorButton.onClick.AddListener(OnChangeColorClicked);
             }
         }
 
@@ -89,7 +96,7 @@ namespace _Game.Scripts.UI
             var localPlayerObj = runner.GetPlayerObject(runner.LocalPlayer);
             if (localPlayerObj != null)
             {
-                var playerComp = localPlayerObj.GetComponent<Player>();
+                var playerComp = localPlayerObj.GetComponent<LobbyPlayer>();
                 if (playerComp != null)
                 {
                     playerComp.ToggleReady();
@@ -107,6 +114,22 @@ namespace _Game.Scripts.UI
                 Debug.Log("[RoomWaitingScreen] All players ready. Host is loading GameScene...");
                 // Load GameScene (index 1) qua mạng
                 runner.LoadScene(SceneRef.FromIndex(1), UnityEngine.SceneManagement.LoadSceneMode.Single);
+            }
+        }
+
+        private void OnChangeColorClicked()
+        {
+            if (FusionNetworkRunner.Instance == null || FusionNetworkRunner.Instance.Runner == null) return;
+
+            var runner = FusionNetworkRunner.Instance.Runner;
+            var localPlayerObj = runner.GetPlayerObject(runner.LocalPlayer);
+            if (localPlayerObj != null)
+            {
+                var playerComp = localPlayerObj.GetComponent<LobbyPlayer>();
+                if (playerComp != null)
+                {
+                    playerComp.CycleColor();
+                }
             }
         }
 
@@ -142,13 +165,15 @@ namespace _Game.Scripts.UI
                 string playerName = $"Player {playerRef.PlayerId}";
                 bool isReady = false;
                 bool isHost = false;
+                Color playerColor = Color.white;
 
                 if (playerObj != null)
                 {
-                    var playerComp = playerObj.GetComponent<Player>();
+                    var playerComp = playerObj.GetComponent<LobbyPlayer>();
                     if (playerComp != null)
                     {
                         isReady = playerComp.IsReady;
+                        playerColor = Player.GetColorByEnum(playerComp.PlayerColor);
                     }
                     
                     isHost = runner.IsServer && (playerRef == runner.LocalPlayer);
@@ -169,11 +194,12 @@ namespace _Game.Scripts.UI
                 GameObject itemObj = Instantiate(playerItemPrefab, playerListContainer);
                 if (itemObj != null)
                 {
+                    itemObj.SetActive(true); // Đảm bảo clone được kích hoạt hiển thị
                     _instantiatedPlayerItems.Add(itemObj);
                     var playerItem = itemObj.GetComponent<RoomWaitingPlayerItem>();
                     if (playerItem != null)
                     {
-                        playerItem.Setup(playerName, isReady);
+                        playerItem.Setup(playerName, isReady, playerColor);
                     }
                 }
             }
@@ -200,7 +226,7 @@ namespace _Game.Scripts.UI
                     var playerObj = runner.GetPlayerObject(playerRef);
                     if (playerObj != null)
                     {
-                        var playerComp = playerObj.GetComponent<Player>();
+                        var playerComp = playerObj.GetComponent<LobbyPlayer>();
                         if (playerComp != null)
                         {
                             if (!playerComp.IsReady) allReady = false;
@@ -225,7 +251,7 @@ namespace _Game.Scripts.UI
                 var localPlayerObj = runner.GetPlayerObject(runner.LocalPlayer);
                 if (localPlayerObj != null)
                 {
-                    var playerComp = localPlayerObj.GetComponent<Player>();
+                    var playerComp = localPlayerObj.GetComponent<LobbyPlayer>();
                     if (playerComp != null)
                     {
                         readyButtonText.text = playerComp.IsReady ? "NOT READY" : "READY";

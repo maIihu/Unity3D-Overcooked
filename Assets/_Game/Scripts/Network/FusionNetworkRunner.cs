@@ -13,10 +13,15 @@ namespace GameCore.Network
     public class FusionNetworkRunner : MonoBehaviour, INetworkRunnerCallbacks
     {
         [SerializeField] private NetworkObject playerPrefab;
+        [SerializeField] private NetworkObject lobbyPlayerPrefab;
         private NetworkRunner _runner;
         public NetworkRunner Runner => _runner;
         private static FusionNetworkRunner _instance;
         public static FusionNetworkRunner Instance => _instance;
+
+        // Cache runner GameObject để tránh FindObjectsOfType tốn kém
+        private GameObject _runnerGo;
+        private NetworkInputHandler _inputHandler;
 
         private void Awake()
         {
@@ -31,21 +36,43 @@ namespace GameCore.Network
 
         public async void StartGameSession(GameMode mode, string sessionName)
         {
-            if (_runner == null)
+            if (_runner != null)
             {
-                _runner = gameObject.AddComponent<NetworkRunner>();
+                Debug.Log("[FusionNetworkRunner] Shutting down active runner before starting new session.");
+                var oldRunner = _runner;
+                _runner = null;
+                await oldRunner.Shutdown();
+                // Dùng cached reference thay vì FindObjectsOfType
+                if (_runnerGo != null)
+                {
+                    DestroyImmediate(_runnerGo);
+                    _runnerGo = null;
+                }
+                await System.Threading.Tasks.Task.Delay(300);
             }
+
+            _runnerGo = new GameObject("FusionNetworkRunner_Instance");
+            DontDestroyOnLoad(_runnerGo);
+
+            _runner = _runnerGo.AddComponent<NetworkRunner>();
             _runner.ProvideInput = true;
-            var inputHandler = GetComponent<NetworkInputHandler>();
-            Debug.Log($"[FusionNetworkRunner] InputHandler found: {inputHandler != null}");
 
-            if (inputHandler != null)
+            // Đăng ký callbacks
+            _runner.AddCallbacks(this);
+            
+            // Đảm bảo chỉ có 1 InputHandler, thêm vào _runnerGo thay vì this
+            _inputHandler = _runnerGo.GetComponent<NetworkInputHandler>();
+            if (_inputHandler == null)
             {
-                _runner.AddCallbacks(inputHandler); // ← thêm dòng này
+                _inputHandler = _runnerGo.AddComponent<NetworkInputHandler>();
+                Debug.Log("[FusionNetworkRunner] InputHandler added to runner GameObject.");
             }
+            _runner.AddCallbacks(_inputHandler);
 
-            // Load thẳng GameScene (index 1) ở Phase 3 để chạy gameplay trực tiếp
-            int sceneIndex = 1;
+            // Singleplayer -> GameScene (index 1), Multiplayer -> MainMenuScene (index 0)
+            int sceneIndex = (mode == GameMode.Single) ? 1 : 0;
+
+            var sceneManager = _runnerGo.AddComponent<NetworkSceneManagerDefault>();
 
             // Start the runner
             var result = await _runner.StartGame(new StartGameArgs()
@@ -53,7 +80,7 @@ namespace GameCore.Network
                 GameMode = mode,
                 SessionName = sessionName,
                 Scene = SceneRef.FromIndex(sceneIndex),
-                SceneManager = gameObject.GetComponent<NetworkSceneManagerDefault>() ?? gameObject.AddComponent<NetworkSceneManagerDefault>()
+                SceneManager = sceneManager,
             });
 
             if (result.Ok)
@@ -70,11 +97,26 @@ namespace GameCore.Network
 
         public async void JoinLobby()
         {
-            if (_runner == null)
+            if (_runner != null)
             {
-                _runner = gameObject.AddComponent<NetworkRunner>();
+                Debug.Log("[FusionNetworkRunner] Shutting down active runner before joining lobby.");
+                var oldRunner = _runner;
+                _runner = null;
+                await oldRunner.Shutdown();
+                if (_runnerGo != null)
+                {
+                    DestroyImmediate(_runnerGo);
+                    _runnerGo = null;
+                }
+                await System.Threading.Tasks.Task.Delay(300);
             }
+
+            _runnerGo = new GameObject("FusionNetworkRunner_Instance");
+            DontDestroyOnLoad(_runnerGo);
+
+            _runner = _runnerGo.AddComponent<NetworkRunner>();
             _runner.ProvideInput = true;
+            _runner.AddCallbacks(this);
 
             var result = await _runner.JoinSessionLobby(SessionLobby.ClientServer);
 
@@ -92,8 +134,16 @@ namespace GameCore.Network
         {
             if (_runner != null)
             {
-                await _runner.Shutdown();
+                Debug.Log("[FusionNetworkRunner] Leaving session and destroying runner component.");
+                var oldRunner = _runner;
                 _runner = null;
+                await oldRunner.Shutdown();
+                if (_runnerGo != null)
+                {
+                    DestroyImmediate(_runnerGo);
+                    _runnerGo = null;
+                }
+                _inputHandler = null;
             }
         }
 
@@ -101,21 +151,18 @@ namespace GameCore.Network
         {
             if (runner.IsServer)
             {
-                // Trong chế độ Host/Client hoặc Single, server/host sinh nhân vật cho tất cả client tham gia
-                Vector3 spawnPosition = new Vector3((player.PlayerId % 4) * 2f, 1, 0);
-                NetworkObject playerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
-                runner.SetPlayerObject(player, playerObject);
-                Debug.Log($"Host spawned player object for player {player.PlayerId}");
-            }
-            else if (runner.GameMode == GameMode.Shared)
-            {
-                // Trong chế độ Shared, mỗi client tự sinh nhân vật của chính mình
-                if (player == runner.LocalPlayer)
+                if (runner.GameMode == GameMode.Single)
                 {
-                    Vector3 spawnPosition = new Vector3((player.PlayerId % 4) * 2f, 1, 0);
-                    NetworkObject playerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
-                    runner.SetPlayerObject(player, playerObject);
-                    Debug.Log($"Client spawned player object for player {player.PlayerId} (Shared Mode)");
+                    // Chơi đơn: Không sinh ở đây, sẽ sinh ở OnSceneLoadDone khi GameScene load xong
+                    Debug.Log($"[FusionNetworkRunner] Singleplayer player {player.PlayerId} joined. Deferring spawn to OnSceneLoadDone.");
+                }
+                else
+                {
+                    // Chơi mạng: Sinh LobbyPlayer tạm thời để lưu giữ thông tin chờ
+                    NetworkObject lobbyPlayerObject = runner.Spawn(lobbyPlayerPrefab, Vector3.zero, Quaternion.identity, player);
+                    runner.SetPlayerObject(player, lobbyPlayerObject);
+                    runner.MakeDontDestroyOnLoad(lobbyPlayerObject.gameObject); // Giữ LobbyPlayer qua scene load để đọc dữ liệu màu sắc
+                    Debug.Log($"[FusionNetworkRunner] Host spawned lobby player object for player {player.PlayerId}");
                 }
             }
         }
@@ -158,6 +205,54 @@ namespace GameCore.Network
 
             if (sceneName == "GameScene")
             {
+                if (runner.IsServer)
+                {
+                    // Lấy danh sách LobbyPlayer hiện có trong scene mới
+                    var lobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+                    Dictionary<PlayerRef, EPlayerColor> playerColors = new Dictionary<PlayerRef, EPlayerColor>();
+                    foreach (var lp in lobbyPlayers)
+                    {
+                        if (lp.Object != null && lp.Object.IsValid)
+                        {
+                            playerColors[lp.Object.InputAuthority] = lp.PlayerColor;
+                        }
+                    }
+
+                    // Host sinh nhân vật gameplay cho tất cả người chơi hoạt động
+                    foreach (var playerRef in runner.ActivePlayers)
+                    {
+                        Vector3 spawnPosition = new Vector3((playerRef.PlayerId % 4) * 2f, 1, 0);
+                        
+                        EPlayerColor selectedColor = EPlayerColor.Red;
+                        if (playerColors.TryGetValue(playerRef, out EPlayerColor lpColor))
+                        {
+                            selectedColor = lpColor;
+                        }
+
+                        // Host sinh gameplay player và truyền data màu sắc trước khi spawn hoàn tất
+                        NetworkObject playerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, playerRef, (runner, obj) => {
+                            var playerComp = obj.GetComponent<Player>();
+                            if (playerComp != null)
+                            {
+                                playerComp.PlayerColor = selectedColor;
+                            }
+                        });
+
+                        // Cập nhật PlayerObject của người chơi sang đối tượng gameplay Player
+                        runner.SetPlayerObject(playerRef, playerObject);
+                        Debug.Log($"[FusionNetworkRunner] Host spawned gameplay player for player {playerRef.PlayerId} with color {selectedColor}");
+                    }
+
+                    // Dọn dẹp các đối tượng LobbyPlayer sau khi đã chuyển thông tin màu sắc xong
+                    foreach (var lp in lobbyPlayers)
+                    {
+                        if (lp.Object != null && lp.Object.IsValid)
+                        {
+                            runner.Despawn(lp.Object);
+                        }
+                    }
+                }
+
                 // Gửi event load level cho GameplayManager
                 MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnLoadLevel));
 
@@ -172,7 +267,14 @@ namespace GameCore.Network
                 // Khi quay về menu (ví dụ sau khi game kết thúc)
                 if (UIManager.Instance != null)
                 {
-                    UIManager.Instance.ShowScreen<MainMenuScreen>();
+                    if (runner != null && (runner.GameMode == GameMode.Host || runner.GameMode == GameMode.Client || runner.GameMode == GameMode.Shared))
+                    {
+                        UIManager.Instance.ShowScreen<RoomWaitingScreen>();
+                    }
+                    else
+                    {
+                        UIManager.Instance.ShowScreen<MainMenuScreen>();
+                    }
                 }
             }
             else

@@ -1,42 +1,96 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using _Game.Scripts.Gameplay;
 using UnityEngine;
 using Kitchen;
 using GameUI;
+using Fusion;
 
 namespace Counter
 {
     public class CuttingCounter : BaseCounter
     {
-        [SerializeField] private float cuttingTime;
+        [SerializeField] private float cuttingTime = 3f;
         [SerializeField] private ProgressBarUI progressBarUI;
 
         public event Action OnCutComplete;
 
-        private float _cuttingProgress;
+        // Networked timer: được sync từ Host sang Client, tránh desync
+        [Networked] private float CuttingProgress { get; set; }
+        [Networked] private NetworkBool IsCutting { get; set; }
+
+        // -------------------------------------------------------
+        #region Fusion Lifecycle
+
+        public override void Spawned()
+        {
+            CuttingProgress = 0f;
+            IsCutting = false;
+        }
+
+        public override void FixedUpdateNetwork()
+        {
+            // Chỉ Host (StateAuthority) cập nhật timer để đảm bảo tính xác thực
+            if (!HasStateAuthority) return;
+            if (!IsCutting) return;
+
+            KitchenObject ko = GetKitchenObject();
+            if (ko == null || ko is not FoodObject food)
+            {
+                IsCutting = false;
+                return;
+            }
+
+            CuttingProgress += Runner.DeltaTime;
+
+            if (CuttingProgress >= cuttingTime)
+            {
+                CuttingProgress = 0f;
+                IsCutting = false;
+                food.SetState(FoodState.Cut);
+                OnCutComplete?.Invoke();
+            }
+        }
+
+        public override void Render()
+        {
+            // Cập nhật progress bar dựa trên giá trị networked — chạy mỗi frame trên tất cả client
+            if (progressBarUI != null)
+            {
+                float ratio = cuttingTime > 0f ? CuttingProgress / cuttingTime : 0f;
+                progressBarUI.UpdateProgress(ratio);
+            }
+        }
+
+        #endregion
+
+        // -------------------------------------------------------
+        #region Interact
 
         public override void Interact(Player player)
         {
             base.Interact(player);
+
             if (HasKitchenObject())
             {
-                // Kiểm tra nếu đang cắt (tiến trình > 0) thì không cho lấy ra
-                if (_cuttingProgress > 0) return;
+                // Không cho nhặt khi đang cắt
+                if (IsCutting) return;
 
                 GetKitchenObject().SetKitchenObjectParent(player);
-
-                progressBarUI?.UpdateProgress(0f);
+                if (HasStateAuthority)
+                {
+                    CuttingProgress = 0f;
+                }
             }
             else
             {
                 if (player.HasKitchenObject())
                 {
                     player.GetKitchenObject().SetKitchenObjectParent(this);
-                    _cuttingProgress = 0f;
-
-                    progressBarUI?.UpdateProgress(0f);
+                    if (HasStateAuthority)
+                    {
+                        CuttingProgress = 0f;
+                        IsCutting = false;
+                    }
                 }
             }
         }
@@ -44,31 +98,30 @@ namespace Counter
         public override void InteractAlternate(Player player)
         {
             base.InteractAlternate(player);
-            if (HasKitchenObject() && GetKitchenObject() is FoodObject food)
+
+            // Được gọi bởi Player.FixedUpdateNetwork() mỗi tick khi đang cắt
+            if (!HasStateAuthority) return;
+            if (HasKitchenObject() && GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
             {
-                _cuttingProgress += Time.deltaTime;
-
-                progressBarUI?.UpdateProgress(_cuttingProgress / cuttingTime);
-
-                if (_cuttingProgress >= cuttingTime)
-                {
-                    _cuttingProgress = 0f;
-                    food.SetState(FoodState.Cut);
-                    OnCutComplete?.Invoke();
-
-                    progressBarUI?.UpdateProgress(0f);
-                }
+                IsCutting = true; // Timer sẽ chạy trong FixedUpdateNetwork
             }
         }
 
+        #endregion
+
+        // -------------------------------------------------------
+        #region Animation / Sound Hooks
+
         public void CuttingSoundAndAnimation()
         {
-            // Implementation
+            // TODO: phát âm thanh và animation
         }
 
         public void StopAnimationCut()
         {
-            // Implementation
+            // TODO: dừng âm thanh và animation
         }
+
+        #endregion
     }
 }

@@ -275,8 +275,7 @@ namespace GameCore.Editor
             lobbySO.ApplyModifiedProperties();
 
 
-            // 7. Tạo RoomWaitingScreen (Tạm thời bỏ qua ở Phase 3 theo yêu cầu của User)
-            /*
+            // 7. Tạo RoomWaitingScreen
             Transform waitingScreenTransform = screenHolder.Find("RoomWaitingScreen");
             if (waitingScreenTransform != null)
             {
@@ -357,6 +356,13 @@ namespace GameCore.Editor
             startRT.anchoredPosition = new Vector2(600, 120);
             startGameBtnObj.GetComponentInChildren<TextMeshProUGUI>().text = "START GAME";
 
+            // Thêm nút Chọn màu (Change Color) cho người chơi
+            GameObject changeColorBtnObj = GameObject.Instantiate(readyBtnTrans.gameObject, waitingScreenObj.transform);
+            changeColorBtnObj.name = "Button_ChangeColor";
+            RectTransform changeColorRT = changeColorBtnObj.GetComponent<RectTransform>();
+            changeColorRT.anchoredPosition = new Vector2(600, 0);
+            changeColorBtnObj.GetComponentInChildren<TextMeshProUGUI>().text = "CHANGE COLOR";
+
             // Sửa tên Scroll View thành PlayerList
             Transform roomBrowserTrans = waitingScreenObj.transform.Find("RoomBrowser");
             Transform playerContentRT = null;
@@ -425,13 +431,13 @@ namespace GameCore.Editor
             waitingSO.FindProperty("readyButtonText").objectReferenceValue = readyBtnTrans.GetComponentInChildren<TextMeshProUGUI>();
             waitingSO.FindProperty("startGameButton").objectReferenceValue = startGameBtnObj.GetComponent<Button>();
             waitingSO.FindProperty("leaveButton").objectReferenceValue = leaveBtnTrans.GetComponent<Button>();
+            waitingSO.FindProperty("changeColorButton").objectReferenceValue = changeColorBtnObj.GetComponent<Button>();
             waitingSO.FindProperty("playerListContainer").objectReferenceValue = playerContentRT;
             waitingSO.FindProperty("playerItemPrefab").objectReferenceValue = playerItemTemplate;
             waitingSO.ApplyModifiedProperties();
-            */
 
 
-            // 8. Đăng ký các Screen mới vào danh sách Screens của UIManager (Chỉ đăng ký MainMenu, Gameplay và Lobby)
+            // 8. Đăng ký các Screen mới vào danh sách Screens của UIManager (Đăng ký đầy đủ MainMenu, Gameplay, Lobby và Waiting)
             SerializedObject uiSO = new SerializedObject(uiManager);
             SerializedProperty listProp = uiSO.FindProperty("listScreen");
             
@@ -447,12 +453,15 @@ namespace GameCore.Editor
             listProp.InsertArrayElementAtIndex(2);
             listProp.GetArrayElementAtIndex(2).objectReferenceValue = lobbyScreen;
 
+            listProp.InsertArrayElementAtIndex(3);
+            listProp.GetArrayElementAtIndex(3).objectReferenceValue = waitingScreen;
+
             uiSO.ApplyModifiedProperties();
 
             EditorUtility.SetDirty(uiManager);
             EditorUtility.SetDirty(screenHolder.gameObject);
             
-            Debug.Log("🎉 [SetupMultiplayerUI] Successfully generated and configured MultiplayerLobbyScreen in the UIManager hierarchy! (Phase 3 Complete)");
+            Debug.Log("🎉 [SetupMultiplayerUI] Successfully generated and configured MultiplayerLobbyScreen and RoomWaitingScreen in the UIManager hierarchy!");
         }
     }
 }

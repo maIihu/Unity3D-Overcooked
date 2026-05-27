@@ -1,8 +1,8 @@
-using System.Collections;
 using Counter;
 using Kitchen;
 using UnityEngine;
 using Fusion;
+using GameCore.Network;
 
 namespace _Game.Scripts.Gameplay
 {
@@ -21,36 +21,69 @@ namespace _Game.Scripts.Gameplay
         [Header("Components")]
         [SerializeField] private Animator animator;
         [SerializeField] private Rigidbody _rb;
+        [SerializeField] private Renderer bodyRend;
 
-        // Local-only (chỉ dùng trên client sở hữu)
+        // Local-only state (chỉ dùng trên client sở hữu)
         private Vector2 _moveInput;
         private Vector3 _lastInteractDir;
         private BaseCounter _selectedCounter;
         private KitchenObject _kitchenObject;
 
+        // Cutting state — local tracking, logic chạy trong FixedUpdateNetwork
         private CuttingCounter _currentCuttingCounter;
         private bool _isCutting;
-        private Coroutine _cutCoroutine;
-
-        // --- Networked properties ---
-        [Networked] public Vector2 NetworkMoveInput { get; set; }
-        [Networked] public NetworkBool IsReady { get; set; }  // Fix: dùng NetworkBool
 
         // -------------------------------------------------------
-        #region Ready System
+        #region Networked Properties
 
-        public void ToggleReady()
+        // Sync animation sang remote clients
+        [Networked] public Vector2 NetworkMoveInput { get; set; }
+
+        // Sync rotation sang remote clients
+        [Networked] public Vector3 NetworkTargetForward { get; set; }
+
+        [Networked]
+        [OnChangedRender(nameof(OnColorChanged))]
+        public EPlayerColor PlayerColor { get; set; }
+
+        #endregion
+
+        // -------------------------------------------------------
+        #region Color System
+
+        // Static readonly: tránh allocation mỗi lần gọi
+        private static readonly Color[] s_PlayerColors = new Color[]
         {
-            // HasInputAuthority: đúng owner của object này mới gọi
-            if (!HasInputAuthority) return;
-            RPC_SetReady(!IsReady);
+            Color.red,
+            Color.blue,
+            Color.green,
+            Color.yellow,
+            new Color(0.5f, 0f, 0.5f), // Purple
+            new Color(1f, 0.5f, 0f),   // Orange
+        };
+
+        public static Color GetColorByEnum(EPlayerColor color)
+        {
+            int idx = (int)color;
+            if (idx < 0 || idx >= s_PlayerColors.Length) return Color.white;
+            return s_PlayerColors[idx];
         }
 
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        private void RPC_SetReady(NetworkBool ready)
+        public void UpdateVisualColor(EPlayerColor color)
         {
-            IsReady = ready;
-            Debug.Log($"[Player] Player {Object.InputAuthority.PlayerId} IsReady = {ready}");
+            if (bodyRend == null) return;
+            Color targetColor = GetColorByEnum(color);
+            Material[] mats = bodyRend.materials;
+            if (mats.Length > 1 && mats[1] != null)
+            {
+                mats[1].color = targetColor;
+            }
+            bodyRend.materials = mats;
+        }
+
+        private void OnColorChanged()
+        {
+            UpdateVisualColor(PlayerColor);
         }
 
         #endregion
@@ -58,49 +91,61 @@ namespace _Game.Scripts.Gameplay
         // -------------------------------------------------------
         #region Fusion Lifecycle
 
-// Thêm field
-        private Vector3 _targetForward;
-        [Networked] public Vector3 NetworkTargetForward { get; set; } // Sync rotation cho remote
-
         public override void Spawned()
         {
             if (_rb != null)
                 _rb.isKinematic = !(HasStateAuthority || HasInputAuthority);
 
-            _targetForward = transform.forward;
+            NetworkTargetForward = transform.forward;
+            _lastInteractDir = transform.forward;
+            UpdateVisualColor(PlayerColor);
         }
 
         public override void FixedUpdateNetwork()
         {
-            // Cho phép cả StateAuthority (Host) và InputAuthority (Client điều khiển) chạy logic di chuyển để hỗ trợ Client-Side Prediction
+            // Chỉ owner (HasStateAuthority hoặc HasInputAuthority) mới chạy prediction
             if (!HasStateAuthority && !HasInputAuthority) return;
 
-            if (GetInput(out NetworkInputData inputData))
+            // --- Cập nhật input từ Fusion ---
+            // GetInput() trả về true khi có dữ liệu mới (không phải resimulation).
+            // Ta cache _moveInput để Move() luôn dùng giá trị mới nhất,
+            // kể cả trên các tick resimulation khi GetInput() trả về false.
+            NetworkInputData inputData = default;
+            bool hasInput = GetInput(out inputData);
+
+            if (hasInput)
             {
                 _moveInput = new Vector2(inputData.MoveX, inputData.MoveY);
-                
+
                 if (HasStateAuthority)
                 {
                     NetworkMoveInput = _moveInput;
                 }
+            }
 
-                Move();
-                
-                // Chỉ StateAuthority mới xử lý tương tác vật lý và logic game quan trọng để tránh cheat/desync
-                if (HasStateAuthority)
-                {
-                    HandleInteractions(inputData);
+            // --- Luôn di chuyển dựa trên _moveInput đã cache ---
+            Move();
 
-                    if (_moveInput != Vector2.zero && _isCutting)
-                        StopCutting();
-                }
+            // --- Chỉ StateAuthority xử lý game logic (tránh desync) ---
+            if (HasStateAuthority && hasInput)
+            {
+                HandleInteractions(inputData);
+
+                // Dừng cắt nếu người chơi di chuyển
+                if (_moveInput != Vector2.zero && _isCutting)
+                    StopCutting();
+            }
+
+            // --- Cutting tick: chạy mỗi fixed tick thay vì Coroutine ---
+            if (HasStateAuthority && _isCutting && _currentCuttingCounter != null)
+            {
+                _currentCuttingCounter.InteractAlternate(this);
             }
         }
-        
+
         private void Update()
         {
             if (Object == null || !Object.IsValid) return;
-            
             UpdateAnimation();
         }
 
@@ -108,65 +153,38 @@ namespace _Game.Scripts.Gameplay
 
         // -------------------------------------------------------
         #region Move
-        
+
         private void Move()
         {
-            Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
+            Vector3 moveDir = new Vector3(_moveInput.x, 0f, _moveInput.y);
 
             if (_rb != null)
             {
                 Vector3 targetVelocity = moveDir * moveSpeed;
-                targetVelocity.y = _rb.velocity.y;
+                targetVelocity.y = _rb.velocity.y; // Giữ trọng lực
                 _rb.velocity = targetVelocity;
             }
 
             if (moveDir != Vector3.zero)
             {
-                _targetForward = moveDir.normalized;
-                
+                _lastInteractDir = moveDir.normalized;
+
                 if (HasStateAuthority)
                 {
-                    NetworkTargetForward = _targetForward;
+                    NetworkTargetForward = _lastInteractDir;
                 }
 
-                Quaternion targetRot = Quaternion.LookRotation(_targetForward);
-
+                Quaternion targetRot = Quaternion.LookRotation(_lastInteractDir);
                 _rb.MoveRotation(
-                    Quaternion.Slerp(
-                        _rb.rotation,
-                        targetRot,
-                        Runner.DeltaTime * rotateSpeed
-                    )
+                    Quaternion.Slerp(_rb.rotation, targetRot, Runner.DeltaTime * rotateSpeed)
                 );
             }
         }
 
-        // private void Move()
-        // {
-        //     Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
-        //
-        //     if (_rb != null)
-        //     {
-        //         Vector3 targetVelocity = moveDir * moveSpeed;
-        //         targetVelocity.y = _rb.velocity.y; // Giữ trọng lực
-        //         _rb.velocity = targetVelocity;
-        //     }
-        //
-        //     if (moveDir != Vector3.zero)
-        //     {
-        //         // Dùng Runner.DeltaTime trong FixedUpdateNetwork
-        //         transform.forward = Vector3.Slerp(
-        //             transform.forward,
-        //             moveDir.normalized,
-        //             Runner.DeltaTime * rotateSpeed
-        //         );
-        //     }
-        // }
-
         private void UpdateAnimation()
         {
-            // Remote clients dùng NetworkMoveInput để animate
-            Vector2 inputToUse = HasStateAuthority ? _moveInput : NetworkMoveInput;
+            // Remote clients dùng NetworkMoveInput để animate (không có GetInput)
+            Vector2 inputToUse = (HasStateAuthority || HasInputAuthority) ? _moveInput : NetworkMoveInput;
             animator.SetFloat("MovingValue", inputToUse.magnitude);
         }
 
@@ -177,7 +195,7 @@ namespace _Game.Scripts.Gameplay
 
         private void HandleInteractions(NetworkInputData inputData)
         {
-            Vector3 moveDir = new Vector3(_moveInput.x, 0, _moveInput.y);
+            Vector3 moveDir = new Vector3(_moveInput.x, 0f, _moveInput.y);
             if (moveDir != Vector3.zero)
                 _lastInteractDir = moveDir;
 
@@ -207,7 +225,7 @@ namespace _Game.Scripts.Gameplay
                         animator.SetBool("HasObject", HasKitchenObject());
                     }
 
-                    // Alternate interact / Cut (R)
+                    // Alternate / Bắt đầu cắt (R) — chỉ khi đứng yên
                     if (inputData.IsAlternatePressed && _moveInput == Vector2.zero)
                     {
                         if (baseCounter is CuttingCounter cuttingCounter &&
@@ -220,7 +238,7 @@ namespace _Game.Scripts.Gameplay
                     return;
                 }
 
-                // Nhặt vật phẩm dưới đất
+                // Nhặt vật phẩm nằm dưới đất
                 if (hit.collider.TryGetComponent(out KitchenObject kitchenObject))
                 {
                     if (kitchenObject != GetKitchenObject())
@@ -269,28 +287,18 @@ namespace _Game.Scripts.Gameplay
         // -------------------------------------------------------
         #region Cutting
 
-        private IEnumerator CutRoutine()
-        {
-            while (_isCutting && _currentCuttingCounter != null)
-            {
-                if (_moveInput != Vector2.zero)
-                {
-                    StopCutting();
-                    yield break;
-                }
-                _currentCuttingCounter.InteractAlternate(this);
-                yield return null;
-            }
-        }
-
         private void StartCutting(CuttingCounter counter)
         {
-            animator.SetBool("IsChopping", true);
+            if (_isCutting && _currentCuttingCounter == counter) return; // Tránh start lại nếu đang cắt cùng counter
+
+            // Dừng counter cũ nếu có
+            if (_isCutting) StopCutting();
+
             _isCutting = true;
             _currentCuttingCounter = counter;
-            _currentCuttingCounter.CuttingSoundAndAnimation();
-            _cutCoroutine = StartCoroutine(CutRoutine());
             _currentCuttingCounter.OnCutComplete += StopCutting;
+            _currentCuttingCounter.CuttingSoundAndAnimation();
+            animator.SetBool("IsChopping", true);
         }
 
         private void StopCutting()
@@ -302,11 +310,6 @@ namespace _Game.Scripts.Gameplay
                 _currentCuttingCounter.OnCutComplete -= StopCutting;
                 _currentCuttingCounter.StopAnimationCut();
                 _currentCuttingCounter = null;
-            }
-            if (_cutCoroutine != null)
-            {
-                StopCoroutine(_cutCoroutine);
-                _cutCoroutine = null;
             }
         }
 

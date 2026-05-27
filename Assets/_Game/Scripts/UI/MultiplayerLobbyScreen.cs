@@ -23,6 +23,7 @@ namespace _Game.Scripts.UI
         [SerializeField] private Button backButton;
 
         private List<GameObject> _instantiatedRoomItems = new List<GameObject>();
+        private GameObject _loadingOverlay;
 
         public override void Initialize(UIManager uiManager)
         {
@@ -60,7 +61,11 @@ namespace _Game.Scripts.UI
                 roomNameInput.text = "";
             }
 
-            RefreshSessionList(new List<SessionInfo>());
+            if (emptyLobbyText != null)
+            {
+                emptyLobbyText.text = "Connecting to lobby...";
+                emptyLobbyText.gameObject.SetActive(true);
+            }
         }
 
         public override void Deactive()
@@ -68,6 +73,7 @@ namespace _Game.Scripts.UI
             base.Deactive();
             FusionNetworkRunner.OnSessionListChanged -= RefreshSessionList;
             ClearRoomList();
+            HideLoadingOverlay();
         }
 
         private void OnCreateRoomClicked()
@@ -82,15 +88,8 @@ namespace _Game.Scripts.UI
             if (FusionNetworkRunner.Instance != null)
             {
                 Debug.Log($"[MultiplayerLobbyScreen] Hosting session: {roomName}");
+                ShowLoadingOverlay("Creating Room...\nPlease wait.");
                 FusionNetworkRunner.Instance.StartGameSession(GameMode.Host, roomName);
-                
-                // Sẽ chuyển sang RoomWaitingScreen ở Phase 4, hiện tại Phase 3 vào thẳng trận đấu
-                /*
-                if (uiManager != null)
-                {
-                    uiManager.ShowScreen<RoomWaitingScreen>();
-                }
-                */
             }
         }
 
@@ -99,15 +98,8 @@ namespace _Game.Scripts.UI
             if (FusionNetworkRunner.Instance != null)
             {
                 Debug.Log($"[MultiplayerLobbyScreen] Joining session: {roomName}");
+                ShowLoadingOverlay("Joining Room...\nPlease wait.");
                 FusionNetworkRunner.Instance.StartGameSession(GameMode.Client, roomName);
-
-                // Sẽ chuyển sang RoomWaitingScreen ở Phase 4, hiện tại Phase 3 vào thẳng trận đấu
-                /*
-                if (uiManager != null)
-                {
-                    uiManager.ShowScreen<RoomWaitingScreen>();
-                }
-                */
             }
         }
 
@@ -133,22 +125,34 @@ namespace _Game.Scripts.UI
         {
             ClearRoomList();
 
-            bool hasRooms = sessionList != null && sessionList.Count > 0;
+            // Lọc bỏ các phòng ma (phòng rỗng có PlayerCount <= 0)
+            List<SessionInfo> activeRooms = new List<SessionInfo>();
+            if (sessionList != null)
+            {
+                foreach (var session in sessionList)
+                {
+                    if (session.IsVisible && session.PlayerCount > 0 && session.PlayerCount < session.MaxPlayers)
+                    {
+                        activeRooms.Add(session);
+                    }
+                }
+            }
+
+            bool hasRooms = activeRooms.Count > 0;
             if (emptyLobbyText != null)
             {
+                emptyLobbyText.text = "No active rooms found. Create one to start!";
                 emptyLobbyText.gameObject.SetActive(!hasRooms);
             }
 
             if (!hasRooms) return;
 
-            foreach (var session in sessionList)
+            foreach (var session in activeRooms)
             {
-                // Chỉ hiển thị phòng có thể tham gia
-                if (!session.IsVisible || session.PlayerCount >= session.MaxPlayers) continue;
-
                 GameObject itemObj = Instantiate(roomItemPrefab, roomListContainer);
                 if (itemObj != null)
                 {
+                    itemObj.SetActive(true); // Đảm bảo clone được kích hoạt hiển thị
                     _instantiatedRoomItems.Add(itemObj);
                     LobbyRoomItem roomItem = itemObj.GetComponent<LobbyRoomItem>();
                     if (roomItem != null)
@@ -169,6 +173,57 @@ namespace _Game.Scripts.UI
                 }
             }
             _instantiatedRoomItems.Clear();
+        }
+
+        private void ShowLoadingOverlay(string message)
+        {
+            if (_loadingOverlay == null)
+            {
+                _loadingOverlay = new GameObject("ConnectingOverlay", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                _loadingOverlay.transform.SetParent(transform, false);
+                
+                RectTransform rt = _loadingOverlay.GetComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.sizeDelta = Vector2.zero;
+                
+                Image img = _loadingOverlay.GetComponent<Image>();
+                img.color = new Color(0, 0, 0, 0.75f);
+
+                GameObject textObj = new GameObject("LoadingText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+                textObj.transform.SetParent(_loadingOverlay.transform, false);
+                
+                RectTransform textRT = textObj.GetComponent<RectTransform>();
+                textRT.anchorMin = Vector2.zero;
+                textRT.anchorMax = Vector2.one;
+                textRT.sizeDelta = Vector2.zero;
+                
+                TextMeshProUGUI txt = textObj.GetComponent<TextMeshProUGUI>();
+                txt.text = message;
+                txt.fontSize = 32;
+                txt.color = Color.white;
+                txt.alignment = TextAlignmentOptions.Center;
+                
+                if (emptyLobbyText != null)
+                {
+                    txt.font = emptyLobbyText.font;
+                }
+            }
+            else
+            {
+                var txt = _loadingOverlay.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = message;
+            }
+            
+            _loadingOverlay.SetActive(true);
+        }
+
+        private void HideLoadingOverlay()
+        {
+            if (_loadingOverlay != null)
+            {
+                _loadingOverlay.SetActive(false);
+            }
         }
 
         protected override void OnScreenDestroyed()

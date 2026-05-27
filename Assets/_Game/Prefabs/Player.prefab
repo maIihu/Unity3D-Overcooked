@@ -86,9 +86,9 @@ MonoBehaviour:
   interactPoint: {fileID: 3369580444840670666}
   animator: {fileID: 8387740328982470546}
   _rb: {fileID: 926398963344026295}
+  bodyRend: {fileID: 4185770859702539200}
   _NetworkMoveInput: {x: 0, y: 0}
-  _IsReady:
-    _value: 0
+  _PlayerColor: 0
   _NetworkTargetForward: {x: 0, y: 0, z: 0}
 --- !u!65 &6756487189995824916
 BoxCollider:
@@ -382,6 +382,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerVisual
       objectReference: {fileID: 0}
+    - target: {fileID: 7031019041938090526, guid: 1c5dda3c7cd3cf742afcade5419faeab,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7982736815109712285, guid: 1c5dda3c7cd3cf742afcade5419faeab,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -413,6 +418,12 @@ PrefabInstance:
       addedObject: {fileID: 1732701233897361038}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c5dda3c7cd3cf742afcade5419faeab, type: 3}
+--- !u!23 &4185770859702539200 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5399284679101036880, guid: 1c5dda3c7cd3cf742afcade5419faeab,
+    type: 3}
+  m_PrefabInstance: {fileID: 8140472536883718800}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6212270192240654983 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2796364244793593879, guid: 1c5dda3c7cd3cf742afcade5419faeab,
