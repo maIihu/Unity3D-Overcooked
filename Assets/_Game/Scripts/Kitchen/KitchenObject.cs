@@ -30,11 +30,7 @@ namespace Kitchen
 
         public virtual void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent)
         {
-            // Request State Authority if we don't have it (Shared Mode)
-            if (Object != null && !HasStateAuthority)
-            {
-                Object.RequestStateAuthority();
-            }
+            // No State Authority request needed in Host-Client mode
 
             if (this.KitchenObjectParent != null) KitchenObjectParent.ClearKitchenObject();
 
@@ -116,7 +112,17 @@ namespace Kitchen
 
         public void DestroySelf()
         {
-            PoolManager.Instance.Release(this);
+            if (Object != null && Object.IsValid)
+            {
+                if (HasStateAuthority)
+                {
+                    Runner.Despawn(Object);
+                }
+            }
+            else
+            {
+                PoolManager.Instance.Release(this);
+            }
         }
 
     }

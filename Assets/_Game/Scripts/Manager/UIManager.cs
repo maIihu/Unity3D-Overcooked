@@ -5,6 +5,7 @@ using System.Linq;
 using _Game.Scripts.DesignPattern.Observer;
 using _Game.Scripts.Gameplay;
 using _Game.Scripts.UI;
+using GameCore.UI;
 using DesignPattern;
 using GameCore;
 using UnityEngine;
@@ -17,6 +18,7 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
     
     [SerializeField] List<ScreenUI> listScreen;
     [SerializeField] List<PopupUI> listPopup;
+    private Dictionary<Type, ScreenUI> _screenCache = new Dictionary<Type, ScreenUI>();
 
     private void Awake()
     {
@@ -34,6 +36,9 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnSpawnNewRecipe, this);
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnRejectRecipe, this);
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnRecipeSuccess, this);
+        MessageManager.Instance.AddSubscriber(ProjectMessageType.OnGameOver, this);
+        MessageManager.Instance.AddSubscriber(ProjectMessageType.OnScoreChanged, this);
+        MessageManager.Instance.AddSubscriber(ProjectMessageType.OnTimerTick, this);
     }
 
     private void OnDisable()
@@ -41,14 +46,22 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnSpawnNewRecipe, this);
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnRejectRecipe, this);
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnRecipeSuccess, this);
+        MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnGameOver, this);
+        MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnScoreChanged, this);
+        MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnTimerTick, this);
     }
     
     public void InitializeUI()
     {
+        _screenCache.Clear();
         foreach (var screen in listScreen)
         {
-            screen.Initialize(this);
-            screen.Deactive();
+            if (screen != null)
+            {
+                _screenCache[screen.GetType()] = screen;
+                screen.Initialize(this);
+                screen.Deactive();
+            }
         }
         foreach (var popup in listPopup)
         {
@@ -71,13 +84,9 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
     
     private T GetScreen<T>() where T : ScreenUI
     {
-        for (int i = 0; i < listScreen.Count; i++)
+        if (_screenCache.TryGetValue(typeof(T), out var screen))
         {
-            if (listScreen[i] is T)
-            {
-                var screen = listScreen[i].GetComponent<T>();
-                return screen;
-            }
+            return screen as T;
         }
         return null;
     }
@@ -95,6 +104,17 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
                 break;
             case ProjectMessageType.OnRecipeSuccess:
                 GetScreen<GameplayScreen>().RemoveMenuItemWithEffect((ActiveRecipe)data[0]);
+                break;
+            case ProjectMessageType.OnScoreChanged:
+                int score = (int)data[0];
+                GetScreen<GameplayScreen>()?.UpdateScore(score);
+                GetScreen<GameOverScreen>()?.SetFinalScore(score);
+                break;
+            case ProjectMessageType.OnTimerTick:
+                GetScreen<GameplayScreen>()?.UpdateTimer((float)data[0]);
+                break;
+            case ProjectMessageType.OnGameOver:
+                ShowScreen<GameOverScreen>();
                 break;
         }
     }

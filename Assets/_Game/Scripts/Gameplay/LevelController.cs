@@ -43,10 +43,15 @@ namespace GameCore
         
         public void ClearLevel()
         {
-            foreach (var counter in _spawnedCounters)
+            if (GameCore.Network.FusionNetworkRunner.Instance != null && 
+                GameCore.Network.FusionNetworkRunner.Instance.Runner != null &&
+                GameCore.Network.FusionNetworkRunner.Instance.Runner.IsServer)
             {
-                if (counter != null) 
-                    PoolManager.Instance.Counter.Release(counter);
+                foreach (var counter in _spawnedCounters)
+                {
+                    if (counter != null && counter.Object != null) 
+                        GameCore.Network.FusionNetworkRunner.Instance.Runner.Despawn(counter.Object);
+                }
             }
             _spawnedCounters.Clear();
             _platesCounters.Clear();
@@ -65,15 +70,22 @@ namespace GameCore
 
         private void SpawnCounter(CounterData cData)
         {
+            if (GameCore.Network.FusionNetworkRunner.Instance == null || 
+                GameCore.Network.FusionNetworkRunner.Instance.Runner == null ||
+                !GameCore.Network.FusionNetworkRunner.Instance.Runner.IsServer)
+            {
+                return; // Only Host spawns networked counters
+            }
+
             CounterType counterType = CounterIdConverter.GetCounterType(cData.counterId);
             
-            // if (counterParent == null)
-            //     counterParent = new GameObject("LevelCounters").transform;
+            BaseCounter prefab = PoolManager.Instance.Counter.GetPrefab(counterType);
+            if (prefab == null) return;
+
+            var netObj = GameCore.Network.FusionNetworkRunner.Instance.Runner.Spawn(prefab, cData.position, Quaternion.Euler(cData.rotation));
+            BaseCounter counter = netObj.GetComponent<BaseCounter>();
             
-            BaseCounter counter = PoolManager.Instance.Counter.Get(counterType);
-            if (counter == null) return;
             counter.transform.SetParent(counterParent);
-            counter.transform.SetPositionAndRotation(cData.position, Quaternion.Euler(cData.rotation));
             ApplyConfiguration(counter, cData.counterId);
             counter.Init();
             _spawnedCounters.Add(counter);
@@ -84,11 +96,11 @@ namespace GameCore
 
             if (cData.kitchenObjectFoodType >= 0 && counter is ClearCounter clearCounter)
             {
-                KitchenObject kitchenGO = PoolManager.Instance.Kitchen.Get((KitchenType)cData.kitchenObjectFoodType);
-                if (kitchenGO != null)
+                var kPrefab = PoolManager.Instance.Kitchen.GetPrefab((KitchenType)cData.kitchenObjectFoodType);
+                if (kPrefab != null)
                 {
-                    kitchenGO.transform.localPosition = Vector3.zero;
-                    kitchenGO.transform.localRotation = Quaternion.identity;
+                    var kNetObj = GameCore.Network.FusionNetworkRunner.Instance.Runner.Spawn(kPrefab, clearCounter.GetKitchenObjectToTransform().position, Quaternion.identity);
+                    KitchenObject kitchenGO = kNetObj.GetComponent<KitchenObject>();
                     clearCounter.SetKitchenObject(kitchenGO);
                 }
             }

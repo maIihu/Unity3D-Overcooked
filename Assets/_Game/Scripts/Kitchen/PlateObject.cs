@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Fusion;
 
 namespace Kitchen
 {
@@ -14,7 +15,8 @@ namespace Kitchen
         [SerializeField] private GameObject dirtyVisual;
         
         private List<EFoodType> _ingredientList = new List<EFoodType>();
-        private bool _isDirty;
+        [Networked, OnChangedRender(nameof(OnDirtyStateChanged))] 
+        private NetworkBool IsDirtyState { get; set; }
         
         public event EventHandler<OnIngredientAddedEventArgs> OnIngredientAdded;
         public class OnIngredientAddedEventArgs : EventArgs
@@ -37,7 +39,7 @@ namespace Kitchen
 
         public bool TryAddIngredient(FoodObject foodObject)
         {
-            if (_isDirty || !validIngredientList.Contains(foodObject.EFoodType))
+            if (IsDirtyState || !validIngredientList.Contains(foodObject.EFoodType))
             {
                 return false;
             }
@@ -55,7 +57,7 @@ namespace Kitchen
 
         public bool TryAddIngredient(EFoodType foodType)
         {
-            if (_isDirty || !validIngredientList.Contains(foodType))
+            if (IsDirtyState || !validIngredientList.Contains(foodType))
             {
                 return false;
             }
@@ -74,12 +76,21 @@ namespace Kitchen
 
         public List<EFoodType> GetIngredientList() => _ingredientList;
 
-        public bool IsDirty() => _isDirty;
+        public bool IsDirty() => IsDirtyState;
 
         public void SetDirty(bool dirty)
         {
-            _isDirty = dirty;
+            if (HasStateAuthority)
+            {
+                IsDirtyState = dirty;
+            }
+            // Update local visual as well
             if (dirtyVisual != null) dirtyVisual.SetActive(dirty);
+        }
+
+        private void OnDirtyStateChanged()
+        {
+            if (dirtyVisual != null) dirtyVisual.SetActive(IsDirtyState);
         }
     }
 }

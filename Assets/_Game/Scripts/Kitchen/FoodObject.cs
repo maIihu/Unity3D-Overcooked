@@ -1,3 +1,4 @@
+using Fusion;
 using UnityEngine;
 
 namespace Kitchen
@@ -13,21 +14,40 @@ namespace Kitchen
         public override void OnSpawn()
         {
             base.OnSpawn();
-            SetState(FoodState.Normal);
+            if (HasStateAuthority)
+            {
+                SetState(FoodState.Normal);
+            }
         }
 
-        public FoodState FoodState { get; private set; }
+        [Networked]
+        [OnChangedRender(nameof(OnStateChanged))]
+        private FoodState NetworkedFoodState { get; set; }
+
+        public FoodState FoodState => NetworkedFoodState;
         public EFoodType EFoodType => eFoodType;
 
         public void SetState(FoodState newState)
         {
-            FoodState = newState;
+            if (HasStateAuthority)
+            {
+                NetworkedFoodState = newState;
+            }
+            UpdateVisuals(newState);
+        }
 
+        private void OnStateChanged()
+        {
+            UpdateVisuals(NetworkedFoodState);
+        }
+
+        private void UpdateVisuals(FoodState state)
+        {
             if (normalVisual != null) normalVisual.SetActive(false);
             if (cuttingVisual != null) cuttingVisual.SetActive(false);
             if (soupVisual != null) soupVisual.SetActive(false);
 
-            switch (newState)
+            switch (state)
             {
                 case FoodState.Normal:
                     if (normalVisual != null) normalVisual.SetActive(true);

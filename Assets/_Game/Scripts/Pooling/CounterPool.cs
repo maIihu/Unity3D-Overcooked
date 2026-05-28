@@ -30,14 +30,22 @@ namespace Pooling
         
         public BaseCounter Get(CounterType type)
         {
+            var prefab = GetPrefab(type);
+            if (prefab != null) return Get(prefab);
+            
+            Debug.LogError($"[KitchenObjectPool] No prefab found for KitchenType: {type}");
+            return null;
+        }
+
+        public BaseCounter GetPrefab(CounterType type)
+        {
             foreach (var counter in counterPrewarmPools)
             {
                 if (counter.type == type)
                 {
-                    return Get(counter.prefab);
+                    return counter.prefab;
                 }
             }
-            Debug.LogError($"[KitchenObjectPool] No prefab found for KitchenType: {type}");
             return null;
         }
     }

@@ -66,19 +66,49 @@ namespace Counter
 
         #endregion
 
-        #region Pooling Helpers
+        #region Network Spawning
         
         protected KitchenObject SpawnKitchenObject(EFoodType type)
         {
-            KitchenObject instance = PoolManager.Instance.Kitchen.Get(type);
-            instance.SetKitchenObjectParent(this);
+            if (!HasStateAuthority) return null;
+            var prefab = PoolManager.Instance.Kitchen.GetPrefab(type);
+            if (prefab == null)
+            {
+                Debug.LogError($"[BaseCounter] SpawnKitchenObject: Prefab for {type} is null!");
+                return null;
+            }
+
+            var networkObject = Runner.Spawn(prefab, transform.position, Quaternion.identity);
+            if (networkObject == null)
+            {
+                Debug.LogError($"[BaseCounter] SpawnKitchenObject: Runner.Spawn returned null for {prefab.name}!");
+                return null;
+            }
+            
+            var instance = networkObject.GetComponent<KitchenObject>();
+            if (instance != null)
+            {
+                instance.SetKitchenObjectParent(this);
+            }
+            else
+            {
+                Debug.LogError($"[BaseCounter] SpawnKitchenObject: instance is null after spawn!");
+            }
             return instance;
         }
         
         protected KitchenObject SpawnKitchenObject(KitchenType type)
         {
-            KitchenObject instance = PoolManager.Instance.Kitchen.Get(type);
-            instance.SetKitchenObjectParent(this);
+            if (!HasStateAuthority) return null;
+            var prefab = PoolManager.Instance.Kitchen.GetPrefab(type);
+            if (prefab == null) return null;
+
+            var networkObject = Runner.Spawn(prefab, transform.position, Quaternion.identity);
+            var instance = networkObject.GetComponent<KitchenObject>();
+            if (instance != null)
+            {
+                instance.SetKitchenObjectParent(this);
+            }
             return instance;
         }
 

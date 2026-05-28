@@ -3,6 +3,8 @@ using _Game.Scripts.Gameplay;
 using GameCore;
 using Kitchen;
 using UnityEngine;
+using TMPro;
+using _Game.Scripts.DesignPattern.Observer;
 
 namespace _Game.Scripts.UI
 {
@@ -10,6 +12,8 @@ namespace _Game.Scripts.UI
     {
         [SerializeField] private UIMenuItem menuItemPrefab;
         [SerializeField] private GameObject menuHolder;
+        [SerializeField] private TextMeshProUGUI scoreText;
+        [SerializeField] private TextMeshProUGUI timerText;
 
         private readonly Dictionary<int, UIMenuItem> activeItems
             = new Dictionary<int, UIMenuItem>();
@@ -22,6 +26,14 @@ namespace _Game.Scripts.UI
         public override void Active()
         {
             base.Active();
+        }
+
+        private void OnEnable()
+        {
+        }
+
+        private void OnDisable()
+        {
         }
 
         public void SetMenuItem(ActiveRecipe activeRecipe)
@@ -82,6 +94,23 @@ namespace _Game.Scripts.UI
 
         protected override void OnScreenDestroyed()
         {
+        }
+        public void UpdateScore(int score)
+        {
+            if (scoreText != null)
+            {
+                scoreText.text = score.ToString();
+            }
+        }
+        
+        public void UpdateTimer(float time)
+        {
+            if (timerText != null)
+            {
+                int minutes = Mathf.FloorToInt(time / 60f);
+                int seconds = Mathf.FloorToInt(time % 60f);
+                timerText.text = $"{minutes:00}:{seconds:00}";
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6372690438302902198}
   - component: {fileID: 5842393494941088665}
+  - component: {fileID: 910332584006156522}
   m_Layer: 0
   m_Name: Cheese Block
   m_TagString: Untagged
@@ -42,10 +43,35 @@ MonoBehaviour:
   m_GameObject: {fileID: 2101015261114366359}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 034f5198da998a7439c8c2fd24e3d84a, type: 3}
+  m_Script: {fileID: 11500000, guid: fd272e0cee8348ba96740f3113ffa846, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kitchen: {fileID: 11400000, guid: fd696ee6691a7a74f8b5a9f507e09038, type: 2}
+  rb: {fileID: 0}
+  col: {fileID: 0}
+  eFoodType: 0
+  normalVisual: {fileID: 0}
+  cuttingVisual: {fileID: 0}
+  soupVisual: {fileID: 0}
+  timeCooked: 0
+--- !u!114 &910332584006156522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2101015261114366359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 3216325494
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 5842393494941088665}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1001 &7636462800482384850
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -23,11 +23,8 @@ namespace _Game.Scripts.Gameplay
         {
             var data = new NetworkInputData();
 
-            float x = 0, y = 0;
-            if (Input.GetKey(KeyCode.W)) y += 1;
-            if (Input.GetKey(KeyCode.A)) x -= 1;
-            if (Input.GetKey(KeyCode.S)) y -= 1;
-            if (Input.GetKey(KeyCode.D)) x += 1;
+            float x = Input.GetAxisRaw("Horizontal");
+            float y = Input.GetAxisRaw("Vertical");
 
             float mag = Mathf.Sqrt(x * x + y * y);
             if (mag > 0) { x /= mag; y /= mag; }

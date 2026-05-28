@@ -46,6 +46,9 @@ namespace _Game.Scripts.Gameplay
         [OnChangedRender(nameof(OnColorChanged))]
         public EPlayerColor PlayerColor { get; set; }
 
+        [Networked] public NetworkBool NetworkIsChopping { get; set; }
+        [Networked] public NetworkBool NetworkIsHoldingObject { get; set; }
+
         #endregion
 
         // -------------------------------------------------------
@@ -126,14 +129,17 @@ namespace _Game.Scripts.Gameplay
             // --- Luôn di chuyển dựa trên _moveInput đã cache ---
             Move();
 
-            // --- Chỉ StateAuthority xử lý game logic (tránh desync) ---
-            if (HasStateAuthority && hasInput)
+            // --- Chỉ StateAuthority xử lý game logic, nhưng InputAuthority cũng chạy để hiển thị Highlight ---
+            if ((HasStateAuthority || HasInputAuthority) && hasInput)
             {
                 HandleInteractions(inputData);
 
-                // Dừng cắt nếu người chơi di chuyển
-                if (_moveInput != Vector2.zero && _isCutting)
-                    StopCutting();
+                if (HasStateAuthority)
+                {
+                    // Dừng cắt nếu người chơi di chuyển
+                    if (_moveInput != Vector2.zero && _isCutting)
+                        StopCutting();
+                }
             }
 
             // --- Cutting tick: chạy mỗi fixed tick thay vì Coroutine ---
@@ -186,6 +192,8 @@ namespace _Game.Scripts.Gameplay
             // Remote clients dùng NetworkMoveInput để animate (không có GetInput)
             Vector2 inputToUse = (HasStateAuthority || HasInputAuthority) ? _moveInput : NetworkMoveInput;
             animator.SetFloat("MovingValue", inputToUse.magnitude);
+            animator.SetBool("IsChopping", NetworkIsChopping);
+            animator.SetBool("HasObject", NetworkIsHoldingObject);
         }
 
         #endregion
@@ -214,25 +222,32 @@ namespace _Game.Scripts.Gameplay
                     if (_selectedCounter != baseCounter)
                         SetSelectedCounter(baseCounter);
 
-                    // Interact (Space)
-                    if (inputData.IsInteractPressed)
+                    if (HasStateAuthority)
                     {
-                        if ((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||
-                            (HasKitchenObject() && _selectedCounter is ClearCounter))
-                            animator.SetTrigger("IsPicked");
-
-                        baseCounter.Interact(this);
-                        animator.SetBool("HasObject", HasKitchenObject());
-                    }
-
-                    // Alternate / Bắt đầu cắt (R) — chỉ khi đứng yên
-                    if (inputData.IsAlternatePressed && _moveInput == Vector2.zero)
-                    {
-                        if (baseCounter is CuttingCounter cuttingCounter &&
-                            cuttingCounter.HasKitchenObject() &&
-                            cuttingCounter.GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
+                        // Interact (Space)
+                        if (inputData.IsInteractPressed)
                         {
-                            StartCutting(cuttingCounter);
+                            if ((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||
+                                (HasKitchenObject() && _selectedCounter is ClearCounter))
+                            {
+                                // Animation logic runs locally via network state later, 
+                                // but we trigger the trigger parameter manually here (could be networked too if needed)
+                                animator.SetTrigger("IsPicked");
+                            }
+
+                            baseCounter.Interact(this);
+                            NetworkIsHoldingObject = HasKitchenObject();
+                        }
+
+                        // Alternate / Bắt đầu cắt (R) — chỉ khi đứng yên
+                        if (inputData.IsAlternatePressed && _moveInput == Vector2.zero)
+                        {
+                            if (baseCounter is CuttingCounter cuttingCounter &&
+                                cuttingCounter.HasKitchenObject() &&
+                                cuttingCounter.GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
+                            {
+                                StartCutting(cuttingCounter);
+                            }
                         }
                     }
                     return;
@@ -244,12 +259,12 @@ namespace _Game.Scripts.Gameplay
                     if (kitchenObject != GetKitchenObject())
                     {
                         SetSelectedCounter(null);
-                        if (inputData.IsInteractPressed &&
+                        if (HasStateAuthority && inputData.IsInteractPressed &&
                             !HasKitchenObject() &&
                             kitchenObject.GetKitchenObjectParent() == null)
                         {
                             kitchenObject.SetKitchenObjectParent(this);
-                            animator.SetBool("HasObject", true);
+                            NetworkIsHoldingObject = true;
                             animator.SetTrigger("IsPicked");
                         }
                         return;
@@ -260,7 +275,7 @@ namespace _Game.Scripts.Gameplay
             SetSelectedCounter(null);
 
             // Thả đồ khi không nhìn vào bàn
-            if (inputData.IsInteractPressed && HasKitchenObject())
+            if (HasStateAuthority && inputData.IsInteractPressed && HasKitchenObject())
                 DropKitchenObject();
         }
 
@@ -279,7 +294,7 @@ namespace _Game.Scripts.Gameplay
             Vector3 dropPosition = transform.position + transform.forward * 1f + Vector3.up * 0.5f;
             kitchenObject.SetKitchenObjectParent(null);
             kitchenObject.transform.position = dropPosition;
-            animator.SetBool("HasObject", false);
+            NetworkIsHoldingObject = false;
         }
 
         #endregion
@@ -298,12 +313,12 @@ namespace _Game.Scripts.Gameplay
             _currentCuttingCounter = counter;
             _currentCuttingCounter.OnCutComplete += StopCutting;
             _currentCuttingCounter.CuttingSoundAndAnimation();
-            animator.SetBool("IsChopping", true);
+            NetworkIsChopping = true;
         }
 
         private void StopCutting()
         {
-            animator.SetBool("IsChopping", false);
+            NetworkIsChopping = false;
             _isCutting = false;
             if (_currentCuttingCounter != null)
             {

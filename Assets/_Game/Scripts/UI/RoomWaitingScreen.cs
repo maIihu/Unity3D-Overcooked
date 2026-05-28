@@ -83,6 +83,7 @@ namespace _Game.Scripts.UI
             if (_refreshTimer >= REFRESH_INTERVAL)
             {
                 _refreshTimer = 0f;
+                // Only refresh UI states, not instantiate/destroy
                 RefreshPlayerList();
                 UpdateButtonsState();
             }
@@ -153,11 +154,10 @@ namespace _Game.Scripts.UI
 
         private void RefreshPlayerList()
         {
-            ClearPlayerList();
-
             if (FusionNetworkRunner.Instance == null || FusionNetworkRunner.Instance.Runner == null) return;
 
             var runner = FusionNetworkRunner.Instance.Runner;
+            int activeIndex = 0;
 
             foreach (var playerRef in runner.ActivePlayers)
             {
@@ -177,31 +177,38 @@ namespace _Game.Scripts.UI
                     }
                     
                     isHost = runner.IsServer && (playerRef == runner.LocalPlayer);
-
                 }
                 else
                 {
                     playerName += " (Spawning...)";
                 }
 
-                // Gắn nhãn
                 if (playerRef == runner.LocalPlayer)
                     playerName += " (You)";
 
                 if (isHost)
                     playerName += " [Host]";
 
-                GameObject itemObj = Instantiate(playerItemPrefab, playerListContainer);
-                if (itemObj != null)
+                if (activeIndex >= _instantiatedPlayerItems.Count)
                 {
-                    itemObj.SetActive(true); // Đảm bảo clone được kích hoạt hiển thị
+                    GameObject itemObj = Instantiate(playerItemPrefab, playerListContainer);
                     _instantiatedPlayerItems.Add(itemObj);
-                    var playerItem = itemObj.GetComponent<RoomWaitingPlayerItem>();
-                    if (playerItem != null)
-                    {
-                        playerItem.Setup(playerName, isReady, playerColor);
-                    }
                 }
+
+                GameObject currentItem = _instantiatedPlayerItems[activeIndex];
+                currentItem.SetActive(true);
+                var playerItem = currentItem.GetComponent<RoomWaitingPlayerItem>();
+                if (playerItem != null)
+                {
+                    playerItem.Setup(playerName, isReady, playerColor);
+                }
+                
+                activeIndex++;
+            }
+
+            for (int i = activeIndex; i < _instantiatedPlayerItems.Count; i++)
+            {
+                _instantiatedPlayerItems[i].SetActive(false);
             }
         }
 
@@ -266,10 +273,9 @@ namespace _Game.Scripts.UI
             {
                 if (item != null)
                 {
-                    Destroy(item);
+                    item.SetActive(false);
                 }
             }
-            _instantiatedPlayerItems.Clear();
         }
 
         protected override void OnScreenDestroyed()

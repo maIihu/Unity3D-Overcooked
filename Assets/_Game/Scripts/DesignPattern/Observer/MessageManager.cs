@@ -10,7 +10,10 @@ namespace _Game.Scripts.DesignPattern.Observer
         OnLoadLevel,
         OnSpawnNewRecipe,
         OnRejectRecipe,
-        OnRecipeSuccess
+        OnRecipeSuccess,
+        OnGameOver,
+        OnScoreChanged,
+        OnTimerTick
 	}
     public class Message
     {

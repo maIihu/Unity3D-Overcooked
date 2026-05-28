@@ -277,6 +277,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5809963650696567076}
   - component: {fileID: 4326007169555768964}
+  - component: {fileID: 209214928653756114}
   m_Layer: 0
   m_Name: Cheese Slices
   m_TagString: Untagged
@@ -310,9 +311,35 @@ MonoBehaviour:
   m_GameObject: {fileID: 8040841428600548111}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 034f5198da998a7439c8c2fd24e3d84a, type: 3}
+  m_Script: {fileID: 11500000, guid: fd272e0cee8348ba96740f3113ffa846, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rb: {fileID: 0}
+  col: {fileID: 0}
+  eFoodType: 0
+  normalVisual: {fileID: 0}
+  cuttingVisual: {fileID: 0}
+  soupVisual: {fileID: 0}
+  timeCooked: 0
+--- !u!114 &209214928653756114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8040841428600548111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 3535110360
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 4326007169555768964}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1001 &3670421109469540822
 PrefabInstance:
   m_ObjectHideFlags: 0

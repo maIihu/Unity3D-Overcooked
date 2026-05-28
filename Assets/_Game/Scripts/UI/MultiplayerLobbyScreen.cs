@@ -22,6 +22,10 @@ namespace _Game.Scripts.UI
         [Header("Navigation")]
         [SerializeField] private Button backButton;
 
+        [Header("Loading UI")]
+        [SerializeField] private GameObject loadingOverlayUI;
+        [SerializeField] private TextMeshProUGUI loadingOverlayText;
+
         private List<GameObject> _instantiatedRoomItems = new List<GameObject>();
         private GameObject _loadingOverlay;
 
@@ -177,6 +181,17 @@ namespace _Game.Scripts.UI
 
         private void ShowLoadingOverlay(string message)
         {
+            if (loadingOverlayUI != null)
+            {
+                loadingOverlayUI.SetActive(true);
+                if (loadingOverlayText != null)
+                {
+                    loadingOverlayText.text = message;
+                }
+                return;
+            }
+
+            // Fallback for when prefab/UI is not assigned
             if (_loadingOverlay == null)
             {
                 _loadingOverlay = new GameObject("ConnectingOverlay", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -220,6 +235,11 @@ namespace _Game.Scripts.UI
 
         private void HideLoadingOverlay()
         {
+            if (loadingOverlayUI != null)
+            {
+                loadingOverlayUI.SetActive(false);
+            }
+            
             if (_loadingOverlay != null)
             {
                 _loadingOverlay.SetActive(false);

@@ -74,6 +74,18 @@ namespace Pooling
             return null;
         }
 
+        public KitchenObject GetPrefab(KitchenType type)
+        {
+            if (_kitchenTypeToPrefab.TryGetValue(type, out var prefab)) return prefab;
+            return null;
+        }
+
+        public KitchenObject GetPrefab(EFoodType type)
+        {
+            if (_foodTypeToPrefab.TryGetValue(type, out var prefab)) return prefab;
+            return null;
+        }
+
 
 
 

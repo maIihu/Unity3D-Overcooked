@@ -18,11 +18,17 @@ namespace GameCore
         private static int _nextId;
         public int Id { get; }
         public MenuRecipeSO Data { get; }
+        public List<EFoodType> RequiredIngredients { get; }
 
         public ActiveRecipe(MenuRecipeSO data)
         {
             Id = _nextId++;
             Data = data;
+            RequiredIngredients = new List<EFoodType>();
+            if (data != null && data.foodObjectMenu != null)
+            {
+                foreach (var m in data.foodObjectMenu) RequiredIngredients.Add(m.foodType);
+            }
         }
     }
 
@@ -77,9 +83,7 @@ namespace GameCore
             for (int i = 0; i < _activeRecipes.Count; i++)
             {
                 ActiveRecipe recipe = _activeRecipes[i];
-                List<EFoodType> required = recipe.Data.foodObjectMenu
-                    .Select(m => m.foodType)
-                    .ToList();
+                List<EFoodType> required = recipe.RequiredIngredients;
 
                 // Check if plate matches recipe
                 if (plateIngredients.Count == required.Count
@@ -116,12 +120,19 @@ namespace GameCore
             var platesCounter = GameManager.Instance.LevelController.GetEmptyPlatesCounter();
             if (platesCounter != null)
             {
-                // We use a custom method in PlatesCounter or just spawn here
-                var instance = PoolManager.Instance.Kitchen.Get(KitchenType.Plate);
-                if (instance is PlateObject plate)
+                if (GameCore.Network.FusionNetworkRunner.Instance.Runner.IsServer)
                 {
-                    plate.SetKitchenObjectParent(platesCounter);
-                    plate.SetDirty(true);
+                    var prefab = PoolManager.Instance.Kitchen.GetPrefab(KitchenType.Plate);
+                    if (prefab != null)
+                    {
+                        var netObj = GameCore.Network.FusionNetworkRunner.Instance.Runner.Spawn(prefab, platesCounter.GetKitchenObjectToTransform().position, Quaternion.identity);
+                        var plate = netObj.GetComponent<PlateObject>();
+                        if (plate != null)
+                        {
+                            plate.SetKitchenObjectParent(platesCounter);
+                            plate.SetDirty(true);
+                        }
+                    }
                 }
             }
             else
