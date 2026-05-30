@@ -8,7 +8,7 @@ namespace Counter
 {
     public class TrashCounter : BaseCounter
     {
-        public override void Interact(Player player)
+        public override void Interact(IPlayer player)
         {
             base.Interact(player);
             if (player.HasKitchenObject())

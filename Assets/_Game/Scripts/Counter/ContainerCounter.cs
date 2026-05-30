@@ -32,7 +32,7 @@ namespace Counter
             }
         }
 
-        public override void Interact(Player player)
+        public override void Interact(IPlayer player)
         {
             if (HasKitchenObject())
             {

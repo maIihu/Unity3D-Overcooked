@@ -6,7 +6,7 @@ using GameCore.Network;
 
 namespace _Game.Scripts.Gameplay
 {
-    public class Player : NetworkBehaviour, IKitchenObjectParent
+    public class Player : NetworkBehaviour, IKitchenObjectParent, IPlayer
     {
         [Header("Player Stats")]
         [SerializeField] private float moveSpeed = 7f;
@@ -23,13 +23,17 @@ namespace _Game.Scripts.Gameplay
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private Renderer bodyRend;
 
-        // Local-only state (chỉ dùng trên client sở hữu)
+        // Local-only state
         private Vector2 _moveInput;
         private Vector3 _lastInteractDir;
         private BaseCounter _selectedCounter;
         private KitchenObject _kitchenObject;
 
-        // Cutting state — local tracking, logic chạy trong FixedUpdateNetwork
+        // Canonical rotation — dùng làm source cho Slerp thay vì transform.rotation
+        // (transform.rotation có thể bị NetworkTransform interpolate, tạo feedback loop giật)
+        private Quaternion _currentRotation;
+
+        // Cutting state
         private CuttingCounter _currentCuttingCounter;
         private bool _isCutting;
 
@@ -39,7 +43,7 @@ namespace _Game.Scripts.Gameplay
         // Sync animation sang remote clients
         [Networked] public Vector2 NetworkMoveInput { get; set; }
 
-        // Sync rotation sang remote clients
+        // Sync hướng nhìn cuối sang remote clients (dùng cho rotation)
         [Networked] public Vector3 NetworkTargetForward { get; set; }
 
         [Networked]
@@ -54,7 +58,6 @@ namespace _Game.Scripts.Gameplay
         // -------------------------------------------------------
         #region Color System
 
-        // Static readonly: tránh allocation mỗi lần gọi
         private static readonly Color[] s_PlayerColors = new Color[]
         {
             Color.red,
@@ -78,9 +81,7 @@ namespace _Game.Scripts.Gameplay
             Color targetColor = GetColorByEnum(color);
             Material[] mats = bodyRend.materials;
             if (mats.Length > 1 && mats[1] != null)
-            {
                 mats[1].color = targetColor;
-            }
             bodyRend.materials = mats;
         }
 
@@ -96,8 +97,22 @@ namespace _Game.Scripts.Gameplay
 
         public override void Spawned()
         {
-            if (_rb != null)
-                _rb.isKinematic = !(HasStateAuthority || HasInputAuthority);
+            // Khởi tạo canonical rotation từ transform thực, không phải từ interpolated value
+            _currentRotation = transform.rotation;
+
+            // Snap xuống sàn ngay khi spawn (tránh spawn trên không rồi rơi xuống vô tận)
+            // Chỉ thực hiện trên local player — remote player sẽ dùng vị trí sync từ network
+            if ((HasInputAuthority || HasStateAuthority) && _rb != null)
+            {
+                int groundMask = ~(1 << gameObject.layer);
+                if (Physics.Raycast(_rb.position + Vector3.up * 5f, Vector3.down,
+                        out RaycastHit groundHit, 10f, groundMask))
+                {
+                    // Dừng hẳn velocity trước khi snap — tránh bị nẩy lên sau snap
+                    _rb.velocity = Vector3.zero;
+                    _rb.position = new Vector3(_rb.position.x, groundHit.point.y, _rb.position.z);
+                }
+            }
 
             NetworkTargetForward = transform.forward;
             _lastInteractDir = transform.forward;
@@ -106,13 +121,9 @@ namespace _Game.Scripts.Gameplay
 
         public override void FixedUpdateNetwork()
         {
-            // Chỉ owner (HasStateAuthority hoặc HasInputAuthority) mới chạy prediction
+            // Chỉ owner chạy movement prediction
             if (!HasStateAuthority && !HasInputAuthority) return;
 
-            // --- Cập nhật input từ Fusion ---
-            // GetInput() trả về true khi có dữ liệu mới (không phải resimulation).
-            // Ta cache _moveInput để Move() luôn dùng giá trị mới nhất,
-            // kể cả trên các tick resimulation khi GetInput() trả về false.
             NetworkInputData inputData = default;
             bool hasInput = GetInput(out inputData);
 
@@ -121,32 +132,25 @@ namespace _Game.Scripts.Gameplay
                 _moveInput = new Vector2(inputData.MoveX, inputData.MoveY);
 
                 if (HasStateAuthority)
-                {
                     NetworkMoveInput = _moveInput;
-                }
             }
 
-            // --- Luôn di chuyển dựa trên _moveInput đã cache ---
+            // Di chuyển dựa trên _moveInput đã cache (kể cả resimulation ticks)
             Move();
 
-            // --- Chỉ StateAuthority xử lý game logic, nhưng InputAuthority cũng chạy để hiển thị Highlight ---
             if ((HasStateAuthority || HasInputAuthority) && hasInput)
             {
                 HandleInteractions(inputData);
 
                 if (HasStateAuthority)
                 {
-                    // Dừng cắt nếu người chơi di chuyển
                     if (_moveInput != Vector2.zero && _isCutting)
                         StopCutting();
                 }
             }
 
-            // --- Cutting tick: chạy mỗi fixed tick thay vì Coroutine ---
             if (HasStateAuthority && _isCutting && _currentCuttingCounter != null)
-            {
                 _currentCuttingCounter.InteractAlternate(this);
-            }
         }
 
         private void Update()
@@ -155,6 +159,11 @@ namespace _Game.Scripts.Gameplay
             UpdateAnimation();
         }
 
+        // Render() KHÔNG override ở đây.
+        // NetworkTransform component đã xử lý interpolation vị trí giữa các tick.
+        // Rigidbody.interpolation = Interpolate xử lý visual smoothness giữa physics steps.
+        // Override Render() để set transform.position sẽ CONFLICT với NetworkTransform!
+
         #endregion
 
         // -------------------------------------------------------
@@ -162,35 +171,49 @@ namespace _Game.Scripts.Gameplay
 
         private void Move()
         {
-            Vector3 moveDir = new Vector3(_moveInput.x, 0f, _moveInput.y);
+            if (_rb == null) return;
 
-            if (_rb != null)
-            {
-                Vector3 targetVelocity = moveDir * moveSpeed;
-                targetVelocity.y = _rb.velocity.y; // Giữ trọng lực
-                _rb.velocity = targetVelocity;
-            }
+            Vector3 moveDir = new Vector3(_moveInput.x, 0f, _moveInput.y);
 
             if (moveDir != Vector3.zero)
             {
+                // Set velocity ngang, GIỮ NGUYÊN velocity.y để gravity hoạt động bình thưỜng.
+                _rb.velocity = new Vector3(
+                    moveDir.x * moveSpeed,
+                    _rb.velocity.y,
+                    moveDir.z * moveSpeed
+                );
+
                 _lastInteractDir = moveDir.normalized;
 
                 if (HasStateAuthority)
-                {
                     NetworkTargetForward = _lastInteractDir;
-                }
 
+                // FIX ROTATION JITTER:
+                // Dùng _currentRotation (canonical, stable) làm source của Slerp.
+                // KHAIÔNG dùng transform.rotation — nó đang bị NetworkTransform interpolate,
+                // tạo feedback loop: đọc interpolated → Slerp → ghi lại → NT đọc lại → giật.
                 Quaternion targetRot = Quaternion.LookRotation(_lastInteractDir);
-                _rb.MoveRotation(
-                    Quaternion.Slerp(_rb.rotation, targetRot, Runner.DeltaTime * rotateSpeed)
+                _currentRotation = Quaternion.Slerp(
+                    _currentRotation,   // ← stable canonical value
+                    targetRot,
+                    Runner.DeltaTime * rotateSpeed
                 );
+                transform.rotation = _currentRotation;
+            }
+            else
+            {
+                // Đứng yên: triệt tiêu velocity ngang, giữ velocity.y (gravity tiếp tục)
+                _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);
             }
         }
 
         private void UpdateAnimation()
         {
-            // Remote clients dùng NetworkMoveInput để animate (không có GetInput)
-            Vector2 inputToUse = (HasStateAuthority || HasInputAuthority) ? _moveInput : NetworkMoveInput;
+            Vector2 inputToUse = (HasStateAuthority || HasInputAuthority)
+                ? _moveInput
+                : NetworkMoveInput;
+
             animator.SetFloat("MovingValue", inputToUse.magnitude);
             animator.SetBool("IsChopping", NetworkIsChopping);
             animator.SetBool("HasObject", NetworkIsHoldingObject);
@@ -224,14 +247,11 @@ namespace _Game.Scripts.Gameplay
 
                     if (HasStateAuthority)
                     {
-                        // Interact (Space)
                         if (inputData.IsInteractPressed)
                         {
                             if ((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||
                                 (HasKitchenObject() && _selectedCounter is ClearCounter))
                             {
-                                // Animation logic runs locally via network state later, 
-                                // but we trigger the trigger parameter manually here (could be networked too if needed)
                                 animator.SetTrigger("IsPicked");
                             }
 
@@ -239,7 +259,6 @@ namespace _Game.Scripts.Gameplay
                             NetworkIsHoldingObject = HasKitchenObject();
                         }
 
-                        // Alternate / Bắt đầu cắt (R) — chỉ khi đứng yên
                         if (inputData.IsAlternatePressed && _moveInput == Vector2.zero)
                         {
                             if (baseCounter is CuttingCounter cuttingCounter &&
@@ -253,7 +272,6 @@ namespace _Game.Scripts.Gameplay
                     return;
                 }
 
-                // Nhặt vật phẩm nằm dưới đất
                 if (hit.collider.TryGetComponent(out KitchenObject kitchenObject))
                 {
                     if (kitchenObject != GetKitchenObject())
@@ -274,7 +292,6 @@ namespace _Game.Scripts.Gameplay
 
             SetSelectedCounter(null);
 
-            // Thả đồ khi không nhìn vào bàn
             if (HasStateAuthority && inputData.IsInteractPressed && HasKitchenObject())
                 DropKitchenObject();
         }
@@ -304,9 +321,8 @@ namespace _Game.Scripts.Gameplay
 
         private void StartCutting(CuttingCounter counter)
         {
-            if (_isCutting && _currentCuttingCounter == counter) return; // Tránh start lại nếu đang cắt cùng counter
+            if (_isCutting && _currentCuttingCounter == counter) return;
 
-            // Dừng counter cũ nếu có
             if (_isCutting) StopCutting();
 
             _isCutting = true;

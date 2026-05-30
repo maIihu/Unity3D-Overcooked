@@ -66,7 +66,7 @@ namespace Counter
         // -------------------------------------------------------
         #region Interact
 
-        public override void Interact(Player player)
+        public override void Interact(IPlayer player)
         {
             base.Interact(player);
 
@@ -95,7 +95,7 @@ namespace Counter
             }
         }
 
-        public override void InteractAlternate(Player player)
+        public override void InteractAlternate(IPlayer player)
         {
             base.InteractAlternate(player);
 

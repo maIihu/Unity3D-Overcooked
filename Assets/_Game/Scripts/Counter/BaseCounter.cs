@@ -44,9 +44,9 @@ namespace Counter
         #endregion
 
         #region Interaction
-        public virtual void Interact(Player player) { }
+        public virtual void Interact(IPlayer player) { }
 
-        public virtual void InteractAlternate(Player player) { }
+        public virtual void InteractAlternate(IPlayer player) { }
         #endregion
 
         #region IKitchenObjectParent Implementation

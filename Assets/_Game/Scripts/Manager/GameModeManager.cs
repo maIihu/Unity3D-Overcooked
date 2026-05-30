@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using DesignPattern;
+using _Game.Scripts.DesignPattern.Observer;
+using _Game.Scripts.UI;
 
 namespace GameCore
 {
@@ -20,6 +22,13 @@ namespace GameCore
 
         /// <summary>Tên Scene Gameplay (phải khớp với tên file scene).</summary>
         private const string GAMEPLAY_SCENE_NAME = "GameScene";
+
+        /// <summary>Prefab Player dùng cho Single Mode (PlayerLocal component, không có NetworkObject).</summary>
+        [SerializeField] private GameObject _localPlayerPrefab;
+        public GameObject LocalPlayerPrefab => _localPlayerPrefab;
+
+        /// <summary>Vị trí spawn Player khi bắt đầu Single Mode.</summary>
+        [SerializeField] private Vector3 _localPlayerSpawnPosition = new Vector3(0f, 1f, 0f);
 
         /// <summary>Chế độ chơi hiện tại.</summary>
         public PlayMode CurrentMode { get; private set; } = PlayMode.None;

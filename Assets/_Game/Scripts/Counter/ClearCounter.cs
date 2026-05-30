@@ -9,7 +9,7 @@ namespace Counter
 {
     public class ClearCounter : BaseCounter
     {
-        public override void Interact(Player player)
+        public override void Interact(IPlayer player)
         {
             base.Interact(player);
 
@@ -27,7 +27,7 @@ namespace Counter
         }
 
 
-        private void HandleCounterHasObject(Player player)
+        private void HandleCounterHasObject(IPlayer player)
         {
             if (!player.HasKitchenObject()) 
                 GetKitchenObject().SetKitchenObjectParent(player);

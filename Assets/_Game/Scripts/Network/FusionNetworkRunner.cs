@@ -223,6 +223,18 @@ namespace GameCore.Network
                     {
                         Vector3 spawnPosition = new Vector3((playerRef.PlayerId % 4) * 2f, 1, 0);
                         
+                        if (runner.GameMode == GameMode.Single)
+                        {
+                            // Trong Singleplayer: Dùng PlayerLocal (thuần MonoBehaviour) để di chuyển mượt, 
+                            // nhưng vẫn giữ Fusion runner cho các Counter & Food.
+                            if (GameModeManager.Instance != null && GameModeManager.Instance.LocalPlayerPrefab != null)
+                            {
+                                Instantiate(GameModeManager.Instance.LocalPlayerPrefab, spawnPosition, Quaternion.identity);
+                                Debug.Log("[FusionNetworkRunner] Spawned PlayerLocal for Singleplayer.");
+                            }
+                            continue;
+                        }
+
                         EPlayerColor selectedColor = EPlayerColor.Red;
                         if (playerColors.TryGetValue(playerRef, out EPlayerColor lpColor))
                         {

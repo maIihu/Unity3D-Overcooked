@@ -60,7 +60,7 @@ namespace Counter
             }
         }
 
-        public override void Interact(Player player)
+        public override void Interact(IPlayer player)
         {
             if (!HasKitchenObject())
             {
@@ -85,7 +85,7 @@ namespace Counter
             }
         }
 
-        public override void InteractAlternate(Player player)
+        public override void InteractAlternate(IPlayer player)
         {
             base.InteractAlternate(player);
             if (!HasStateAuthority) return;
