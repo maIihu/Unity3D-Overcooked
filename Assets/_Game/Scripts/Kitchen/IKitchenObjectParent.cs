@@ -10,6 +10,7 @@ namespace Kitchen
         public KitchenObject GetKitchenObject();
         public void ClearKitchenObject();
         public bool HasKitchenObject();
+        public Fusion.NetworkObject GetNetworkObject();
     }
 
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5954880707319825164}
   - component: {fileID: 5046532932119348013}
   - component: {fileID: -8141123884052172853}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cabbage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -48,6 +48,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   col: {fileID: 0}
+  _ParentNetworkId:
+    Raw: 0
   eFoodType: 0
   normalVisual: {fileID: 0}
   cuttingVisual: {fileID: 0}

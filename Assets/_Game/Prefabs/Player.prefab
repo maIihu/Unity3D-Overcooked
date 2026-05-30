@@ -88,8 +88,12 @@ MonoBehaviour:
   _rb: {fileID: 926398963344026295}
   bodyRend: {fileID: 4185770859702539200}
   _NetworkMoveInput: {x: 0, y: 0}
-  _PlayerColor: 0
   _NetworkTargetForward: {x: 0, y: 0, z: 0}
+  _PlayerColor: 0
+  _NetworkIsChopping:
+    _value: 0
+  _NetworkIsHoldingObject:
+    _value: 0
 --- !u!65 &6756487189995824916
 BoxCollider:
   m_ObjectHideFlags: 0

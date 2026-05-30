@@ -6,9 +6,6 @@ namespace GameCore
 {
     public class ScoreController : NetworkBehaviour, IMessageHandle
     {
-        [SerializeField] private int pointsPerRecipe = 10;
-        [SerializeField] private int penaltyPerWrongRecipe = 5;
-
         [Networked, OnChangedRender(nameof(OnScoreChangedCallback))]
         public int CurrentScore { get; set; }
 
@@ -36,11 +33,11 @@ namespace GameCore
             switch (message.Type)
             {
                 case ProjectMessageType.OnRecipeSuccess:
-                    CurrentScore += pointsPerRecipe;
+                    int scoreAdded = (int)message.Data[1];
+                    CurrentScore += scoreAdded;
                     break;
                 case ProjectMessageType.OnRejectRecipe:
-                    CurrentScore -= penaltyPerWrongRecipe;
-                    if (CurrentScore < 0) CurrentScore = 0;
+                    // No penalty for wrong/late delivery as requested
                     break;
             }
         }

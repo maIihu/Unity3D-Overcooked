@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1339356600632360765}
   - component: {fileID: 16706904939424415}
   - component: {fileID: 5678543677840576080}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: IconUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 4946196280442499301}
   - component: {fileID: 1207060506050932666}
   - component: {fileID: 7676477188964738040}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -203,7 +203,7 @@ GameObject:
   - component: {fileID: 1961942688279857041}
   - component: {fileID: 5927981796877885457}
   - component: {fileID: -207068382690815603}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Bread
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -240,6 +240,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   col: {fileID: 0}
+  _ParentNetworkId:
+    Raw: 0
   eFoodType: 0
   normalVisual: {fileID: 0}
   cuttingVisual: {fileID: 0}
@@ -293,7 +295,7 @@ GameObject:
   - component: {fileID: 2573590024749230229}
   - component: {fileID: 4691895955195811799}
   - component: {fileID: 3384287897795071138}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}

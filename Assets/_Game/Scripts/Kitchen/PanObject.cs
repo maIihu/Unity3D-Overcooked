@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Kitchen
 {
@@ -34,6 +34,8 @@ namespace Kitchen
         {
             return this._kitchenObject != null;
         }
+
+        public Fusion.NetworkObject GetNetworkObject() => Object;
 
         #endregion
     }

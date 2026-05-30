@@ -222,9 +222,6 @@ namespace _Game.Scripts.Gameplay
             }
 
             SetSelectedCounter(null);
-
-            if (_interactPressed && HasKitchenObject())
-                DropKitchenObject();
         }
 
         private void SetSelectedCounter(BaseCounter baseCounter)
@@ -232,16 +229,6 @@ namespace _Game.Scripts.Gameplay
             _selectedCounter?.Hide();
             _selectedCounter = baseCounter;
             _selectedCounter?.Show();
-        }
-
-        private void DropKitchenObject()
-        {
-            KitchenObject kitchenObject = GetKitchenObject();
-            if (kitchenObject == null) return;
-
-            Vector3 dropPosition = transform.position + transform.forward * 1f + Vector3.up * 0.5f;
-            kitchenObject.SetKitchenObjectParent(null);
-            kitchenObject.transform.position = dropPosition;
         }
 
         // ─── Cutting ─────────────────────────────────────────────
@@ -275,6 +262,7 @@ namespace _Game.Scripts.Gameplay
         public KitchenObject GetKitchenObject() => _kitchenObject;
         public void ClearKitchenObject() => _kitchenObject = null;
         public bool HasKitchenObject() => _kitchenObject != null;
+        public Fusion.NetworkObject GetNetworkObject() => null;
 
         // ─── Gizmos ───────────────────────────────────────────────
 

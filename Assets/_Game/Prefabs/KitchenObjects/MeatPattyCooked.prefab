@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6770348285893601615}
   - component: {fileID: 188263790814930498}
   - component: {fileID: 7118129865447126753}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: IconUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 5055220448937464365}
   - component: {fileID: 6662525805416717862}
   - component: {fileID: 6549038939080776060}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -203,7 +203,7 @@ GameObject:
   - component: {fileID: 7358248324327591387}
   - component: {fileID: 2398889741707301890}
   - component: {fileID: 1594963873744990779}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -279,7 +279,7 @@ GameObject:
   - component: {fileID: -4971004684936391500}
   - component: {fileID: 7006350321896514449}
   - component: {fileID: 1676518766559682539}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: MeatPattyCooked
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -316,6 +316,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   col: {fileID: 0}
+  _ParentNetworkId:
+    Raw: 0
   eFoodType: 0
   normalVisual: {fileID: 0}
   cuttingVisual: {fileID: 0}

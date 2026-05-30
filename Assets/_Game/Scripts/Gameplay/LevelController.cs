@@ -66,6 +66,15 @@ namespace GameCore
             return null;
         }
 
+        public DeliveryCounter GetDeliveryCounter()
+        {
+            foreach (var counter in _spawnedCounters)
+            {
+                if (counter is DeliveryCounter dc) return dc;
+            }
+            return null;
+        }
+
         // ── Private ────────────────────────────────────────────
 
         private void SpawnCounter(CounterData cData)

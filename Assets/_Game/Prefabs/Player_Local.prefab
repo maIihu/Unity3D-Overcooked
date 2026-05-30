@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 926398963344026295}
   - component: {fileID: 6756487189995824916}
   - component: {fileID: 3040514432908336335}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Player_Local
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,7 +115,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3369580444840670666}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: InteractPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -146,7 +146,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6957290034226936634}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: HandPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -250,6 +250,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Knife
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 02184b266bf196f44aaa055f90d3b316,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 02184b266bf196f44aaa055f90d3b316,
         type: 3}

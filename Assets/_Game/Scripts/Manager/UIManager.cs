@@ -19,6 +19,8 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
     [SerializeField] List<ScreenUI> listScreen;
     [SerializeField] List<PopupUI> listPopup;
     private Dictionary<Type, ScreenUI> _screenCache = new Dictionary<Type, ScreenUI>();
+    
+    public FloatingScoreManager floatingScoreManager;
 
     private void Awake()
     {

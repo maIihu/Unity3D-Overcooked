@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7709171640845079742}
   - component: {fileID: 2155899522130530684}
   - component: {fileID: 3573168099036837328}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: IconUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 5684186538832582127}
   - component: {fileID: 996017877731817131}
   - component: {fileID: 5536633943845741668}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,7 +202,7 @@ GameObject:
   - component: {fileID: 4034697847917316706}
   - component: {fileID: 2661597581539496207}
   - component: {fileID: 5190693417930615120}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -279,7 +279,7 @@ GameObject:
   - component: {fileID: -4971004684936391500}
   - component: {fileID: 4076874890866313208}
   - component: {fileID: 7610660856523639873}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Tomato Slices
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -316,6 +316,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   col: {fileID: 0}
+  _ParentNetworkId:
+    Raw: 0
   eFoodType: 0
   normalVisual: {fileID: 0}
   cuttingVisual: {fileID: 0}

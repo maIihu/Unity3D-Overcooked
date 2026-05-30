@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5475769275802502558}
   - component: {fileID: 999953786405782283}
   - component: {fileID: 1434297563013814751}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: IconUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 7593373614323714905}
   - component: {fileID: 7841395647051759204}
   - component: {fileID: 4969764287311700364}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,7 +202,7 @@ GameObject:
   - component: {fileID: 7550344052500476494}
   - component: {fileID: 246984412790826027}
   - component: {fileID: 7222268645380074906}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -279,7 +279,7 @@ GameObject:
   - component: {fileID: 4326007169555768964}
   - component: {fileID: 209214928653756114}
   - component: {fileID: -819709819523190948}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cheese Slices
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -316,6 +316,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   col: {fileID: 0}
+  _ParentNetworkId:
+    Raw: 0
   eFoodType: 0
   normalVisual: {fileID: 0}
   cuttingVisual: {fileID: 0}

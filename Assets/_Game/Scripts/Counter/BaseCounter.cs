@@ -63,6 +63,8 @@ namespace Counter
         public virtual void ClearKitchenObject() => _kitchenObject = null;
 
         public bool HasKitchenObject() => _kitchenObject != null;
+        
+        public Fusion.NetworkObject GetNetworkObject() => Object;
 
         #endregion
 

@@ -10,10 +10,13 @@ namespace GameCore
 
         [Networked] public float CurrentTime { get; set; }
         [Networked] public NetworkBool IsTimerRunning { get; set; }
+        private bool _hasFiredGameOver = false;
 
         public override void Spawned()
         {
             Debug.Log($"[GameTimerController] Spawned! HasStateAuthority: {HasStateAuthority}");
+            _hasFiredGameOver = false;
+            
             if (HasStateAuthority)
             {
                 CurrentTime = gameDuration;
@@ -34,22 +37,20 @@ namespace GameCore
                 CurrentTime = 0f;
                 IsTimerRunning = false;
                 
-                Debug.Log("[GameTimerController] Timer finished! Broadcasting OnGameOver");
-                // Trigger Game Over
-                MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnGameOver));
+                Debug.Log("[GameTimerController] Timer finished!");
+                // Let Render() handle the UI broadcast so it runs on all clients predictably
             }
         }
 
         public override void Render()
         {
-            // Debug.Log($"[GameTimerController] Render - CurrentTime: {CurrentTime}, IsTimerRunning: {IsTimerRunning}");
             // Update UI smoothly every frame
             MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnTimerTick, new object[] { CurrentTime }));
             
-            // If timer stopped and reached 0, also broadcast GameOver to client side
-            // Note: FixedUpdateNetwork might trigger OnGameOver on host, but we can also trigger it based on property for clients
-            if (!IsTimerRunning && CurrentTime <= 0.01f)
+            // If timer stopped and reached 0, broadcast GameOver (only once per client/host)
+            if (!IsTimerRunning && CurrentTime <= 0.01f && !_hasFiredGameOver)
             {
+                _hasFiredGameOver = true;
                 MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnGameOver));
             }
         }

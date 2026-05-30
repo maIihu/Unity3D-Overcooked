@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7290513490277968347}
   - component: {fileID: 8482711146146147271}
   - component: {fileID: 1995767884621147661}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: LobbyPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -66,4 +66,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _IsReady:
     _value: 0
-  _ColorIndex: 0
+  _PlayerColor: 0

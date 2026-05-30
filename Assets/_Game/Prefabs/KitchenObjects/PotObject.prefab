@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4382194694159614031}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Vfx
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7645905887964108719}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Pivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5584683170457929501}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: TopPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -110,7 +110,7 @@ GameObject:
   - component: {fileID: 7388250531353371702}
   - component: {fileID: 6327329685547741424}
   - component: {fileID: 5404259525365954338}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PotObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -198,6 +198,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 1783962928946364944}
   col: {fileID: 6573324176737962346}
+  _ParentNetworkId:
+    Raw: 0
   liquidHeight: 0.1
   liquidGO: {fileID: 3975085236037813863}
   burnedColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
@@ -253,7 +255,7 @@ GameObject:
   - component: {fileID: 2051890062132041880}
   - component: {fileID: 8863113168564448177}
   - component: {fileID: 165628533695654543}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -356,6 +358,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProgressBar
       objectReference: {fileID: 0}
+    - target: {fileID: 3298028668083535105, guid: fcd6bf12dfdfbf54db300dfd172dc910,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4743280423077751689, guid: fcd6bf12dfdfbf54db300dfd172dc910,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 5552155709498957468, guid: fcd6bf12dfdfbf54db300dfd172dc910,
         type: 3}
       propertyPath: m_Pivot.x
@@ -456,6 +468,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7502429839636305603, guid: fcd6bf12dfdfbf54db300dfd172dc910,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -487,10 +504,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7645905887964108719}
     m_Modifications:
+    - target: {fileID: 2318040495929611775, guid: a3867ae41dc39fc4dbc5251198d12f53,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 2338083580476331517, guid: a3867ae41dc39fc4dbc5251198d12f53,
         type: 3}
       propertyPath: m_Name
       value: CookingPot_Model
+      objectReference: {fileID: 0}
+    - target: {fileID: 2338083580476331517, guid: a3867ae41dc39fc4dbc5251198d12f53,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 3114619626764848967, guid: a3867ae41dc39fc4dbc5251198d12f53,
         type: 3}
@@ -591,6 +618,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SteamParticles
+      objectReference: {fileID: 0}
+    - target: {fileID: 8878381063130434635, guid: 4d000e47cf857524bbd3a2de011d00a1,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8878381063130434638, guid: 4d000e47cf857524bbd3a2de011d00a1,
         type: 3}
@@ -721,6 +753,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BurnedSmokeParticles
+      objectReference: {fileID: 0}
+    - target: {fileID: 6136795692007766947, guid: c029180c4a4d5474cb53d9dcc0dcb1f8,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 6136795692007766947, guid: c029180c4a4d5474cb53d9dcc0dcb1f8,
         type: 3}

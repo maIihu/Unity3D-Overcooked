@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1706215564105115003}
   - component: {fileID: 7262321171176234848}
   - component: {fileID: 5622082703857255272}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Liquid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 4133019759459701955}
   - component: {fileID: 3041180108965128954}
   - component: {fileID: 7672177522010599530}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PlateObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,6 +183,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 2288304409815527160}
   col: {fileID: 4754606328650493023}
+  _ParentNetworkId:
+    Raw: 0
   topPoint: {fileID: 8148707808569584337}
   validIngredientList: 01000000
   liquidGO: {fileID: 242325000542038882}
@@ -233,7 +235,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8148707808569584337}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: TopPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -319,10 +321,25 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 112c2cf1bc1e64545b11c40249c8cc94, type: 2}
+    - target: {fileID: -5042423737551950501, guid: 7e3ff7410716f4d46aa28324ec6168af,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: -4976450414491041561, guid: 7e3ff7410716f4d46aa28324ec6168af,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7e3ff7410716f4d46aa28324ec6168af,
         type: 3}
       propertyPath: m_Name
       value: Plate
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7e3ff7410716f4d46aa28324ec6168af,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: -4971004684936391500}
   - component: {fileID: 6822204536962976208}
   - component: {fileID: 1400038740347581322}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: MeatPattyUncooked
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -48,6 +48,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   col: {fileID: 0}
+  _ParentNetworkId:
+    Raw: 0
   eFoodType: 0
   normalVisual: {fileID: 0}
   cuttingVisual: {fileID: 0}
