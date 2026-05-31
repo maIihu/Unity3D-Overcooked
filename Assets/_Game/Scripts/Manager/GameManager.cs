@@ -45,6 +45,7 @@ namespace GameCore
         private void Awake()
         {
             Initialize(this);
+            Application.targetFrameRate = 60;
         }
 
         private void OnEnable()

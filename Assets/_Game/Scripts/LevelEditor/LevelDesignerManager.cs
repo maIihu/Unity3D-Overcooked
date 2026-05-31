@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using Counter;
 using Kitchen;
 using UnityEngine;
@@ -17,23 +16,31 @@ public class LevelDesignerManager : MonoBehaviour
 
     public KitchenObjectLibrarySO GetKitchenObjectLibrary() => kitchenObjectLibrary;
 
-    private Dictionary<BaseCounter, CounterData> _placedCountersMap = new Dictionary<BaseCounter, CounterData>();
-
     private void Awake()
     {
         Instance = this;
         if (counterParent == null) counterParent = new GameObject("PlacedCounters").transform;
     }
-    
 
-    public void SpawnCounter(int counterId, Vector3 position, Vector3 rotation, int kitchenObjectFoodType = -1)
+    public static CounterType GetCounterType(BaseCounter counter)
     {
-        CounterType counterType = CounterIdConverter.GetCounterType(counterId);
+        if (counter is ContainerCounter) return CounterType.ContainerCounter;
+        if (counter is StoveCounter) return CounterType.StoveCounter;
+        if (counter is CuttingCounter) return CounterType.CuttingCounter;
+        if (counter is TrashCounter) return CounterType.TrashCounter;
+        if (counter is PlatesCounter) return CounterType.PlatesCounter;
+        if (counter is DeliveryCounter) return CounterType.DeliveryCounter;
+        if (counter is ClearCounter) return CounterType.ClearCounter;
+        return CounterType.ClearCounter;
+    }
+
+    public void SpawnCounter(CounterType counterType, Vector3 position, Vector3 rotation, int subType = 0)
+    {
         CounterTemplate template = templateList.GetTemplateByType(counterType);
 
         if (template == null)
         {
-            Debug.LogError($"No template found for CounterType {counterType} (id={counterId})!");
+            Debug.LogError($"No template found for CounterType {counterType}!");
             return;
         }
 
@@ -42,58 +49,38 @@ public class LevelDesignerManager : MonoBehaviour
 
         if (counter != null)
         {
-            CounterData data = new CounterData
+            if (counter is ContainerCounter container)
             {
-                counterId = counterId,
-                position = position,
-                rotation = rotation,
-                kitchenObjectFoodType = kitchenObjectFoodType
-            };
-
-            _placedCountersMap.Add(counter, data);
-            ApplyConfiguration(counter, counterId);
-
-            // Restore pre-placed KitchenObject
-            if (kitchenObjectFoodType >= 0 && counter is ClearCounter clearCounter)
+                container.SetContainer((EFoodType)subType);
+            }
+            else if (counter is StoveCounter stove)
             {
-                if (kitchenObjectLibrary != null)
-                {
-                    KitchenObject prefab = kitchenObjectLibrary.GetPrefab((KitchenType)kitchenObjectFoodType);
-                    if (prefab != null)
-                    {
-                        KitchenObject instance = Instantiate(prefab, clearCounter.GetKitchenObjectToTransform());
-                        instance.transform.localPosition = Vector3.zero;
-                        instance.transform.localRotation = Quaternion.identity;
-                        clearCounter.SetKitchenObject(instance);
-                    }
-                }
+                stove.SetStoveData((KitchenType)subType);
             }
         }
     }
 
     public void RemoveCounter(BaseCounter counter)
     {
-        if (counter != null && _placedCountersMap.ContainsKey(counter))
+        if (counter != null)
         {
-            _placedCountersMap.Remove(counter);
+            DestroyImmediate(counter.gameObject);
         }
     }
 
-    /// <summary>
-    /// Update the KitchenObject pre-placed on a ClearCounter and persist the change in CounterData.
-    /// Pass foodType = -1 to clear the item.
-    /// </summary>
     public void SetKitchenObjectOnCounter(BaseCounter counter, int foodType)
     {
-        if (!_placedCountersMap.TryGetValue(counter, out CounterData data)) return;
-
-        data.kitchenObjectFoodType = foodType;
-
         if (counter is ClearCounter clearCounter)
         {
+            // Clear existing if any
+            if (clearCounter.HasKitchenObject())
+            {
+                DestroyImmediate(clearCounter.GetKitchenObject().gameObject);
+                clearCounter.ClearKitchenObject();
+            }
+
             if (foodType >= 0)
             {
-                // Logic Spawn trực tiếp cho Editor (không pool)
                 if (kitchenObjectLibrary == null)
                 {
                     Debug.LogWarning("[LevelDesignerManager] KitchenObjectLibrarySO is not assigned!");
@@ -103,128 +90,103 @@ public class LevelDesignerManager : MonoBehaviour
                 KitchenObject prefab = kitchenObjectLibrary.GetPrefab((KitchenType)foodType);
                 if (prefab != null)
                 {
-                    // Clear cũ nếu có
-                    if (clearCounter.HasKitchenObject())
-                    {
-                        Destroy(clearCounter.GetKitchenObject().gameObject);
-                        clearCounter.ClearKitchenObject();
-                    }
-
                     KitchenObject instance = Instantiate(prefab, clearCounter.GetKitchenObjectToTransform());
                     instance.transform.localPosition = Vector3.zero;
                     instance.transform.localRotation = Quaternion.identity;
                     clearCounter.SetKitchenObject(instance);
                 }
             }
-            else
-            {
-                // Clear Item
-                if (clearCounter.HasKitchenObject())
-                {
-                    Destroy(clearCounter.GetKitchenObject().gameObject);
-                    clearCounter.ClearKitchenObject();
-                }
-            }
-        }
-    }
-
-    public bool TryGetCounterData(BaseCounter counter, out CounterData data)
-    {
-        if (counter != null && _placedCountersMap.TryGetValue(counter, out data))
-        {
-            return true;
-        }
-        
-        data = default;
-        return false;
-    }
-
-    private void ApplyConfiguration(BaseCounter counter, int counterId)
-    {
-        CounterType counterType = CounterIdConverter.GetCounterType(counterId);
-
-        switch (counterType)
-        {
-            case CounterType.ContainerCounter:
-                if (counter is ContainerCounter container)
-                {
-                    container.SetContainer(CounterIdConverter.GetFoodType(counterId));
-                }
-                break;
-
-            case CounterType.StoveCounter:
-                if (counter is StoveCounter stove)
-                {
-                    stove.SetStoveData(CounterIdConverter.GetKitchenType(counterId));
-                }
-                break;
         }
     }
 
     public void SaveLevel(string levelName)
     {
-        LevelData data = new LevelData();
+#if UNITY_EDITOR
+        // Attach/Get LevelPrefabData component to root
+        LevelPrefabData prefabData = counterParent.GetComponent<LevelPrefabData>();
+        if (prefabData == null) prefabData = counterParent.gameObject.AddComponent<LevelPrefabData>();
 
+        // Set camera
         if (levelPreviewCamera != null)
         {
-            data.cameraPosition = levelPreviewCamera.transform.position;
-            data.cameraEulerAngles = levelPreviewCamera.transform.eulerAngles;
+            prefabData.cameraPosition = levelPreviewCamera.transform.position;
+            prefabData.cameraEulerAngles = levelPreviewCamera.transform.eulerAngles;
         }
 
-        foreach (var pair in _placedCountersMap)
-        {
-            BaseCounter counter = pair.Key;
-            CounterData cData = pair.Value;
+        // Fill lists directly from active child GameObjects
+        prefabData.baseCounters.Clear();
+        prefabData.baseCounters.AddRange(counterParent.GetComponentsInChildren<BaseCounter>(true));
 
-            if (counter == null) continue;
+        prefabData.kitchenObjects.Clear();
+        prefabData.kitchenObjects.AddRange(counterParent.GetComponentsInChildren<KitchenObject>(true));
 
-            // Sync current transform to data
-            cData.position = counter.transform.position;
-            cData.rotation = counter.transform.eulerAngles;
+        // Rename root
+        counterParent.name = "Level_" + levelName;
 
-            data.counterList.Add(cData);
-        }
-        
-        string json = JsonUtility.ToJson(data, true);
-        string path = Path.Combine(Application.dataPath, "Resources/Levels", "Level_" + levelName + ".json");
+        // Save as Prefab
+        string folderPath = "Assets/Resources/Levels";
+        if (!System.IO.Directory.Exists(folderPath))
+            System.IO.Directory.CreateDirectory(folderPath);
 
-        Directory.CreateDirectory(Path.GetDirectoryName(path));
-        File.WriteAllText(path, json);
-        Debug.Log($"Level saved to: {path}");
+        string prefabPath = folderPath + "/Level_" + levelName + ".prefab";
+        UnityEditor.PrefabUtility.SaveAsPrefabAssetAndConnect(
+            counterParent.gameObject, prefabPath,
+            UnityEditor.InteractionMode.UserAction, out bool success);
+
+        if (success)
+            Debug.Log($"[LevelDesigner] Prefab saved: {prefabPath}");
+        else
+            Debug.LogError($"[LevelDesigner] Failed to save prefab: {prefabPath}");
+
+        UnityEditor.AssetDatabase.Refresh();
+#else
+        Debug.LogWarning("[LevelDesigner] SaveLevel is only available in the Unity Editor.");
+#endif
     }
 
     public void LoadLevel(string levelName)
     {
+#if UNITY_EDITOR
         ClearLevel();
 
-        string path = Path.Combine(Application.dataPath, "Resources/Levels", "Level_"+ levelName + ".json");
-        if (!File.Exists(path))
+        string prefabPath = "Assets/Resources/Levels/Level_" + levelName + ".prefab";
+        GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+        if (prefab == null)
         {
-            Debug.LogError($"Level file not found at: {path}");
+            Debug.LogError($"[LevelDesigner] Prefab not found: {prefabPath}");
             return;
         }
 
-        string json = File.ReadAllText(path);
-        LevelData data = JsonUtility.FromJson<LevelData>(json);
+        // Instantiate prefab
+        GameObject instance = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab);
+        instance.transform.position = Vector3.zero;
+        instance.transform.rotation = Quaternion.identity;
+        counterParent = instance.transform;
 
-        if (levelPreviewCamera != null && data.cameraPosition != Vector3.zero)
+        // Read camera settings from LevelPrefabData
+        LevelPrefabData prefabData = instance.GetComponent<LevelPrefabData>();
+        if (prefabData != null)
         {
-            levelPreviewCamera.transform.position = data.cameraPosition;
-            levelPreviewCamera.transform.eulerAngles = data.cameraEulerAngles;
+            if (levelPreviewCamera != null && prefabData.cameraPosition != Vector3.zero)
+            {
+                levelPreviewCamera.transform.position = prefabData.cameraPosition;
+                levelPreviewCamera.transform.eulerAngles = prefabData.cameraEulerAngles;
+            }
         }
 
-        foreach (var cData in data.counterList)
-        {
-            SpawnCounter(cData.counterId, cData.position, cData.rotation, cData.kitchenObjectFoodType);
-        }
+        Debug.Log($"[LevelDesigner] Loaded prefab: Level_{levelName}");
+#else
+        Debug.LogWarning("[LevelDesigner] LoadLevel is only available in the Unity Editor.");
+#endif
     }
 
     public void ClearLevel()
     {
-        foreach (var counter in _placedCountersMap.Keys)
+        if (counterParent != null)
         {
-            if (counter != null) Destroy(counter.gameObject);
+            DestroyImmediate(counterParent.gameObject);
         }
-        _placedCountersMap.Clear();
+        counterParent = new GameObject("PlacedCounters").transform;
     }
 }

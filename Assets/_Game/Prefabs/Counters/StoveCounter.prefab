@@ -253,6 +253,7 @@ GameObject:
   - component: {fileID: 4891514115967128645}
   - component: {fileID: 5464922795783465971}
   - component: {fileID: 7043005168475393459}
+  - component: {fileID: 1620663478622099285}
   m_Layer: 0
   m_Name: StoveCounter
   m_TagString: Untagged
@@ -320,6 +321,7 @@ MonoBehaviour:
   completeSprite: {fileID: 572477956, guid: c9ee23f792db63642a2c3c37556299f3, type: 3}
   warningSprite: {fileID: -2014618199, guid: c9ee23f792db63642a2c3c37556299f3, type: 3}
   imageUI: {fileID: 1471879935748960255}
+  kitchenType: 0
 --- !u!114 &7043005168475393459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,7 +340,25 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 5464922795783465971}
+  - {fileID: 1620663478622099285}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &1620663478622099285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5498409353710322713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
 --- !u!1 &6084091839250338669
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,32 +13,44 @@ namespace GameCore
 
         private readonly List<BaseCounter> _spawnedCounters = new List<BaseCounter>();
         private readonly List<PlatesCounter> _platesCounters = new List<PlatesCounter>();
+        private GameObject _currentLevelInstance;
         
         public void LoadLevel(string levelName)
         {
             ClearLevel();
-            //Debug.Log("Load Level");
-            TextAsset jsonAsset = Resources.Load<TextAsset>("Levels/Level_" + levelName);
-            if (jsonAsset == null)
+
+            GameObject prefab = Resources.Load<GameObject>("Levels/Level_" + levelName);
+            if (prefab == null)
             {
-                Debug.LogError($"[LevelController] Level file not found: Levels/Level_{levelName}");
+                Debug.LogError($"[LevelController] Level prefab not found: Levels/Level_{levelName}");
                 return;
             }
 
-            LevelData data = JsonUtility.FromJson<LevelData>(jsonAsset.text);
+            // Instantiate prefab to retain environment props
+            _currentLevelInstance = Instantiate(prefab, counterParent);
+            _currentLevelInstance.name = "Level_" + levelName;
 
-            if (data.cameraPosition != Vector3.zero && Camera.main != null)
+            LevelPrefabData prefabData = _currentLevelInstance.GetComponent<LevelPrefabData>();
+            if (prefabData == null)
             {
-                CameraManager.Instance.GetMainCam.transform.position = data.cameraPosition;
-                CameraManager.Instance.GetMainCam.transform.eulerAngles = data.cameraEulerAngles;
+                Debug.LogError($"[LevelController] LevelPrefabData missing on prefab: Level_{levelName}");
+                return;
             }
 
-            foreach (var cData in data.counterList)
+            if (prefabData.cameraPosition != Vector3.zero && Camera.main != null)
             {
-                SpawnCounter(cData);
+                CameraManager.Instance.GetMainCam.transform.position = prefabData.cameraPosition;
+                CameraManager.Instance.GetMainCam.transform.eulerAngles = prefabData.cameraEulerAngles;
             }
 
-            Debug.Log($"[LevelController] Loaded level: {levelName} ({data.counterList.Count} counters)");
+            foreach (var templateCounter in prefabData.baseCounters)
+            {
+                if (templateCounter == null) continue;
+                SpawnCounter(templateCounter);
+                Destroy(templateCounter.gameObject); // Remove non-networked template counter from environment
+            }
+
+            Debug.Log($"[LevelController] Loaded level environment & counters: {levelName} ({prefabData.baseCounters.Count} counters)");
         }
         
         public void ClearLevel()
@@ -55,6 +67,12 @@ namespace GameCore
             }
             _spawnedCounters.Clear();
             _platesCounters.Clear();
+
+            if (_currentLevelInstance != null)
+            {
+                Destroy(_currentLevelInstance);
+                _currentLevelInstance = null;
+            }
         }
 
         public PlatesCounter GetEmptyPlatesCounter()
@@ -75,9 +93,25 @@ namespace GameCore
             return null;
         }
 
+        public void RegisterSpawnedCounter(BaseCounter counter)
+        {
+            if (!_spawnedCounters.Contains(counter))
+            {
+                _spawnedCounters.Add(counter);
+            }
+            if (counter is PlatesCounter platesCounter && !_platesCounters.Contains(platesCounter))
+            {
+                _platesCounters.Add(platesCounter);
+            }
+            if (counterParent != null)
+            {
+                counter.transform.SetParent(counterParent);
+            }
+        }
+
         // ── Private ────────────────────────────────────────────
 
-        private void SpawnCounter(CounterData cData)
+        private void SpawnCounter(BaseCounter templateCounter)
         {
             if (GameCore.Network.FusionNetworkRunner.Instance == null || 
                 GameCore.Network.FusionNetworkRunner.Instance.Runner == null ||
@@ -86,50 +120,46 @@ namespace GameCore
                 return; // Only Host spawns networked counters
             }
 
-            CounterType counterType = CounterIdConverter.GetCounterType(cData.counterId);
+            CounterType counterType = LevelDesignerManager.GetCounterType(templateCounter);
             
             BaseCounter prefab = PoolManager.Instance.Counter.GetPrefab(counterType);
             if (prefab == null) return;
 
-            var netObj = GameCore.Network.FusionNetworkRunner.Instance.Runner.Spawn(prefab, cData.position, Quaternion.Euler(cData.rotation));
+            var netObj = GameCore.Network.FusionNetworkRunner.Instance.Runner.Spawn(
+                prefab, 
+                templateCounter.transform.position, 
+                templateCounter.transform.rotation
+            );
             BaseCounter counter = netObj.GetComponent<BaseCounter>();
-            
-            counter.transform.SetParent(counterParent);
-            ApplyConfiguration(counter, cData.counterId);
-            counter.Init();
-            _spawnedCounters.Add(counter);
-            if (counter is PlatesCounter platesCounter)
+
+            // Copy configuration
+            if (counter is ContainerCounter container && templateCounter is ContainerCounter templateContainer)
             {
-                _platesCounters.Add(platesCounter);
+                container.SetContainer(templateContainer.ContainerEFoodType);
+            }
+            else if (counter is StoveCounter stove && templateCounter is StoveCounter templateStove)
+            {
+                stove.SetStoveData(templateStove.KitchenType);
             }
 
-            if (cData.kitchenObjectFoodType >= 0 && counter is ClearCounter clearCounter)
+            // Spawn pre-placed KitchenObject if any
+            KitchenObject templateKitchenObj = templateCounter.GetComponentInChildren<KitchenObject>(true);
+            if (templateKitchenObj != null && counter is ClearCounter clearCounter)
             {
-                var kPrefab = PoolManager.Instance.Kitchen.GetPrefab((KitchenType)cData.kitchenObjectFoodType);
+                KitchenObject kPrefab = null;
+                if (templateKitchenObj is PlateObject)
+                    kPrefab = PoolManager.Instance.Kitchen.GetPrefab(KitchenType.Plate);
+                else if (templateKitchenObj is PotObject)
+                    kPrefab = PoolManager.Instance.Kitchen.GetPrefab(KitchenType.Pot);
+                else if (templateKitchenObj is PanObject)
+                    kPrefab = PoolManager.Instance.Kitchen.GetPrefab(KitchenType.Pan);
+
                 if (kPrefab != null)
                 {
                     var kNetObj = GameCore.Network.FusionNetworkRunner.Instance.Runner.Spawn(kPrefab, clearCounter.GetKitchenObjectToTransform().position, Quaternion.identity);
                     KitchenObject kitchenGO = kNetObj.GetComponent<KitchenObject>();
                     clearCounter.SetKitchenObject(kitchenGO);
                 }
-            }
-        }
-
-        private void ApplyConfiguration(BaseCounter counter, int counterId)
-        {
-            CounterType counterType = CounterIdConverter.GetCounterType(counterId);
-
-            switch (counterType)
-            {
-                case CounterType.ContainerCounter:
-                    if (counter is ContainerCounter container)
-                        container.SetContainer(CounterIdConverter.GetFoodType(counterId));
-                    break;
-
-                case CounterType.StoveCounter:
-                    if (counter is StoveCounter stove)
-                        stove.SetStoveData(CounterIdConverter.GetKitchenType(counterId));
-                    break;
             }
         }
     }

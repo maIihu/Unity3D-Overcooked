@@ -15,12 +15,13 @@ namespace Counter
         [SerializeField] private ContainerData[] containerDataArr;
         [SerializeField] private Renderer[] decalRendererArr;
 
-        private EFoodType _containerEFoodType;
+        [SerializeField] private EFoodType containerEFoodType;
 
+        public EFoodType ContainerEFoodType => containerEFoodType;
 
         public void SetContainer(EFoodType eFoodType)
         {
-            _containerEFoodType = eFoodType;
+            containerEFoodType = eFoodType;
             foreach (var data in containerDataArr)
             {
                 if (data.eFoodType == eFoodType)
@@ -30,6 +31,12 @@ namespace Counter
                     break;
                 }
             }
+        }
+
+        public override void Init()
+        {
+            base.Init();
+            SetContainer(containerEFoodType);
         }
 
         public override void Interact(IPlayer player)
@@ -51,7 +58,7 @@ namespace Counter
                 {
                     if (anim != null) anim.Play("OpenClose");
 
-                    var food = SpawnKitchenObject(_containerEFoodType) as FoodObject;
+                    var food = SpawnKitchenObject(containerEFoodType) as FoodObject;
                     if (food != null)
                     {
                         food.SetState(FoodState.Normal);

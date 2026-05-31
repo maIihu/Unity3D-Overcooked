@@ -32,7 +32,6 @@ namespace Counter
         private bool _isCompleteUIShown;
         private Tween _imageFadeTween;
 
-        private KitchenType _kitchenType;
 
         // -------------------------------------------------------
         #region Fusion Lifecycle
@@ -148,19 +147,22 @@ namespace Counter
 
         #endregion
 
+        [SerializeField] private KitchenType kitchenType;
+        public KitchenType KitchenType => kitchenType;
+
         // -------------------------------------------------------
         #region Setup
 
-        public void SetStoveData(KitchenType kitchenType)
+        public void SetStoveData(KitchenType type)
         {
-            _kitchenType = kitchenType;
+            kitchenType = type;
         }
 
         public override void Init()
         {
             base.Init();
             if (imageUI != null) imageUI.enabled = false;
-            _kitchenObject = SpawnKitchenObject(_kitchenType);
+            _kitchenObject = SpawnKitchenObject(kitchenType);
             // Reset networked state handled in Spawned()
         }
 

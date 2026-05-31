@@ -132,8 +132,7 @@ public class LevelDesignerUI : MonoBehaviour
 
             default:
                 HideSubTypeDropdown();
-                int counterId = CounterIdConverter.ToId(template.counterType);
-                LevelDesignerManager.Instance.SpawnCounter(counterId, Vector3.zero, Vector3.zero);
+                LevelDesignerManager.Instance.SpawnCounter(template.counterType, Vector3.zero, Vector3.zero);
                 break;
         }
         
@@ -197,8 +196,7 @@ public class LevelDesignerUI : MonoBehaviour
                 break;
         }
 
-        int counterId = CounterIdConverter.ToId(_selectedTemplate.counterType, subTypeInt);
-        LevelDesignerManager.Instance.SpawnCounter(counterId, Vector3.zero, Vector3.zero);
+        LevelDesignerManager.Instance.SpawnCounter(_selectedTemplate.counterType, Vector3.zero, Vector3.zero, subTypeInt);
         HideSubTypeDropdown();
     }
 
@@ -213,28 +211,33 @@ public class LevelDesignerUI : MonoBehaviour
 
         if (counterInfoPanel == null || counterInfoText == null) return;
 
-        if (LevelDesignerManager.Instance.TryGetCounterData(counter, out CounterData data))
+        CounterType type = LevelDesignerManager.GetCounterType(counter);
+        string subTypeStr = "";
+
+        if (counter is ContainerCounter container)
+            subTypeStr = $"\n<b>Sub-Type:</b> {container.ContainerEFoodType}";
+        else if (counter is StoveCounter stove)
+            subTypeStr = $"\n<b>Sub-Type:</b> {stove.KitchenType}";
+
+        string cName = counter.gameObject.name.Replace("(Clone)", "");
+        counterInfoText.text = $"<b>Name:</b> {cName}\n<b>Pos:</b> {counter.transform.position}{subTypeStr}";
+        counterInfoPanel.SetActive(true);
+
+        // Show KitchenObject panel only for ClearCounter
+        bool isClearCounter = counter is ClearCounter;
+        if (kitchenObjectPanel != null)
+            kitchenObjectPanel.SetActive(isClearCounter);
+
+        // Sync dropdown to current saved food type
+        if (isClearCounter && foodTypeDropdown != null)
         {
-            CounterType type = CounterIdConverter.GetCounterType(data.counterId);
-            string subTypeStr = "";
-
-            if (type == CounterType.ContainerCounter)
-                subTypeStr = $"\n<b>Sub-Type:</b> {CounterIdConverter.GetFoodType(data.counterId)}";
-            else if (type == CounterType.StoveCounter)
-                subTypeStr = $"\n<b>Sub-Type:</b> {CounterIdConverter.GetKitchenType(data.counterId)}";
-
-            string cName = counter.gameObject.name.Replace("(Clone)", "");
-            counterInfoText.text = $"<b>Name:</b> {cName}\n<b>ID:</b> {data.counterId}\n<b>Pos:</b> {data.position}{subTypeStr}";
-            counterInfoPanel.SetActive(true);
-
-            // Show KitchenObject panel only for ClearCounter
-            bool isClearCounter = counter is ClearCounter;
-            if (kitchenObjectPanel != null)
-                kitchenObjectPanel.SetActive(isClearCounter);
-
-            // Sync dropdown to current saved food type
-            if (isClearCounter && foodTypeDropdown != null && data.kitchenObjectFoodType >= 0)
-                foodTypeDropdown.value = data.kitchenObjectFoodType;
+            KitchenObject childKO = counter.GetComponentInChildren<KitchenObject>(true);
+            if (childKO != null)
+            {
+                if (childKO is PlateObject) foodTypeDropdown.value = (int)KitchenType.Plate;
+                else if (childKO is PotObject) foodTypeDropdown.value = (int)KitchenType.Pot;
+                else if (childKO is PanObject) foodTypeDropdown.value = (int)KitchenType.Pan;
+            }
         }
     }
 

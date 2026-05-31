@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 3945989509915035645}
   - component: {fileID: 7082521471990096122}
   - component: {fileID: 164369640706212895}
+  - component: {fileID: 8270358165336770724}
   m_Layer: 0
   m_Name: ContainerCounter
   m_TagString: Untagged
@@ -166,6 +167,7 @@ MonoBehaviour:
   decalRendererArr:
   - {fileID: 8563336377923434635}
   - {fileID: 2670483780576105798}
+  containerEFoodType: 0
 --- !u!114 &164369640706212895
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -184,7 +186,25 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 7082521471990096122}
+  - {fileID: 8270358165336770724}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &8270358165336770724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5498409353710322713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
 --- !u!1001 &1555702091940458490
 PrefabInstance:
   m_ObjectHideFlags: 0

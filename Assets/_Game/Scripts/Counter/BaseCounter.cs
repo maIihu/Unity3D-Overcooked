@@ -20,6 +20,15 @@ namespace Counter
             Hide();
         }
 
+        public override void Spawned()
+        {
+            Init();
+            if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.LevelController != null)
+            {
+                GameCore.GameManager.Instance.LevelController.RegisterSpawnedCounter(this);
+            }
+        }
+
         public virtual void OnSpawn() { }
 
         public virtual void OnDespawn()
