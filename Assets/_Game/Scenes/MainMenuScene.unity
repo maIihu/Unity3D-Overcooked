@@ -476,6 +476,55 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.data[0]
+      value: 
+      objectReference: {fileID: 2073080415846863667, guid: 3cadf1429656c204b90933a7b7c7557f,
+        type: 3}
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.data[1]
+      value: 
+      objectReference: {fileID: 5296546368256908186, guid: adb9d4fe3cef18c47a2dabab08bcdb6f,
+        type: 3}
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.data[2]
+      value: 
+      objectReference: {fileID: 9109685912005875748, guid: 21359b8d7944a99428a15b4fa62d2c86,
+        type: 3}
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.data[3]
+      value: 
+      objectReference: {fileID: 5018214900811949421, guid: 8c34416f04a6fa84397b2628fa654bb9,
+        type: 3}
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.data[4]
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.data[5]
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.data[6]
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3930141332772121974, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+        type: 3}
+      propertyPath: listScreen.Array.data[7]
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4437412391486706476, guid: 4f3aa7b8e1914434daf0c90555dc8632,
         type: 3}
       propertyPath: m_Name
@@ -708,6 +757,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3174201161416149819, guid: 7589692d9893cf1499bb7fbd7dcdd9e0,
+        type: 3}
+      propertyPath: field of view
+      value: 48
+      objectReference: {fileID: 0}
     - target: {fileID: 3256369570863218097, guid: 7589692d9893cf1499bb7fbd7dcdd9e0,
         type: 3}
       propertyPath: m_Name
