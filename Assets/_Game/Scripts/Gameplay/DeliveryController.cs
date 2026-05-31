@@ -49,14 +49,16 @@ namespace GameCore
         [Header("Recipe Config")]
         [SerializeField] private List<MenuRecipeSO> menuRecipeList;
         [SerializeField] private int maxActiveRecipes = 4;
-        [SerializeField] private float spawnInterval = 5f;
+        [SerializeField] private float initialSpawnDelay = 5f;
+        [SerializeField] private float multiPlayerSpawnInterval = 30f;
+        [SerializeField] private float singlePlayerSpawnInterval = 60f;
         [SerializeField] private float returnPlateDelay = 3f;
 
         [Networked]
         [Capacity(8)]
         private NetworkLinkedList<NetworkRecipe> NetworkedRecipes { get; }
 
-        [Networked] public NetworkBool IsSpawning { get; set; }
+        public bool IsSpawning { get; set; }
 
         private readonly List<ActiveRecipe> _activeRecipes = new List<ActiveRecipe>();
         private float _spawnTimer = 0f;
@@ -67,32 +69,46 @@ namespace GameCore
 
         public void StartSpawning()
         {
-            if (HasStateAuthority) IsSpawning = true;
+            IsSpawning = true;
+            Debug.Log("[DeliveryController] Start Spawn");
         }
 
         public void StopSpawning()
         {
-            if (HasStateAuthority) IsSpawning = false;
+            IsSpawning = false;
+            Debug.Log("[DeliveryController] Stop Spawn");
+
         }
 
         public override void Spawned()
         {
             _activeRecipes.Clear();
-            _spawnTimer = spawnInterval; // Spawn first recipe after interval
+            _spawnTimer = initialSpawnDelay; // Spawn first recipe after initial delay
         }
 
         public override void FixedUpdateNetwork()
         {
             if (!HasStateAuthority) return;
             if (!IsSpawning) return;
-            
+            int recipeCount = menuRecipeList != null ? menuRecipeList.Count : 0;
+            //Debug.Log($"[DeliveryController] Check spawn. List count: {recipeCount}, Timer: {_spawnTimer}");
+
             // Handle spawning
             if (NetworkedRecipes.Count < maxActiveRecipes && menuRecipeList != null && menuRecipeList.Count > 0)
             {
                 _spawnTimer -= Runner.DeltaTime;
                 if (_spawnTimer <= 0f)
                 {
-                    _spawnTimer = spawnInterval;
+                    Debug.Log("[DeliveryController] Spawning new recipe!");
+                    if (GameModeManager.Instance != null && GameModeManager.Instance.IsOffline)
+                    {
+                        _spawnTimer = singlePlayerSpawnInterval;
+                    }
+                    else
+                    {
+                        _spawnTimer = multiPlayerSpawnInterval;
+                    }
+                    
                     SpawnNewRecipe();
                 }
             }
@@ -150,18 +166,18 @@ namespace GameCore
                 {
                     // Success!
                     NetworkedRecipes.Remove(netRecipe);
-                    
+                
                     // Tính điểm (Tip system)
                     float age = (Runner.Tick - netRecipe.SpawnTick) * Runner.DeltaTime;
                     float timeRemaining = recipeData.timeRemaining - age;
                     float timePercentage = timeRemaining / recipeData.timeRemaining;
-                    
+                
                     int scoreAdded = 20; // Base score
                     if (timePercentage >= 0.5f) scoreAdded += 10; // Tip cao (giao sớm)
                     else if (timePercentage >= 0.25f) scoreAdded += 5; // Tip thấp (giao vừa)
 
                     RPC_DeliverSuccess(netRecipe.Id, netRecipe.RecipeIndex, scoreAdded);
-                    
+                
                     StartCoroutine(ReturnDirtyPlateAfterDelay());
                     return;
                 }
@@ -186,6 +202,29 @@ namespace GameCore
             var recipe = new ActiveRecipe(recipeData);
             recipe.Id = recipeId;
             MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnRecipeSuccess, new object[] { recipe, scoreAdded }));
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        private void RPC_DeliverFailed()
+        {
+            // Trừ điểm
+            //GameManager.Instance.ScoreManager.AddScore(-GameManager.Instance.ScoreManager.penaltyPerWrongRecipe);
+            
+            // Xóa plate model (hoặc làm UI chớp đỏ, báo âm thanh...)
+            Debug.Log("Delivery Failed!");
+            //ProjectEventManager.Instance.InvokeOnDeliveryFailed();
+        }
+
+        // Dùng để test hiệu ứng giao thành công bằng phím Space
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && HasStateAuthority && NetworkedRecipes.Count > 0)
+            {
+                Debug.Log("[Test] Forcing Delivery Success!");
+                var netRecipe = NetworkedRecipes[0];
+                NetworkedRecipes.Remove(netRecipe);
+                RPC_DeliverSuccess(netRecipe.Id, netRecipe.RecipeIndex, 20);
+            }
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

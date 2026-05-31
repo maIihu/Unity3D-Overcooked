@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 406320792}
   - component: {fileID: 406320791}
   - component: {fileID: 406320790}
+  - component: {fileID: 406320794}
   m_Layer: 0
   m_Name: GameManagerNetworked
   m_TagString: Untagged
@@ -191,7 +192,27 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 406320791}
   - {fileID: 406320790}
+  - {fileID: 406320794}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &406320794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 406320789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 148bfd668e529da4892df20ff741ad91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  menuRecipeList:
+  - {fileID: 11400000, guid: 52777661360d1714a90c65edbf5a04dc, type: 2}
+  maxActiveRecipes: 4
+  initialSpawnDelay: 5
+  multiPlayerSpawnInterval: 15
+  singlePlayerSpawnInterval: 20
+  returnPlateDelay: 3
 --- !u!4 &406320793
 Transform:
   m_ObjectHideFlags: 0

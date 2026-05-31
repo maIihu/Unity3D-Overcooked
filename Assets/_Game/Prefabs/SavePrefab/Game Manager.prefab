@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1470531493784207776}
   - component: {fileID: 8838210378286872262}
+  - component: {fileID: 1234567890123456789}
   m_Layer: 0
   m_Name: DeliveryController
   m_TagString: Untagged
@@ -47,8 +48,29 @@ MonoBehaviour:
   menuRecipeList:
   - {fileID: 11400000, guid: 52777661360d1714a90c65edbf5a04dc, type: 2}
   maxActiveRecipes: 4
-  spawnInterval: 20
+  initialSpawnDelay: 5
+  multiPlayerSpawnInterval: 20
+  singlePlayerSpawnInterval: 40
   returnPlateDelay: 3
+--- !u!114 &1234567890123456789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687007196269694894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 3131870825
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 8838210378286872262}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1 &1252042722435436316
 GameObject:
   m_ObjectHideFlags: 0
@@ -223,7 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 2237712710
+  SortKey: 3174873136
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
@@ -259,6 +281,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 078d079f54c16e248addb976d73e2cb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointsPerRecipe: 10
-  penaltyPerWrongRecipe: 5
   _CurrentScore: 0

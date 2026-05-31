@@ -19,7 +19,25 @@ namespace GameCore
         public string levelData; // temp
 
         // ── Public Accessors ───────────────────────────────────
-        public DeliveryController DeliveryController => deliveryController;
+        public DeliveryController DeliveryController 
+        {
+            get 
+            {
+                if (deliveryController == null || deliveryController.gameObject.scene.name == "DontDestroyOnLoad")
+                {
+                    var controllers = FindObjectsOfType<DeliveryController>();
+                    foreach (var c in controllers)
+                    {
+                        if (c.gameObject.scene.name != "DontDestroyOnLoad")
+                        {
+                            deliveryController = c;
+                            break;
+                        }
+                    }
+                }
+                return deliveryController;
+            }
+        }
         public LevelController LevelController => levelController;
         
         private Counter.DeliveryCounter _deliveryCounter;
@@ -62,7 +80,22 @@ namespace GameCore
         {
             levelController.LoadLevel(levelData);
             _deliveryCounter = levelController.GetDeliveryCounter();
-            deliveryController.StartSpawning();
+            
+            // Force find the DeliveryController in the active scene to avoid the DontDestroyOnLoad instance
+            var controllers = FindObjectsOfType<DeliveryController>();
+            foreach (var c in controllers)
+            {
+                if (c.gameObject.scene.name != "DontDestroyOnLoad")
+                {
+                    deliveryController = c;
+                    break;
+                }
+            }
+            
+            if (deliveryController != null)
+            {
+                deliveryController.StartSpawning();
+            }
         }
 
         protected override void OnRegistration()

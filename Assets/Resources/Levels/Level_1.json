@@ -11,7 +11,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 700,
@@ -24,7 +25,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -37,7 +39,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -50,7 +53,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -63,7 +67,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -76,7 +81,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -89,7 +95,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -102,7 +109,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -115,7 +123,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -128,7 +137,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 201,
@@ -141,7 +151,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -154,7 +165,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -167,7 +179,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -180,7 +193,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -193,7 +207,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 401,
@@ -206,7 +221,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -219,7 +235,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -232,7 +249,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -245,7 +263,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -258,7 +277,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -271,7 +291,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -284,7 +305,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -297,7 +319,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -310,7 +333,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -323,7 +347,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -336,7 +361,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -349,7 +375,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -362,7 +389,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -375,7 +403,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -388,7 +417,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -401,7 +431,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -414,7 +445,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -427,7 +459,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -440,7 +473,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -453,7 +487,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -466,7 +501,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -479,7 +515,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -492,7 +529,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": 0
         },
         {
             "counterId": 100,
@@ -505,7 +543,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -518,7 +557,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -531,7 +571,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": 0
         },
         {
             "counterId": 100,
@@ -544,7 +585,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -557,7 +599,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -570,7 +613,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 100,
@@ -583,7 +627,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 500,
@@ -596,7 +641,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 300,
@@ -609,7 +655,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         },
         {
             "counterId": 300,
@@ -622,7 +669,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "kitchenObjectFoodType": -1
         }
     ],
     "cameraPosition": {
