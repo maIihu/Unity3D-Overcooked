@@ -3,6 +3,7 @@ using _Game.Scripts.Gameplay;
 using GameCore;
 using Kitchen;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using _Game.Scripts.DesignPattern.Observer;
 
@@ -14,6 +15,7 @@ namespace _Game.Scripts.UI
         [SerializeField] private GameObject menuHolder;
         [SerializeField] private TextMeshProUGUI scoreText;
         [SerializeField] private TextMeshProUGUI timerText;
+        [SerializeField] private Button settingsButton;
 
         private readonly Dictionary<int, UIMenuItem> activeItems
             = new Dictionary<int, UIMenuItem>();
@@ -30,10 +32,27 @@ namespace _Game.Scripts.UI
 
         private void OnEnable()
         {
+            if (settingsButton != null)
+                settingsButton.onClick.AddListener(OnSettingsClicked);
         }
 
         private void OnDisable()
         {
+            if (settingsButton != null)
+                settingsButton.onClick.RemoveListener(OnSettingsClicked);
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
+            {
+                OnSettingsClicked();
+            }
+        }
+
+        private void OnSettingsClicked()
+        {
+            MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnToggleSettings));
         }
 
         public void SetMenuItem(ActiveRecipe activeRecipe)

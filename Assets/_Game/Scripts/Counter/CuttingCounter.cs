@@ -23,6 +23,7 @@ namespace Counter
 
         public override void Spawned()
         {
+            base.Spawned();
             CuttingProgress = 0f;
             IsCutting = false;
         }

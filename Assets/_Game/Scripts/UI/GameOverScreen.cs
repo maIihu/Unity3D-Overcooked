@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using _Game.Scripts.DesignPattern.Observer;
 using _Game.Scripts.UI;
+using _Game.Scripts.Utilities;
 using GameCore.Network;
 
 namespace GameCore.UI
@@ -37,8 +38,7 @@ namespace GameCore.UI
 
         private void OnMainMenuClicked()
         {
-            // Disconnect and go back to main menu
-            FusionNetworkRunner.Instance.LeaveSession();
+            MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnExitGame));
             Loader.Load(Loader.Scene.MainMenuScene);
         }
 

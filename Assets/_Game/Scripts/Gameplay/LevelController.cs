@@ -15,11 +15,17 @@ namespace GameCore
         private readonly List<PlatesCounter> _platesCounters = new List<PlatesCounter>();
         private GameObject _currentLevelInstance;
         
-        public void LoadLevel(string levelName)
+        public async System.Threading.Tasks.Task LoadLevelAsync(string levelName)
         {
             ClearLevel();
 
-            GameObject prefab = Resources.Load<GameObject>("Levels/Level_" + levelName);
+            ResourceRequest request = Resources.LoadAsync<GameObject>("Levels/Level_" + levelName);
+            while (!request.isDone)
+            {
+                await System.Threading.Tasks.Task.Yield();
+            }
+
+            GameObject prefab = request.asset as GameObject;
             if (prefab == null)
             {
                 Debug.LogError($"[LevelController] Level prefab not found: Levels/Level_{levelName}");
@@ -74,6 +80,7 @@ namespace GameCore
                 _currentLevelInstance = null;
             }
         }
+
 
         public PlatesCounter GetEmptyPlatesCounter()
         {

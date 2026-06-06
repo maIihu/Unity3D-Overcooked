@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using GameCore.Network;
+using _Game.Scripts.Utilities;
 
 namespace _Game.Scripts.UI
 {
@@ -25,7 +26,7 @@ namespace _Game.Scripts.UI
                     {
                         playButton.interactable = false;
                         Debug.Log("Play Button Clicked: Starting Fusion Lobby");
-                        _networkRunner.StartGameSession(Fusion.GameMode.Shared, "OvercookedRoom");
+                        _networkRunner.StartGameSession(Fusion.GameMode.Shared, "OvercookedRoom").FireAndForget();
                         this.Deactive();
                     }
                     else

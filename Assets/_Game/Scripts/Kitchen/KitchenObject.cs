@@ -17,15 +17,36 @@ namespace Kitchen
         {
         }
 
+        public override void Spawned()
+        {
+            OnSpawn();
+        }
+
         public virtual void OnSpawn()
         {
             // Reset state when spawned from pool
+        }
+
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            OnDespawn();
         }
 
         public virtual void OnDespawn()
         {
             if (KitchenObjectParent != null) KitchenObjectParent.ClearKitchenObject();
             transform.DOKill();
+        }
+
+        public override void Render()
+        {
+            if (ParentNetworkId.IsValid)
+            {
+                if (KitchenObjectParent == null || KitchenObjectParent.GetNetworkObject() == null || KitchenObjectParent.GetNetworkObject().Id != ParentNetworkId)
+                {
+                    OnParentNetworkIdChanged();
+                }
+            }
         }
 
         [Networked]
@@ -98,10 +119,10 @@ namespace Kitchen
 
                 bool hasNetParent = kitchenObjectParent.GetNetworkObject() != null;
                 var nt = GetComponent<NetworkTransform>();
-                if (nt != null) nt.enabled = hasNetParent;
+                if (nt != null) nt.enabled = !hasNetParent;
                 
                 var nr = GetComponent("NetworkRigidbody3D") as MonoBehaviour;
-                if (nr != null) nr.enabled = hasNetParent;
+                if (nr != null) nr.enabled = !hasNetParent;
             }
             else
             {

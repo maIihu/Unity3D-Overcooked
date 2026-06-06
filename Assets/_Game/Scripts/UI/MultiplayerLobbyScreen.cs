@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Fusion;
 using GameCore;
 using GameCore.Network;
+using _Game.Scripts.Utilities;
 
 namespace _Game.Scripts.UI
 {
@@ -57,7 +58,7 @@ namespace _Game.Scripts.UI
             if (FusionNetworkRunner.Instance != null)
             {
                 Debug.Log("[MultiplayerLobbyScreen] Connecting to lobby...");
-                FusionNetworkRunner.Instance.JoinLobby();
+                FusionNetworkRunner.Instance.JoinLobby().FireAndForget();
             }
 
             if (roomNameInput != null)
@@ -80,7 +81,7 @@ namespace _Game.Scripts.UI
             HideLoadingOverlay();
         }
 
-        private void OnCreateRoomClicked()
+        private async void OnCreateRoomClicked()
         {
             string roomName = roomNameInput != null ? roomNameInput.text : "";
             if (string.IsNullOrEmpty(roomName))
@@ -93,17 +94,27 @@ namespace _Game.Scripts.UI
             {
                 Debug.Log($"[MultiplayerLobbyScreen] Hosting session: {roomName}");
                 ShowLoadingOverlay("Creating Room...\nPlease wait.");
-                FusionNetworkRunner.Instance.StartGameSession(GameMode.Host, roomName);
+                bool success = await FusionNetworkRunner.Instance.StartGameSession(GameMode.Host, roomName);
+                if (!success)
+                {
+                    HideLoadingOverlay();
+                    Debug.LogWarning("[MultiplayerLobbyScreen] Failed to create room.");
+                }
             }
         }
 
-        private void OnJoinRoomClicked(string roomName)
+        private async void OnJoinRoomClicked(string roomName)
         {
             if (FusionNetworkRunner.Instance != null)
             {
                 Debug.Log($"[MultiplayerLobbyScreen] Joining session: {roomName}");
                 ShowLoadingOverlay("Joining Room...\nPlease wait.");
-                FusionNetworkRunner.Instance.StartGameSession(GameMode.Client, roomName);
+                bool success = await FusionNetworkRunner.Instance.StartGameSession(GameMode.Client, roomName);
+                if (!success)
+                {
+                    HideLoadingOverlay();
+                    Debug.LogWarning($"[MultiplayerLobbyScreen] Failed to join room {roomName}.");
+                }
             }
         }
 
@@ -111,7 +122,7 @@ namespace _Game.Scripts.UI
         {
             if (FusionNetworkRunner.Instance != null)
             {
-                FusionNetworkRunner.Instance.LeaveSession();
+                FusionNetworkRunner.Instance.LeaveSession().FireAndForget();
             }
 
             if (GameModeManager.Instance != null)

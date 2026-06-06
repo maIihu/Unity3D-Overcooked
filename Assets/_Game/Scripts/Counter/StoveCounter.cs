@@ -38,6 +38,7 @@ namespace Counter
 
         public override void Spawned()
         {
+            base.Spawned();
             FryingTimer = 0f;
             BurningTimer = 0f;
             NetworkStoveState = StoveState.Idle;
@@ -156,13 +157,13 @@ namespace Counter
         public void SetStoveData(KitchenType type)
         {
             kitchenType = type;
+            _kitchenObject = SpawnKitchenObject(kitchenType);
         }
 
         public override void Init()
         {
             base.Init();
             if (imageUI != null) imageUI.enabled = false;
-            _kitchenObject = SpawnKitchenObject(kitchenType);
             // Reset networked state handled in Spawned()
         }
 

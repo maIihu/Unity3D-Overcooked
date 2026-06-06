@@ -28,7 +28,7 @@ namespace Kitchen
         {
             base.OnSpawn();
             liquidGO.SetActive(false);
-            SetDirty(false);
+            if (dirtyVisual != null) dirtyVisual.SetActive(IsDirtyState);
         }
 
         public override void OnDespawn()

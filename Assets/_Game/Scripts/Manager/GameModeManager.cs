@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using DesignPattern;
 using _Game.Scripts.DesignPattern.Observer;
 using _Game.Scripts.UI;
+using _Game.Scripts.Utilities;
 
 namespace GameCore
 {
@@ -57,7 +58,7 @@ namespace GameCore
 
             if (GameCore.Network.FusionNetworkRunner.Instance != null)
             {
-                GameCore.Network.FusionNetworkRunner.Instance.StartGameSession(Fusion.GameMode.Single, "OfflineRoom");
+                GameCore.Network.FusionNetworkRunner.Instance.StartGameSession(Fusion.GameMode.Single, "OfflineRoom").FireAndForget();
             }
             else
             {

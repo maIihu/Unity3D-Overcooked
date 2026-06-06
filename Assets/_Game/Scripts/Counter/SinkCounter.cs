@@ -18,6 +18,7 @@ namespace Counter
 
         public override void Spawned()
         {
+            base.Spawned();
             WashingProgress = 0f;
             IsWashing = false;
         }

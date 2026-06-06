@@ -318,6 +318,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2915540577206658490, guid: d72bee846803d074784ffb8f64e993ca,
         type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915540577206658490, guid: d72bee846803d074784ffb8f64e993ca,
+        type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915540577206658490, guid: d72bee846803d074784ffb8f64e993ca,
+        type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
@@ -418,6 +428,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7575857158502562040, guid: d72bee846803d074784ffb8f64e993ca,
         type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7575857158502562040, guid: d72bee846803d074784ffb8f64e993ca,
+        type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
@@ -475,6 +490,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 8732670646725812522, guid: d72bee846803d074784ffb8f64e993ca,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8732670646725812522, guid: d72bee846803d074784ffb8f64e993ca,
         type: 3}
@@ -696,6 +716,11 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 7575857158502562040, guid: d72bee846803d074784ffb8f64e993ca,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7600811130571545157, guid: d72bee846803d074784ffb8f64e993ca,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -750,6 +775,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 8732670646725812522, guid: d72bee846803d074784ffb8f64e993ca,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8748793332781204375, guid: d72bee846803d074784ffb8f64e993ca,
         type: 3}

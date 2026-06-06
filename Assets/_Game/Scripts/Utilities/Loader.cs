@@ -1,3 +1,5 @@
+using _Game.Scripts.Utilities;
+
 namespace GameCore
 {
     public static class Loader
@@ -9,14 +11,14 @@ namespace GameCore
             LoadingScene
         }
 
-        public static void Load(Scene targetScene)
+        public static async void Load(Scene targetScene)
         {
             if (Network.FusionNetworkRunner.Instance != null && Network.FusionNetworkRunner.Instance.Runner != null)
             {
                 // Active multiplayer session, should leave session and then load main menu
                 if (targetScene == Scene.MainMenuScene)
                 {
-                    Network.FusionNetworkRunner.Instance.LeaveSession();
+                    await Network.FusionNetworkRunner.Instance.LeaveSession();
                     UnityEngine.SceneManagement.SceneManager.LoadScene(targetScene.ToString());
                 }
                 else

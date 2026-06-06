@@ -6,6 +6,7 @@ using Kitchen;
 using System;
 using _Game.Scripts.Gameplay;
 using UnityEngine.Serialization;
+using Fusion;
 
 namespace Counter
 {
@@ -17,9 +18,27 @@ namespace Counter
 
         [SerializeField] private EFoodType containerEFoodType;
 
+        [Networked]
+        [OnChangedRender(nameof(OnContainerChanged))]
+        private EFoodType NetworkedContainerEFoodType { get; set; }
+
         public EFoodType ContainerEFoodType => containerEFoodType;
 
         public void SetContainer(EFoodType eFoodType)
+        {
+            if (HasStateAuthority)
+            {
+                NetworkedContainerEFoodType = eFoodType;
+            }
+            UpdateVisual(eFoodType);
+        }
+
+        private void OnContainerChanged()
+        {
+            UpdateVisual(NetworkedContainerEFoodType);
+        }
+
+        private void UpdateVisual(EFoodType eFoodType)
         {
             containerEFoodType = eFoodType;
             foreach (var data in containerDataArr)
@@ -36,7 +55,13 @@ namespace Counter
         public override void Init()
         {
             base.Init();
-            SetContainer(containerEFoodType);
+            UpdateVisual(containerEFoodType);
+        }
+
+        public override void Spawned()
+        {
+            base.Spawned();
+            UpdateVisual(NetworkedContainerEFoodType);
         }
 
         public override void Interact(IPlayer player)

@@ -29,6 +29,7 @@ namespace GameCore
         {
             if (!HasStateAuthority) return;
             if (!IsTimerRunning) return;
+            if (GameManager.Instance != null && GameManager.Instance.CurrentGameState != EGameState.Play) return;
 
             CurrentTime -= Runner.DeltaTime;
             

@@ -90,6 +90,8 @@ namespace GameCore
         {
             if (!HasStateAuthority) return;
             if (!IsSpawning) return;
+            if (GameManager.Instance != null && GameManager.Instance.CurrentGameState != EGameState.Play) return;
+            
             int recipeCount = menuRecipeList != null ? menuRecipeList.Count : 0;
             //Debug.Log($"[DeliveryController] Check spawn. List count: {recipeCount}, Timer: {_spawnTimer}");
 

@@ -16,8 +16,9 @@ namespace Kitchen
             base.OnSpawn();
             if (HasStateAuthority)
             {
-                SetState(FoodState.Normal);
+                NetworkedFoodState = FoodState.Normal;
             }
+            UpdateVisuals(NetworkedFoodState);
         }
 
         [Networked]

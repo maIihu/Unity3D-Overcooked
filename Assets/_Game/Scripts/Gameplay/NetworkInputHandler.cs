@@ -8,32 +8,37 @@ namespace _Game.Scripts.Gameplay
 {
     public class NetworkInputHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
-        // Capture GetKeyDown ở Update level bằng cách tích lũy buttons
-
+        // Tích lũy GetKeyDown ở Update level (GetKeyDown chỉ reliable trong Update, không phải FixedUpdate)
         private byte _pendingButtons;
+        private float _lastX;
+        private float _lastY;
 
         private void Update()
         {
-            // Tích lũy GetKeyDown giữa các fixed ticks
             if (Input.GetKeyDown(KeyCode.Space)) _pendingButtons |= NetworkInputData.INTERACT;
             if (Input.GetKeyDown(KeyCode.R))     _pendingButtons |= NetworkInputData.ALTERNATE;
+
+            _lastX = Input.GetAxisRaw("Horizontal");
+            _lastY = Input.GetAxisRaw("Vertical");
         }
 
         public void OnInput(NetworkRunner runner, NetworkInput input)
         {
             var data = new NetworkInputData();
 
-            float x = Input.GetAxisRaw("Horizontal");
-            float y = Input.GetAxisRaw("Vertical");
+            float x = _lastX;
+            float y = _lastY;
 
+            // Normalize để tránh diagonal speed boost (8-direction → cùng tốc độ)
             float mag = Mathf.Sqrt(x * x + y * y);
-            if (mag > 0) { x /= mag; y /= mag; }
+            if (mag > 0f) { x /= mag; y /= mag; }
 
-            data.MoveX = x;
-            data.MoveY = y;
+            // RoundToInt: -1, 0, hoặc 1 → phù hợp sbyte, không mất thông tin với digital input
+            data.MoveX = (sbyte)Mathf.RoundToInt(x);
+            data.MoveY = (sbyte)Mathf.RoundToInt(y);
             data.Buttons = _pendingButtons;
-            
-            // Reset sau khi đã gửi để tránh fire nhiều lần
+
+            // Reset sau khi đã gửi để tránh fire nhiều lần cùng 1 input
             _pendingButtons = 0;
 
             input.Set(data);

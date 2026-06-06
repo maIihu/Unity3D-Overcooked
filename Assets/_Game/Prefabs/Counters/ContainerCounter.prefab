@@ -240,9 +240,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1797493671082473303, guid: 9a9137fa2b035d34e881701d2c178192,
         type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1797493671082473303, guid: 9a9137fa2b035d34e881701d2c178192,
+        type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
+    - target: {fileID: 2761265509363676214, guid: 9a9137fa2b035d34e881701d2c178192,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2761265509363676214, guid: 9a9137fa2b035d34e881701d2c178192,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -282,6 +292,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_ConstrainProportionsScale
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3501971017668967100, guid: 9a9137fa2b035d34e881701d2c178192,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4589716710238282922, guid: 9a9137fa2b035d34e881701d2c178192,
         type: 3}
@@ -418,6 +433,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 2761265509363676214, guid: 9a9137fa2b035d34e881701d2c178192,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3501971017668967100, guid: 9a9137fa2b035d34e881701d2c178192,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4589716710238282922, guid: 9a9137fa2b035d34e881701d2c178192,
         type: 3}

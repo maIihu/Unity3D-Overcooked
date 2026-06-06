@@ -18,6 +18,9 @@ namespace GameCore
 
             MessageManager.Instance.AddSubscriber(ProjectMessageType.OnRecipeSuccess, this);
             MessageManager.Instance.AddSubscriber(ProjectMessageType.OnRejectRecipe, this);
+
+            // Trigger visual update for clients joining mid-game
+            OnScoreChangedCallback();
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)

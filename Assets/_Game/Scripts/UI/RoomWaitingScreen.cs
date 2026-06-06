@@ -6,6 +6,7 @@ using Fusion;
 using GameCore;
 using GameCore.Network;
 using _Game.Scripts.Gameplay;
+using _Game.Scripts.Utilities;
 
 namespace _Game.Scripts.UI
 {
@@ -138,7 +139,7 @@ namespace _Game.Scripts.UI
         {
             if (FusionNetworkRunner.Instance != null)
             {
-                FusionNetworkRunner.Instance.LeaveSession();
+                FusionNetworkRunner.Instance.LeaveSession().FireAndForget();
             }
 
             if (GameModeManager.Instance != null)

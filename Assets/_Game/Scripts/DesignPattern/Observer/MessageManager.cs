@@ -13,7 +13,10 @@ namespace _Game.Scripts.DesignPattern.Observer
         OnRecipeSuccess,
         OnGameOver,
         OnScoreChanged,
-        OnTimerTick
+        OnTimerTick,
+        OnGameStateChanged,
+        OnToggleSettings,
+        OnExitGame
 	}
     public class Message
     {

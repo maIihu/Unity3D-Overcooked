@@ -70,6 +70,15 @@ namespace _Game.Scripts.Gameplay
 
         private void Update()
         {
+            if (GameManager.Instance != null && GameManager.Instance.CurrentGameState != EGameState.Play)
+            {
+                _moveInput = Vector2.zero;
+                _interactPressed = false;
+                _alternatePressed = false;
+                UpdateAnimation();
+                return;
+            }
+
             // Đọc movement input (normalized để tránh diagonal speed boost)
             float x = Input.GetAxisRaw("Horizontal");
             float z = Input.GetAxisRaw("Vertical");
@@ -86,6 +95,20 @@ namespace _Game.Scripts.Gameplay
 
         private void FixedUpdate()
         {
+            if (GameManager.Instance != null && GameManager.Instance.CurrentGameState != EGameState.Play)
+            {
+                _moveInput = Vector2.zero;
+                if (_rb != null)
+                {
+                    _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);
+                }
+                if (_isCutting)
+                    StopCutting();
+                _interactPressed = false;
+                _alternatePressed = false;
+                return;
+            }
+
             Move();
             HandleInteractions();
 
