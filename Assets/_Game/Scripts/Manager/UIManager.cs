@@ -28,10 +28,11 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
         Initialize(this);
     }
 
-    private void Start()
+    public void InitUI()
     {
         InitializeUI();
         ShowScreen<_Game.Scripts.UI.MainMenuScreen>();
+        Debug.Log("Show");
         CleanDuplicateEventSystems();
     }
 
@@ -107,9 +108,11 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
 
     public void ShowScreen<T>() where T : ScreenUI
     {
-        // Deactive all screens first
         foreach (var screen in listScreen)
-            screen.Deactive();
+        {
+            if (screen != null)
+                screen.Deactive();
+        }
 
         // Active the target screen
         var target = GetScreen<T>();
@@ -117,7 +120,7 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
             target.Active();
     }
     
-    private T GetScreen<T>() where T : ScreenUI
+    public T GetScreen<T>() where T : ScreenUI
     {
         if (_screenCache.TryGetValue(typeof(T), out var screen))
         {

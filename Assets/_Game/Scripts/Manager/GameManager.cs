@@ -47,8 +47,12 @@ namespace GameCore
         private void Awake()
         {
             Initialize(this);
+        }
+
+        public void InitGame()
+        {
             Application.targetFrameRate = 60;
-            Application.runInBackground = true; // Rất quan trọng khi test Multiplayer trên cùng 1 máy!
+            Application.runInBackground = true; 
         }
 
         private void OnEnable()

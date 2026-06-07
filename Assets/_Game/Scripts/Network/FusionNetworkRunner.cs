@@ -74,8 +74,10 @@ namespace GameCore.Network
                 }
                 _runner.AddCallbacks(_inputHandler);
 
-                // Singleplayer → GameScene (index 1), Multiplayer → MainMenuScene (index 0)
-                int sceneIndex = (mode == GameMode.Single) ? 1 : 0;
+                // Singleplayer → GameScene, Multiplayer → MainMenuScene
+                int sceneIndex = (mode == GameMode.Single)
+                    ? UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath("Assets/_Game/Scenes/GameScene.unity")
+                    : UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath("Assets/_Game/Scenes/MainMenuScene.unity");
 
                 var sceneManager = _runnerGo.AddComponent<NetworkSceneManagerDefault>();
 
