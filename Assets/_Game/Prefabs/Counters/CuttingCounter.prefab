@@ -123,7 +123,7 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
+  m_SortingLayerID: -135064593
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!114 &2250262379025442925
@@ -870,16 +870,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProgressBar
       objectReference: {fileID: 0}
-    - target: {fileID: 3298028668083535105, guid: fcd6bf12dfdfbf54db300dfd172dc910,
-        type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 2147483647
-      objectReference: {fileID: 0}
-    - target: {fileID: 4743280423077751689, guid: fcd6bf12dfdfbf54db300dfd172dc910,
-        type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 2147483647
-      objectReference: {fileID: 0}
     - target: {fileID: 5552155709498957468, guid: fcd6bf12dfdfbf54db300dfd172dc910,
         type: 3}
       propertyPath: m_Pivot.x
@@ -979,11 +969,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7502429839636305603, guid: fcd6bf12dfdfbf54db300dfd172dc910,
-        type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 2147483647
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

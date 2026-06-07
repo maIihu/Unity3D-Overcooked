@@ -13,6 +13,16 @@ namespace Kitchen
         [SerializeField] private Rigidbody rb;
         [SerializeField] private Collider col;
 
+        // Cached components — tránh GetComponent mỗi lần SetKitchenObjectParentLocal
+        private NetworkTransform _cachedNetworkTransform;
+        private MonoBehaviour _cachedNetworkRigidbody;
+
+        private void Awake()
+        {
+            _cachedNetworkTransform = GetComponent<NetworkTransform>();
+            _cachedNetworkRigidbody = GetComponent("NetworkRigidbody3D") as MonoBehaviour;
+        }
+
         public void Init()
         {
         }
@@ -38,8 +48,20 @@ namespace Kitchen
             transform.DOKill();
         }
 
+        protected bool _isOffline;
+
+        private void Start()
+        {
+            if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
+            {
+                _isOffline = true;
+            }
+        }
+
         public override void Render()
         {
+            if (_isOffline) return;
+
             if (ParentNetworkId.IsValid)
             {
                 if (KitchenObjectParent == null || KitchenObjectParent.GetNetworkObject() == null || KitchenObjectParent.GetNetworkObject().Id != ParentNetworkId)
@@ -118,11 +140,8 @@ namespace Kitchen
                 if (col != null) col.enabled = false;
 
                 bool hasNetParent = kitchenObjectParent.GetNetworkObject() != null;
-                var nt = GetComponent<NetworkTransform>();
-                if (nt != null) nt.enabled = !hasNetParent;
-                
-                var nr = GetComponent("NetworkRigidbody3D") as MonoBehaviour;
-                if (nr != null) nr.enabled = !hasNetParent;
+                if (_cachedNetworkTransform != null) _cachedNetworkTransform.enabled = !hasNetParent;
+                if (_cachedNetworkRigidbody != null) _cachedNetworkRigidbody.enabled = !hasNetParent;
             }
             else
             {
@@ -130,11 +149,8 @@ namespace Kitchen
                 if (rb != null) rb.isKinematic = false;
                 if (col != null) col.enabled = true;
 
-                var nt = GetComponent<NetworkTransform>();
-                if (nt != null) nt.enabled = true;
-                
-                var nr = GetComponent("NetworkRigidbody3D") as MonoBehaviour;
-                if (nr != null) nr.enabled = true;
+                if (_cachedNetworkTransform != null) _cachedNetworkTransform.enabled = true;
+                if (_cachedNetworkRigidbody != null) _cachedNetworkRigidbody.enabled = true;
             }
         }
 
@@ -150,8 +166,12 @@ namespace Kitchen
 
         public void DestroySelf()
         {
+            if (KitchenObjectParent != null) KitchenObjectParent.ClearKitchenObject();
+            transform.DOKill();
+
             if (Object != null && Object.IsValid)
             {
+                // Online: Despawn qua Fusion
                 if (HasStateAuthority)
                 {
                     Runner.Despawn(Object);
@@ -159,7 +179,8 @@ namespace Kitchen
             }
             else
             {
-                PoolManager.Instance.Release(this);
+                // Offline: Destroy trực tiếp
+                Destroy(gameObject);
             }
         }
 

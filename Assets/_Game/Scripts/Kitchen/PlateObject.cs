@@ -27,8 +27,22 @@ namespace Kitchen
         public override void OnSpawn()
         {
             base.OnSpawn();
+            _isOffline = GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline;
             liquidGO.SetActive(false);
-            if (dirtyVisual != null) dirtyVisual.SetActive(IsDirtyState);
+            if (dirtyVisual != null) dirtyVisual.SetActive(_isOffline ? _offlineIsDirtyState : (bool)IsDirtyState);
+        }
+
+        // ── Offline local state ──
+        private bool _offlineIsDirtyState;
+
+        private void Start()
+        {
+            if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
+            {
+                _isOffline = true;
+                _offlineIsDirtyState = false; // default
+                if (dirtyVisual != null) dirtyVisual.SetActive(_offlineIsDirtyState);
+            }
         }
 
         public override void OnDespawn()
@@ -39,7 +53,7 @@ namespace Kitchen
 
         public bool TryAddIngredient(FoodObject foodObject)
         {
-            if (IsDirtyState || !validIngredientList.Contains(foodObject.EFoodType))
+            if (IsDirty() || !validIngredientList.Contains(foodObject.EFoodType))
             {
                 return false;
             }
@@ -57,14 +71,13 @@ namespace Kitchen
 
         public bool TryAddIngredient(EFoodType foodType)
         {
-            if (IsDirtyState || !validIngredientList.Contains(foodType))
+            if (IsDirty() || !validIngredientList.Contains(foodType))
             {
                 return false;
             }
 
             _ingredientList.Add(foodType);
             if(foodType == EFoodType.Onion) liquidGO.SetActive(true);
-
 
             OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
             {
@@ -76,11 +89,15 @@ namespace Kitchen
 
         public List<EFoodType> GetIngredientList() => _ingredientList;
 
-        public bool IsDirty() => IsDirtyState;
+        public bool IsDirty() => _isOffline ? _offlineIsDirtyState : (bool)IsDirtyState;
 
         public void SetDirty(bool dirty)
         {
-            if (HasStateAuthority)
+            if (_isOffline)
+            {
+                _offlineIsDirtyState = dirty;
+            }
+            else if (HasStateAuthority)
             {
                 IsDirtyState = dirty;
             }
@@ -90,6 +107,7 @@ namespace Kitchen
 
         private void OnDirtyStateChanged()
         {
+            if (_isOffline) return;
             if (dirtyVisual != null) dirtyVisual.SetActive(IsDirtyState);
         }
     }

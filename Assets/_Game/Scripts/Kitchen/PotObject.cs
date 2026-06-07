@@ -55,15 +55,31 @@ namespace Kitchen
             }
         }
 
-        private void Update()
+        // State tracking để tránh gọi Play()/Stop() mỗi frame
+        private bool _lastSteamState;
+        private bool _lastBurnedState;
+
+        /// <summary>
+        /// Gọi từ StoveCounter khi state thay đổi thay vì mỗi frame.
+        /// Cũng có thể tự gọi trong Update nhưng với state check để giảm overhead.
+        /// </summary>
+        public void UpdateEffects()
         {
             bool isOnStove = GetKitchenObjectParent() is StoveCounter;
 
             bool shouldShowSteam = isOnStove && HasIngredients() && !IsBurned && IsCooked;
-            PlayFryingEffect(shouldShowSteam);
+            if (shouldShowSteam != _lastSteamState)
+            {
+                _lastSteamState = shouldShowSteam;
+                PlayFryingEffect(shouldShowSteam);
+            }
 
             bool shouldShowBurned = IsBurned;
-            PlayBurnedEffect(shouldShowBurned);
+            if (shouldShowBurned != _lastBurnedState)
+            {
+                _lastBurnedState = shouldShowBurned;
+                PlayBurnedEffect(shouldShowBurned);
+            }
         }
 
         public override void OnSpawn()

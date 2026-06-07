@@ -1,6 +1,7 @@
 using Fusion;
 using Fusion.Sockets;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -221,16 +222,43 @@ namespace GameCore.Network
 
         private void HandleGameSceneLoaded(NetworkRunner runner)
         {
-            if (runner.IsServer)
+            StartCoroutine(GameSceneLoadedCoroutine(runner));
+        }
+
+        /// <summary>
+        /// Flow: Load level (counters/env) → chờ vài nhịp → spawn Player → chờ physics → complete loading.
+        /// </summary>
+        private IEnumerator GameSceneLoadedCoroutine(NetworkRunner runner)
+        {
+            // 1. Gửi OnLoadLevel — counters + environment được spawn
+            MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnLoadLevel));
+
+            // 2. Chờ vài nhịp để counters/environment spawn xong
+            yield return new WaitForSeconds(1f);
+
+            // 3. Spawn players SAU KHI level đã sẵn sàng
+            if (runner != null && runner.IsServer)
             {
                 SpawnGameplayPlayersFromLobby(runner);
             }
 
-            // Gửi event load level cho GameplayManager
-            MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnLoadLevel));
+            // 4. Chờ physics settle — tránh player bị nhảy
+            yield return new WaitForSeconds(0.5f);
 
-            // Hiện GameplayScreen cho tất cả client
-            UIManager.Instance?.ShowScreen<GameplayScreen>();
+            // 5. Complete loading screen rồi show GameplayScreen
+            var loadingScreen = UIManager.Instance?.GetScreen<LoadingScreenUI>();
+            if (loadingScreen != null && loadingScreen.gameObject.activeSelf)
+            {
+                bool completed = false;
+                loadingScreen.CompleteProgress(() => completed = true);
+                yield return new WaitUntil(() => completed);
+                UIManager.Instance?.ShowScreen<GameplayScreen>();
+            }
+            else
+            {
+                // Không có loading screen (ví dụ: multiplayer) → show trực tiếp
+                UIManager.Instance?.ShowScreen<GameplayScreen>();
+            }
         }
 
         private void HandleMenuSceneLoaded(NetworkRunner runner)
@@ -269,9 +297,9 @@ namespace GameCore.Network
 
                 if (runner.GameMode == GameMode.Single)
                 {
-                    if (GameModeManager.Instance?.LocalPlayerPrefab != null)
+                    if (GameManager.Instance?.LocalPlayerPrefab != null)
                     {
-                        Instantiate(GameModeManager.Instance.LocalPlayerPrefab, spawnPosition, Quaternion.identity);
+                        Instantiate(GameManager.Instance.LocalPlayerPrefab, spawnPosition, Quaternion.identity);
                         Debug.Log("[FusionNetworkRunner] Spawned PlayerLocal for Singleplayer.");
                     }
                     continue;

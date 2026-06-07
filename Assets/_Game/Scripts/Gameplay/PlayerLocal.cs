@@ -13,6 +13,11 @@ namespace _Game.Scripts.Gameplay
     /// </summary>
     public class PlayerLocal : MonoBehaviour, IPlayer
     {
+        // ── Animator Hash Cache (tránh string lookup mỗi frame) ──
+        private static readonly int s_MovingValue = Animator.StringToHash("MovingValue");
+        private static readonly int s_IsChopping  = Animator.StringToHash("IsChopping");
+        private static readonly int s_HasObject   = Animator.StringToHash("HasObject");
+        private static readonly int s_IsPicked    = Animator.StringToHash("IsPicked");
         [Header("Player Stats")]
         [SerializeField] private float moveSpeed = 7f;
         [SerializeField] private float rotateSpeed = 10f;
@@ -176,9 +181,9 @@ namespace _Game.Scripts.Gameplay
         private void UpdateAnimation()
         {
             if (animator == null) return;
-            animator.SetFloat("MovingValue", _moveInput.magnitude);
-            animator.SetBool("IsChopping", _isCutting);
-            animator.SetBool("HasObject", HasKitchenObject());
+            animator.SetFloat(s_MovingValue, _moveInput.magnitude);
+            animator.SetBool(s_IsChopping, _isCutting);
+            animator.SetBool(s_HasObject, HasKitchenObject());
         }
 
         // ─── Interactions ────────────────────────────────────────
@@ -210,7 +215,7 @@ namespace _Game.Scripts.Gameplay
                         if ((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||
                             (HasKitchenObject() && _selectedCounter is ClearCounter))
                         {
-                            animator?.SetTrigger("IsPicked");
+                            animator?.SetTrigger(s_IsPicked);
                         }
 
                         baseCounter.Interact(this);
@@ -237,7 +242,7 @@ namespace _Game.Scripts.Gameplay
                             kitchenObject.GetKitchenObjectParent() == null)
                         {
                             kitchenObject.SetKitchenObjectParent(this);
-                            animator?.SetTrigger("IsPicked");
+                            animator?.SetTrigger(s_IsPicked);
                         }
                         return;
                     }

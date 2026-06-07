@@ -16,6 +16,19 @@ namespace Counter
         [Networked] private float WashingProgress { get; set; }
         [Networked] private NetworkBool IsWashing { get; set; }
 
+        // ── Offline local state ──
+        private bool _isOffline;
+        private float _offlineWashingProgress;
+        private bool _offlineIsWashing;
+
+        public override void Init()
+        {
+            base.Init();
+            _isOffline = GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline;
+            _offlineWashingProgress = 0f;
+            _offlineIsWashing = false;
+        }
+
         public override void Spawned()
         {
             base.Spawned();
@@ -49,15 +62,39 @@ namespace Counter
         {
             if (progressBarUI != null)
             {
-                if (IsWashing)
+                bool isWashingNow = _isOffline ? _offlineIsWashing : (bool)IsWashing;
+                if (isWashingNow)
                 {
                     progressBarUI.Show();
-                    progressBarUI.UpdateProgress(WashingProgress / washingTime);
+                    float progress = _isOffline ? _offlineWashingProgress : (float)WashingProgress;
+                    progressBarUI.UpdateProgress(progress / washingTime);
                 }
                 else
                 {
                     progressBarUI.Hide();
                 }
+            }
+        }
+
+        private void Update()
+        {
+            if (!_isOffline) return;
+            if (!_offlineIsWashing) return;
+
+            KitchenObject ko = GetKitchenObject();
+            if (ko == null || ko is not PlateObject plate || !plate.IsDirty())
+            {
+                _offlineIsWashing = false;
+                return;
+            }
+
+            _offlineWashingProgress += Time.deltaTime;
+
+            if (_offlineWashingProgress >= washingTime)
+            {
+                _offlineWashingProgress = 0f;
+                _offlineIsWashing = false;
+                plate.SetDirty(false);
             }
         }
 
@@ -89,11 +126,13 @@ namespace Counter
         public override void InteractAlternate(IPlayer player)
         {
             base.InteractAlternate(player);
-            if (!HasStateAuthority) return;
+            
+            if (!_isOffline && !HasStateAuthority) return;
 
             if (HasKitchenObject() && GetKitchenObject() is PlateObject plate && plate.IsDirty())
             {
-                IsWashing = true;
+                if (_isOffline) _offlineIsWashing = true;
+                else IsWashing = true;
             }
         }
     }

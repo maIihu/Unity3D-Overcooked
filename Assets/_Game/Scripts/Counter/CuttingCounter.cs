@@ -18,8 +18,21 @@ namespace Counter
         [Networked] private float CuttingProgress { get; set; }
         [Networked] private NetworkBool IsCutting { get; set; }
 
+        // ── Offline local state ──
+        private bool _isOffline;
+        private float _offlineCuttingProgress;
+        private bool _offlineIsCutting;
+
         // -------------------------------------------------------
         #region Fusion Lifecycle
+
+        public override void Init()
+        {
+            base.Init();
+            _isOffline = GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline;
+            _offlineCuttingProgress = 0f;
+            _offlineIsCutting = false;
+        }
 
         public override void Spawned()
         {
@@ -54,11 +67,54 @@ namespace Counter
 
         public override void Render()
         {
-            // Cập nhật progress bar dựa trên giá trị networked — chạy mỗi frame trên tất cả client
+            if (!_isOffline)
+            {
+                UpdateVisualProgress((float)CuttingProgress, (bool)IsCutting);
+            }
+        }
+
+        private void UpdateVisualProgress(float progress, bool isCuttingNow)
+        {
             if (progressBarUI != null)
             {
-                float ratio = cuttingTime > 0f ? CuttingProgress / cuttingTime : 0f;
-                progressBarUI.UpdateProgress(ratio);
+                if (isCuttingNow)
+                {
+                    progressBarUI.Show();
+                    float ratio = cuttingTime > 0f ? progress / cuttingTime : 0f;
+                    progressBarUI.UpdateProgress(ratio);
+                }
+                else
+                {
+                    progressBarUI.Hide();
+                }
+            }
+        }
+
+        // ── Offline Path ──
+        private void Update()
+        {
+            if (!_isOffline) return;
+
+            // Cập nhật Visual cho Offline vì Render() không được gọi khi mất Fusion
+            UpdateVisualProgress(_offlineCuttingProgress, _offlineIsCutting);
+
+            if (!_offlineIsCutting) return;
+
+            KitchenObject ko = GetKitchenObject();
+            if (ko == null || ko is not FoodObject food)
+            {
+                _offlineIsCutting = false;
+                return;
+            }
+
+            _offlineCuttingProgress += Time.deltaTime;
+
+            if (_offlineCuttingProgress >= cuttingTime)
+            {
+                _offlineCuttingProgress = 0f;
+                _offlineIsCutting = false;
+                food.SetState(FoodState.Cut);
+                OnCutComplete?.Invoke();
             }
         }
 
@@ -74,10 +130,14 @@ namespace Counter
             if (HasKitchenObject())
             {
                 // Không cho nhặt khi đang cắt
-                if (IsCutting) return;
+                if ((_isOffline && _offlineIsCutting) || (!_isOffline && IsCutting)) return;
 
                 GetKitchenObject().SetKitchenObjectParent(player);
-                if (HasStateAuthority)
+                if (_isOffline)
+                {
+                    _offlineCuttingProgress = 0f;
+                }
+                else if (HasStateAuthority)
                 {
                     CuttingProgress = 0f;
                 }
@@ -87,7 +147,12 @@ namespace Counter
                 if (player.HasKitchenObject())
                 {
                     player.GetKitchenObject().SetKitchenObjectParent(this);
-                    if (HasStateAuthority)
+                    if (_isOffline)
+                    {
+                        _offlineCuttingProgress = 0f;
+                        _offlineIsCutting = false;
+                    }
+                    else if (HasStateAuthority)
                     {
                         CuttingProgress = 0f;
                         IsCutting = false;
@@ -100,11 +165,12 @@ namespace Counter
         {
             base.InteractAlternate(player);
 
-            // Được gọi bởi Player.FixedUpdateNetwork() mỗi tick khi đang cắt
-            if (!HasStateAuthority) return;
+            if (!_isOffline && !HasStateAuthority) return;
+
             if (HasKitchenObject() && GetKitchenObject() is FoodObject { FoodState: FoodState.Normal })
             {
-                IsCutting = true; // Timer sẽ chạy trong FixedUpdateNetwork
+                if (_isOffline) _offlineIsCutting = true;
+                else IsCutting = true;
             }
         }
 

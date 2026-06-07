@@ -9,10 +9,8 @@ namespace GameCore
 {
     /// <summary>
     /// Quản lý chế độ chơi toàn cục (Singleplayer / Multiplayer).
-    /// Singleton tồn tại xuyên suốt toàn bộ game (DontDestroyOnLoad).
-    /// ⚠️ Nhớ tick '_dontDestroyOnLoad = true' trong Inspector trên GameObject.
     /// </summary>
-    public class GameModeManager : Singleton<GameModeManager>
+    public class GameModeController : MonoBehaviour
     {
         public enum PlayMode
         {
@@ -40,31 +38,41 @@ namespace GameCore
         /// <summary>Đang ở chế độ Online (Multiplayer)?</summary>
         public bool IsOnline => CurrentMode == PlayMode.Multiplayer;
 
-        private void Awake()
-        {
-            // Gọi Initialize để kích hoạt cơ chế DontDestroyOnLoad từ Singleton base.
-            // ⚠️ Phải tick _dontDestroyOnLoad = true trong Inspector.
-            Initialize(this);
-        }
-
         /// <summary>
         /// Bắt đầu chế độ Single Player.
-        /// Đặt mode = Singleplayer và khởi chạy Fusion dưới dạng Single player (Local simulation).
+        /// Load GameScene trực tiếp (không khởi chạy Fusion Runner) để tránh networking overhead.
         /// </summary>
         public void StartSingleplayer()
         {
-            Debug.Log("[GameModeManager] Starting Singleplayer mode via Fusion.");
+            Debug.Log("[GameModeController] Starting Singleplayer mode (Offline — no Fusion).");
             CurrentMode = PlayMode.Singleplayer;
 
-            if (GameCore.Network.FusionNetworkRunner.Instance != null)
+            // Hiển thị Loading Screen → load GameScene trực tiếp (không qua Fusion)
+            var loadingScreen = UIManager.Instance?.GetScreen<LoadingScreenUI>();
+            if (loadingScreen != null)
             {
-                GameCore.Network.FusionNetworkRunner.Instance.StartGameSession(Fusion.GameMode.Single, "OfflineRoom").FireAndForget();
+                UIManager.Instance.ShowScreen<LoadingScreenUI>();
+                loadingScreen.TriggerLoad(GAMEPLAY_SCENE_NAME, OnSingleplayerSceneLoaded);
             }
             else
             {
-                Debug.LogError("[GameModeManager] FusionNetworkRunner.Instance not found! Falling back to standard scene load.");
+                // Fallback nếu không có LoadingScreen
                 SceneManager.LoadScene(GAMEPLAY_SCENE_NAME);
+                // Gọi sau 1 frame để scene kịp load
+                StartCoroutine(DelayedOnSingleplayerSceneLoaded());
             }
+        }
+
+        private void OnSingleplayerSceneLoaded()
+        {
+            // Trigger load level + spawn player offline
+            MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnLoadLevel));
+        }
+
+        private System.Collections.IEnumerator DelayedOnSingleplayerSceneLoaded()
+        {
+            yield return null;
+            OnSingleplayerSceneLoaded();
         }
 
         /// <summary>
@@ -73,7 +81,7 @@ namespace GameCore
         /// </summary>
         public void SetMultiplayerMode()
         {
-            Debug.Log("[GameModeManager] Switching to Multiplayer mode.");
+            Debug.Log("[GameModeController] Switching to Multiplayer mode.");
             CurrentMode = PlayMode.Multiplayer;
         }
 
@@ -83,11 +91,6 @@ namespace GameCore
         public void ResetMode()
         {
             CurrentMode = PlayMode.None;
-        }
-
-        protected override void OnRegistration()
-        {
-            base.OnRegistration();
         }
     }
 }

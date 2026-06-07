@@ -14,23 +14,41 @@ namespace Kitchen
         public override void OnSpawn()
         {
             base.OnSpawn();
+            _isOffline = GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline;
             if (HasStateAuthority)
             {
                 NetworkedFoodState = FoodState.Normal;
             }
-            UpdateVisuals(NetworkedFoodState);
+            UpdateVisuals(_isOffline ? _offlineFoodState : NetworkedFoodState);
+        }
+
+        // ── Offline local state ──
+        private FoodState _offlineFoodState;
+
+        private void Start()
+        {
+            if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
+            {
+                _isOffline = true;
+                _offlineFoodState = FoodState.Normal;
+                UpdateVisuals(_offlineFoodState);
+            }
         }
 
         [Networked]
         [OnChangedRender(nameof(OnStateChanged))]
         private FoodState NetworkedFoodState { get; set; }
 
-        public FoodState FoodState => NetworkedFoodState;
+        public FoodState FoodState => _isOffline ? _offlineFoodState : NetworkedFoodState;
         public EFoodType EFoodType => eFoodType;
 
         public void SetState(FoodState newState)
         {
-            if (HasStateAuthority)
+            if (_isOffline)
+            {
+                _offlineFoodState = newState;
+            }
+            else if (HasStateAuthority)
             {
                 NetworkedFoodState = newState;
             }
@@ -39,6 +57,7 @@ namespace Kitchen
 
         private void OnStateChanged()
         {
+            if (_isOffline) return;
             UpdateVisuals(NetworkedFoodState);
         }
 

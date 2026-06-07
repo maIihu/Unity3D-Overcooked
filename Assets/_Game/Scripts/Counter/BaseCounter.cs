@@ -81,7 +81,6 @@ namespace Counter
         
         protected KitchenObject SpawnKitchenObject(EFoodType type)
         {
-            if (!HasStateAuthority) return null;
             var prefab = PoolManager.Instance.Kitchen.GetPrefab(type);
             if (prefab == null)
             {
@@ -89,14 +88,26 @@ namespace Counter
                 return null;
             }
 
-            var networkObject = Runner.Spawn(prefab, transform.position, Quaternion.identity);
-            if (networkObject == null)
+            KitchenObject instance;
+            if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
             {
-                Debug.LogError($"[BaseCounter] SpawnKitchenObject: Runner.Spawn returned null for {prefab.name}!");
-                return null;
+                // ── Offline: Instantiate trực tiếp ──
+                var go = Instantiate(prefab, transform.position, Quaternion.identity);
+                instance = go.GetComponent<KitchenObject>();
             }
-            
-            var instance = networkObject.GetComponent<KitchenObject>();
+            else
+            {
+                // ── Online: Spawn qua Fusion ──
+                if (!HasStateAuthority) return null;
+                var networkObject = Runner.Spawn(prefab, transform.position, Quaternion.identity);
+                if (networkObject == null)
+                {
+                    Debug.LogError($"[BaseCounter] SpawnKitchenObject: Runner.Spawn returned null for {prefab.name}!");
+                    return null;
+                }
+                instance = networkObject.GetComponent<KitchenObject>();
+            }
+
             if (instance != null)
             {
                 instance.SetKitchenObjectParent(this);
@@ -110,12 +121,24 @@ namespace Counter
         
         protected KitchenObject SpawnKitchenObject(KitchenType type)
         {
-            if (!HasStateAuthority) return null;
             var prefab = PoolManager.Instance.Kitchen.GetPrefab(type);
             if (prefab == null) return null;
 
-            var networkObject = Runner.Spawn(prefab, transform.position, Quaternion.identity);
-            var instance = networkObject.GetComponent<KitchenObject>();
+            KitchenObject instance;
+            if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
+            {
+                // ── Offline: Instantiate trực tiếp ──
+                var go = Instantiate(prefab, transform.position, Quaternion.identity);
+                instance = go.GetComponent<KitchenObject>();
+            }
+            else
+            {
+                // ── Online: Spawn qua Fusion ──
+                if (!HasStateAuthority) return null;
+                var networkObject = Runner.Spawn(prefab, transform.position, Quaternion.identity);
+                instance = networkObject.GetComponent<KitchenObject>();
+            }
+
             if (instance != null)
             {
                 instance.SetKitchenObjectParent(this);

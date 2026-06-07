@@ -36,12 +36,29 @@ namespace Counter
         // -------------------------------------------------------
         #region Fusion Lifecycle
 
+        // ── Offline local state (dùng khi không có Fusion Runner) ──
+        private bool _isOffline;
+        private float _offlineFryingTimer;
+        private float _offlineBurningTimer;
+        private StoveState _offlineStoveState = StoveState.Idle;
+
         public override void Spawned()
         {
             base.Spawned();
             FryingTimer = 0f;
             BurningTimer = 0f;
             NetworkStoveState = StoveState.Idle;
+            _lastRenderedState = StoveState.Idle;
+        }
+
+        public override void Init()
+        {
+            base.Init();
+            if (imageUI != null) imageUI.enabled = false;
+            _isOffline = GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline;
+            _offlineFryingTimer = 0f;
+            _offlineBurningTimer = 0f;
+            _offlineStoveState = StoveState.Idle;
             _lastRenderedState = StoveState.Idle;
         }
 
@@ -79,7 +96,7 @@ namespace Counter
                     if (FryingTimer >= fryingTimerMax)
                     {
                         pot.IsCooked = true;
-                        FryingTimer = fryingTimerMax; // Clamp
+                        FryingTimer = fryingTimerMax;
                         NetworkStoveState = StoveState.Fried;
                     }
                     break;
@@ -89,13 +106,12 @@ namespace Counter
                     if (BurningTimer >= burningTimerMax)
                     {
                         pot.IsBurned = true;
-                        BurningTimer = burningTimerMax; // Clamp
+                        BurningTimer = burningTimerMax;
                         NetworkStoveState = StoveState.Burned;
                     }
                     break;
 
                 case StoveState.Burned:
-                    // Không làm gì thêm
                     break;
             }
         }
@@ -125,6 +141,8 @@ namespace Counter
                         pot.UpdateCookingProgress(0f);
                         break;
                 }
+
+                pot.UpdateEffects();
             }
 
             // Cập nhật UI khi state thay đổi
@@ -138,6 +156,129 @@ namespace Counter
             if (NetworkStoveState == StoveState.Fried && pot != null)
             {
                 HandleFriedUI();
+            }
+        }
+
+        // ── Offline cooking logic (Update thay vì FixedUpdateNetwork) ──
+
+        private void Update()
+        {
+            if (!_isOffline) return;
+
+            if (_kitchenObject == null)
+            {
+                if (_offlineStoveState != StoveState.Idle)
+                    _offlineStoveState = StoveState.Idle;
+                return;
+            }
+
+            PotObject pot = _kitchenObject as PotObject;
+            if (pot == null) return;
+
+            switch (_offlineStoveState)
+            {
+                case StoveState.Idle:
+                    if (pot.HasIngredients())
+                    {
+                        if (pot.IsBurned) _offlineStoveState = StoveState.Burned;
+                        else if (pot.IsCooked) _offlineStoveState = StoveState.Fried;
+                        else _offlineStoveState = StoveState.Frying;
+                    }
+                    break;
+
+                case StoveState.Frying:
+                    _offlineFryingTimer += Time.deltaTime;
+                    if (_offlineFryingTimer >= fryingTimerMax)
+                    {
+                        pot.IsCooked = true;
+                        _offlineFryingTimer = fryingTimerMax;
+                        _offlineStoveState = StoveState.Fried;
+                    }
+                    break;
+
+                case StoveState.Fried:
+                    _offlineBurningTimer += Time.deltaTime;
+                    if (_offlineBurningTimer >= burningTimerMax)
+                    {
+                        pot.IsBurned = true;
+                        _offlineBurningTimer = burningTimerMax;
+                        _offlineStoveState = StoveState.Burned;
+                    }
+                    break;
+
+                case StoveState.Burned:
+                    break;
+            }
+
+            // Visual updates (offline)
+            OfflineRender(pot);
+        }
+
+        private void OfflineRender(PotObject pot)
+        {
+            if (pot == null) return;
+
+            switch (_offlineStoveState)
+            {
+                case StoveState.Frying:
+                    pot.UpdateCookingProgress(fryingTimerMax > 0f ? _offlineFryingTimer / fryingTimerMax : 0f);
+                    break;
+                case StoveState.Fried:
+                    pot.UpdateCookingProgress(burningTimerMax > 0f ? _offlineBurningTimer / burningTimerMax : 0f);
+                    break;
+                default:
+                    pot.UpdateCookingProgress(0f);
+                    break;
+            }
+
+            pot.UpdateEffects();
+
+            if (_offlineStoveState != _lastRenderedState)
+            {
+                _lastRenderedState = _offlineStoveState;
+                OnStoveStateChangedVisual(_offlineStoveState);
+            }
+
+            if (_offlineStoveState == StoveState.Fried)
+            {
+                HandleFriedUIOffline();
+            }
+        }
+
+        private void HandleFriedUIOffline()
+        {
+            if (imageUI == null) return;
+            float burnProgress = burningTimerMax > 0f ? _offlineBurningTimer / burningTimerMax : 0f;
+
+            if (burnProgress >= 0.5f)
+            {
+                if (imageUI.sprite != warningSprite || !imageUI.enabled)
+                {
+                    _imageFadeTween?.Kill();
+                    imageUI.sprite = warningSprite;
+                    imageUI.color = Color.white;
+                    imageUI.enabled = true;
+                    _imageFadeTween = imageUI.DOFade(0.2f, 0.5f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+                }
+                float intensity = (burnProgress - 0.5f) / 0.5f;
+                if (_imageFadeTween != null) _imageFadeTween.timeScale = Mathf.Lerp(1f, 5f, intensity);
+            }
+            else
+            {
+                if (!_isCompleteUIShown)
+                {
+                    _isCompleteUIShown = true;
+                    _imageFadeTween?.Kill();
+                    imageUI.sprite = completeSprite;
+                    imageUI.color = new Color(1f, 1f, 1f, 0f);
+                    imageUI.enabled = true;
+                    Sequence completeSequence = DOTween.Sequence();
+                    completeSequence.Append(imageUI.DOFade(1f, 0.3f));
+                    completeSequence.AppendInterval(1f);
+                    completeSequence.Append(imageUI.DOFade(0f, 0.5f));
+                    completeSequence.OnComplete(() => { imageUI.enabled = false; });
+                    _imageFadeTween = completeSequence;
+                }
             }
         }
 
@@ -160,12 +301,6 @@ namespace Counter
             _kitchenObject = SpawnKitchenObject(kitchenType);
         }
 
-        public override void Init()
-        {
-            base.Init();
-            if (imageUI != null) imageUI.enabled = false;
-            // Reset networked state handled in Spawned()
-        }
 
         #endregion
 
@@ -187,7 +322,13 @@ namespace Counter
                     if (player.GetKitchenObject() is FoodObject { FoodState: FoodState.Cut } food && pot != null && pot.CanAddIngredient(food))
                     {
                         pot.OnIngredientAdded(food);
-                        if (HasStateAuthority)
+                        if (_isOffline)
+                        {
+                            _offlineFryingTimer = 0f;
+                            _offlineBurningTimer = 0f;
+                            _offlineStoveState = StoveState.Frying;
+                        }
+                        else if (HasStateAuthority)
                         {
                             FryingTimer = 0f;
                             BurningTimer = 0f;
@@ -212,7 +353,13 @@ namespace Counter
                         if (transferSuccess)
                         {
                             pot.EmptyPot();
-                            if (HasStateAuthority)
+                            if (_isOffline)
+                            {
+                                _offlineFryingTimer = 0f;
+                                _offlineBurningTimer = 0f;
+                                _offlineStoveState = StoveState.Idle;
+                            }
+                            else if (HasStateAuthority)
                             {
                                 FryingTimer = 0f;
                                 BurningTimer = 0f;
@@ -238,11 +385,31 @@ namespace Counter
             _isCompleteUIShown = false;
             _imageFadeTween?.Kill();
 
-            if (HasStateAuthority)
+            if (_isOffline)
+            {
+                _offlineFryingTimer = 0f;
+                _offlineBurningTimer = 0f;
+                if (kitchenObject != null)
+                {
+                    PotObject pot = kitchenObject as PotObject;
+                    if (pot != null)
+                    {
+                        pot.BurningTimerMax = burningTimerMax;
+                        if (pot.HasIngredients())
+                        {
+                            if (pot.IsBurned) _offlineStoveState = StoveState.Burned;
+                            else if (pot.IsCooked) _offlineStoveState = StoveState.Fried;
+                            else _offlineStoveState = StoveState.Frying;
+                        }
+                        else _offlineStoveState = StoveState.Idle;
+                    }
+                }
+                else _offlineStoveState = StoveState.Idle;
+            }
+            else if (HasStateAuthority)
             {
                 FryingTimer = 0f;
                 BurningTimer = 0f;
-
                 if (kitchenObject != null)
                 {
                     PotObject pot = kitchenObject as PotObject;
@@ -255,16 +422,10 @@ namespace Counter
                             else if (pot.IsCooked) NetworkStoveState = StoveState.Fried;
                             else NetworkStoveState = StoveState.Frying;
                         }
-                        else
-                        {
-                            NetworkStoveState = StoveState.Idle;
-                        }
+                        else NetworkStoveState = StoveState.Idle;
                     }
                 }
-                else
-                {
-                    NetworkStoveState = StoveState.Idle;
-                }
+                else NetworkStoveState = StoveState.Idle;
             }
         }
 
@@ -272,7 +433,13 @@ namespace Counter
         {
             base.ClearKitchenObject();
             _imageFadeTween?.Kill();
-            if (HasStateAuthority)
+            if (_isOffline)
+            {
+                _offlineFryingTimer = 0f;
+                _offlineBurningTimer = 0f;
+                _offlineStoveState = StoveState.Idle;
+            }
+            else if (HasStateAuthority)
             {
                 FryingTimer = 0f;
                 BurningTimer = 0f;

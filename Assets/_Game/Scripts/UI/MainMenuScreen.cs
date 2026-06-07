@@ -41,26 +41,28 @@ namespace _Game.Scripts.UI
         {
             Debug.Log("[MainMenuScreen] Single Player selected.");
 
-            if (GameModeManager.Instance == null)
+            // Disable button to prevent double-click
+            if (singlePlayerButton != null) singlePlayerButton.interactable = false;
+
+            // Show loading screen immediately with fake progress
+            if (uiManager != null)
             {
-                Debug.LogError("[MainMenuScreen] GameModeManager not found!");
-                return;
+                var loadingScreen = uiManager.GetScreen<LoadingScreenUI>();
+                if (loadingScreen != null)
+                {
+                    uiManager.ShowScreen<LoadingScreenUI>();
+                    loadingScreen.StartFakeProgress();
+                }
             }
 
-            GameModeManager.Instance.StartSingleplayer();
+            // Trigger singleplayer start (Fusion will load GameScene)
+            _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(new _Game.Scripts.DesignPattern.Observer.Message(_Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStartSingleplayer));
         }
 
         private void OnMultiplayerClicked()
         {
             Debug.Log("[MainMenuScreen] Multiplayer selected.");
-
-            if (GameModeManager.Instance == null)
-            {
-                Debug.LogError("[MainMenuScreen] GameModeManager not found!");
-                return;
-            }
-
-            GameModeManager.Instance.SetMultiplayerMode();
+            _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(new _Game.Scripts.DesignPattern.Observer.Message(_Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnSetMultiplayerMode));
 
             if (uiManager != null)
             {

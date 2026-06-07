@@ -16,7 +16,11 @@ namespace _Game.Scripts.DesignPattern.Observer
         OnTimerTick,
         OnGameStateChanged,
         OnToggleSettings,
-        OnExitGame
+        OnExitGame,
+        OnStartSingleplayer,
+        OnSetMultiplayerMode,
+        OnResetPlayMode,
+        OnSetupCamera
 	}
     public class Message
     {

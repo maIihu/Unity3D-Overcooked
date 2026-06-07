@@ -2,6 +2,7 @@ using System;
 using _Game.Scripts.DesignPattern.Observer;
 using DesignPattern;
 using UnityEngine;
+using _Game.Scripts.UI;
 
 namespace GameCore
 {
@@ -15,6 +16,7 @@ namespace GameCore
         [Header("Controllers")]
         [SerializeField] private DeliveryController deliveryController;
         [SerializeField] private LevelController levelController;
+        [SerializeField] private GameModeController gameModeController;
 
         [Header("Game State")]
         [SerializeField] private int targetScore = 50;
@@ -38,19 +40,36 @@ namespace GameCore
 
         // ── Public Accessors ───────────────────────────────────
         // Trả về trực tiếp — không gọi FindObjectsOfType mỗi lần access.
-        // deliveryController được resolve một lần duy nhất trong LoadLevel().
-        public DeliveryController DeliveryController => deliveryController;
+        public DeliveryController DeliveryController 
+        {
+            get => deliveryController;
+            set => deliveryController = value;
+        }
         public LevelController LevelController => levelController;
+        public GameModeController GameModeController => gameModeController;
+
+        public bool IsOffline => gameModeController != null && gameModeController.IsOffline;
+        public bool IsOnline => gameModeController != null && gameModeController.IsOnline;
+        public GameObject LocalPlayerPrefab => gameModeController != null ? gameModeController.LocalPlayerPrefab : null;
         
         private Counter.DeliveryCounter _deliveryCounter;
 
         private void Awake()
         {
             Initialize(this);
+            if (gameModeController == null)
+            {
+                gameModeController = GetComponent<GameModeController>();
+                if (gameModeController == null)
+                {
+                    gameModeController = gameObject.AddComponent<GameModeController>();
+                }
+            }
         }
 
         public void InitGame()
         {
+            QualitySettings.vSyncCount = 0; // Tắt VSync — tránh override targetFrameRate
             Application.targetFrameRate = 60;
             Application.runInBackground = true; 
         }
@@ -62,6 +81,9 @@ namespace GameCore
             MessageManager.Instance.AddSubscriber(ProjectMessageType.OnGameOver, this);
             MessageManager.Instance.AddSubscriber(ProjectMessageType.OnScoreChanged, this);
             MessageManager.Instance.AddSubscriber(ProjectMessageType.OnExitGame, this);
+            MessageManager.Instance.AddSubscriber(ProjectMessageType.OnStartSingleplayer, this);
+            MessageManager.Instance.AddSubscriber(ProjectMessageType.OnSetMultiplayerMode, this);
+            MessageManager.Instance.AddSubscriber(ProjectMessageType.OnResetPlayMode, this);
         }
 
         private void OnDisable()
@@ -71,6 +93,9 @@ namespace GameCore
             MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnGameOver, this);
             MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnScoreChanged, this);
             MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnExitGame, this);
+            MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnStartSingleplayer, this);
+            MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnSetMultiplayerMode, this);
+            MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnResetPlayMode, this);
         }
 
         public void Handle(Message message)
@@ -101,6 +126,24 @@ namespace GameCore
                         UIManager.Instance.floatingScoreManager.SpawnFloatingScore(scoreAdded, _deliveryCounter.transform.position);
                     }
                     break;
+                case ProjectMessageType.OnStartSingleplayer:
+                    if (gameModeController != null)
+                    {
+                        gameModeController.StartSingleplayer();
+                    }
+                    break;
+                case ProjectMessageType.OnSetMultiplayerMode:
+                    if (gameModeController != null)
+                    {
+                        gameModeController.SetMultiplayerMode();
+                    }
+                    break;
+                case ProjectMessageType.OnResetPlayMode:
+                    if (gameModeController != null)
+                    {
+                        gameModeController.ResetMode();
+                    }
+                    break;
             }
         }
 
@@ -109,26 +152,68 @@ namespace GameCore
             await levelController.LoadLevelAsync(levelData);
             _deliveryCounter = levelController.GetDeliveryCounter();
 
-            // Resolve DeliveryController từ scene hiện tại một lần duy nhất (tránh FindObjectsOfType trong getter)
-            var controllers = FindObjectsOfType<DeliveryController>();
-            deliveryController = null;
-            foreach (var c in controllers)
+            if (IsOffline)
             {
-                if (c.gameObject.scene.name != "DontDestroyOnLoad")
+                // ── Offline (Single Mode) ──
+                // Lấy instance từ LevelController (nếu map có DeliveryController riêng)
+                var levelDeliveryController = levelController.GetDeliveryControllerInstance();
+                if (levelDeliveryController != null)
                 {
-                    deliveryController = c;
-                    break;
+                    deliveryController = levelDeliveryController;
                 }
-            }
 
-            if (deliveryController != null)
-            {
-                deliveryController.StartSpawning();
+                if (deliveryController != null)
+                {
+                    deliveryController.StartSpawning();
+                }
+                else
+                {
+                    Debug.LogWarning("[GameManager] DeliveryController not found in level (offline)!");
+                }
+
+                // Start offline timer
+                var timer = FindObjectOfType<GameTimerController>();
+                if (timer != null)
+                {
+                    timer.StartOfflineTimer();
+                }
+
+                // Spawn player local
+                SpawnLocalPlayer();
+
+                // Chờ 1 frame để player kịp khởi tạo
+                await System.Threading.Tasks.Task.Yield();
+                UIManager.Instance?.ShowScreen<GameplayScreen>();
             }
             else
             {
-                Debug.LogWarning("[GameManager] DeliveryController not found in active scene!");
+                // ── Online (Multiplayer) ──
+                // DeliveryController (NetworkBehaviour) được spawn qua mạng sẽ tự động đăng ký 
+                // vào GameManager.DeliveryController thông qua hàm Awake/Spawned của nó.
+                // Chờ 1 frame để object mạng có thời gian Instantiate và Awake
+                await System.Threading.Tasks.Task.Yield();
+
+                if (deliveryController != null)
+                {
+                    deliveryController.StartSpawning();
+                }
+                else
+                {
+                    Debug.LogWarning("[GameManager] DeliveryController not found in active scene!");
+                }
             }
+        }
+
+        private void SpawnLocalPlayer()
+        {
+            if (LocalPlayerPrefab == null)
+            {
+                Debug.LogError("[GameManager] LocalPlayerPrefab is null! Cannot spawn player in Single Mode.");
+                return;
+            }
+            Vector3 spawnPos = new Vector3(0f, 1f, 0f);
+            Instantiate(LocalPlayerPrefab, spawnPos, Quaternion.identity);
+            Debug.Log("[GameManager] Spawned PlayerLocal for Singleplayer.");
         }
 
         protected override void OnRegistration()

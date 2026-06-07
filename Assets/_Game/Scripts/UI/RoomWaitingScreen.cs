@@ -142,10 +142,7 @@ namespace _Game.Scripts.UI
                 FusionNetworkRunner.Instance.LeaveSession().FireAndForget();
             }
 
-            if (GameModeManager.Instance != null)
-            {
-                GameModeManager.Instance.ResetMode();
-            }
+            _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(new _Game.Scripts.DesignPattern.Observer.Message(_Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnResetPlayMode));
 
             if (uiManager != null)
             {

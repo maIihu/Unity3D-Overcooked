@@ -969,20 +969,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1234567890123456789, guid: 2526ad8ad2b4f4b4a87d25c815c19445,
-        type: 3}
-      propertyPath: SortKey
-      value: 3939175505
-      objectReference: {fileID: 0}
     - target: {fileID: 1303012113198712420, guid: 2526ad8ad2b4f4b4a87d25c815c19445,
         type: 3}
       propertyPath: m_Name
       value: Game Manager
-      objectReference: {fileID: 0}
-    - target: {fileID: 1642025807531451866, guid: 2526ad8ad2b4f4b4a87d25c815c19445,
-        type: 3}
-      propertyPath: SortKey
-      value: 3982177816
       objectReference: {fileID: 0}
     - target: {fileID: 5218778472815609920, guid: 2526ad8ad2b4f4b4a87d25c815c19445,
         type: 3}
@@ -1084,7 +1074,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1458411355}
-  - component: {fileID: 1458411354}
   m_Layer: 0
   m_Name: GameModeManager
   m_TagString: Untagged
@@ -1092,22 +1081,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1458411354
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1458411353}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 974d236b73268954e9160c72208f78a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _dontDestroyOnLoad: 1
-  _localPlayerPrefab: {fileID: 1569148104918303626, guid: 7fcb3b628d2649c4a8ee2625dc616106,
-    type: 3}
-  _localPlayerSpawnPosition: {x: 0, y: 1, z: 0}
 --- !u!4 &1458411355
 Transform:
   m_ObjectHideFlags: 0
@@ -1430,6 +1403,12 @@ Transform:
   - {fileID: 679062411}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!20 &1868699881 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 6968441878445362614, guid: 4f3aa7b8e1914434daf0c90555dc8632,
+    type: 3}
+  m_PrefabInstance: {fileID: 1731515669}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8263490132255608605
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1438,11 +1417,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3174201161416149819, guid: 7589692d9893cf1499bb7fbd7dcdd9e0,
+    - target: {fileID: 1800260728796771779, guid: 7589692d9893cf1499bb7fbd7dcdd9e0,
         type: 3}
-      propertyPath: field of view
-      value: 48
-      objectReference: {fileID: 0}
+      propertyPath: UICamera
+      value: 
+      objectReference: {fileID: 1868699881}
     - target: {fileID: 3256369570863218097, guid: 7589692d9893cf1499bb7fbd7dcdd9e0,
         type: 3}
       propertyPath: m_Name

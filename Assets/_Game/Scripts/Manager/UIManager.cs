@@ -13,7 +13,6 @@ using UnityEngine.UI;
 
 public class UIManager : Singleton<UIManager>, IMessageHandle
 {
-    public Camera UICamera;
     public Canvas canvas;
     
     [SerializeField] List<ScreenUI> listScreen;
@@ -32,7 +31,6 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
     {
         InitializeUI();
         ShowScreen<_Game.Scripts.UI.MainMenuScreen>();
-        Debug.Log("Show");
         CleanDuplicateEventSystems();
     }
 

@@ -26,7 +26,11 @@ namespace Counter
 
         public void SetContainer(EFoodType eFoodType)
         {
-            if (HasStateAuthority)
+            if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
+            {
+                // Offline mode: just update visual, skip network state
+            }
+            else if (HasStateAuthority)
             {
                 NetworkedContainerEFoodType = eFoodType;
             }
