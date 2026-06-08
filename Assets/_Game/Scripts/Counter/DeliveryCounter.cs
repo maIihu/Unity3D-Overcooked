@@ -17,7 +17,6 @@ namespace Counter
             {
                 if (player.GetKitchenObject() is PlateObject plate)
                 {
-                    // Chỉ nhận đĩa có đồ ăn
                     if (plate.GetIngredientList().Count > 0)
                     {
                         if (GameManager.Instance != null && GameManager.Instance.DeliveryController != null)
@@ -29,7 +28,6 @@ namespace Counter
                             Debug.LogWarning("[DeliveryCounter] Mất GameManager hoặc DeliveryController! Kiểm tra lại scene.");
                         }
 
-                        // Người chơi giao đĩa => Hủy cái đĩa (và các món trên đĩa)
                         player.GetKitchenObject().DestroySelf();
                     }
                 }

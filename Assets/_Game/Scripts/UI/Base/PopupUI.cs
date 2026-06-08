@@ -59,7 +59,6 @@ public abstract class PopupUI : MonoBehaviour
         {
             return;
         }
-        //AudioManager.Instance.PlayOneShot("SFX_ClosePopup", 1f);
         isShowing = false;
         float time = 0;
         if (mainPopUp && isAniClose)

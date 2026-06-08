@@ -27,6 +27,7 @@ namespace GameCore.Network
 
         // Guard chống race condition khi bấm Start/Join nhiều lần liên tiếp
         private bool _isStarting;
+        private bool _userInitiatedLeave = false;
 
         // ── Scene name constants (tránh magic string, dễ đổi sau) ────────────────
         private const string SCENE_GAME      = "GameScene";
@@ -54,6 +55,7 @@ namespace GameCore.Network
             }
             
             _isStarting = true;
+            _userInitiatedLeave = false;
             try
             {
                 await ShutdownExistingRunner();
@@ -118,6 +120,7 @@ namespace GameCore.Network
         {
             if (_isStarting) return;
             _isStarting = true;
+            _userInitiatedLeave = false;
             try
             {
                 await ShutdownExistingRunner();
@@ -150,6 +153,7 @@ namespace GameCore.Network
             _isStarting = true;
             try
             {
+                _userInitiatedLeave = true;
                 await ShutdownExistingRunner();
                 _inputHandler = null;
             }
@@ -246,7 +250,7 @@ namespace GameCore.Network
             yield return new WaitForSeconds(0.5f);
 
             // 5. Complete loading screen rồi show GameplayScreen
-            var loadingScreen = UIManager.Instance?.GetScreen<LoadingScreenUI>();
+            var loadingScreen = UIManager.Instance?.GetScreen<LoadingScreen>();
             if (loadingScreen != null && loadingScreen.gameObject.activeSelf)
             {
                 bool completed = false;
@@ -341,9 +345,51 @@ namespace GameCore.Network
         // --- Empty INetworkRunnerCallbacks implementation ---
         public void OnInput(NetworkRunner runner, NetworkInput input) { }
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+        
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+        {
+            if (_userInitiatedLeave)
+            {
+                _userInitiatedLeave = false;
+                return;
+            }
+
+            string msg = "Phòng chơi đã bị đóng hoặc chủ phòng đã thoát game.";
+            if (shutdownReason == ShutdownReason.HostMigration)
+            {
+                msg = "Chủ phòng đã thoát game. Đang chuyển về Menu.";
+            }
+
+            HandleDisconnect(msg);
+        }
+
         public void OnConnectedToServer(NetworkRunner runner) { }
-        public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
+
+        public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+        {
+            HandleDisconnect($"Mất kết nối với máy chủ. Lý do: {reason}");
+        }
+
+        private void HandleDisconnect(string message)
+        {
+            Debug.LogWarning($"[FusionNetworkRunner] Disconnected: {message}");
+
+            if (_runner != null)
+            {
+                _ = ShutdownExistingRunner();
+            }
+
+            if (UIManager.Instance != null)
+            {
+                var popup = UIManager.Instance.GetPopup<_Game.Scripts.UI.PopupDisconnect>();
+                if (popup != null)
+                {
+                    popup.SetMessage(message);
+                    UIManager.Instance.ShowPopup<_Game.Scripts.UI.PopupDisconnect>();
+                }
+            }
+        }
+
         public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
         public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
         public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }

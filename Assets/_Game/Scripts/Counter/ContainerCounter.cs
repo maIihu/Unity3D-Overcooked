@@ -28,7 +28,6 @@ namespace Counter
         {
             if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
             {
-                // Offline mode: just update visual, skip network state
             }
             else if (HasStateAuthority)
             {

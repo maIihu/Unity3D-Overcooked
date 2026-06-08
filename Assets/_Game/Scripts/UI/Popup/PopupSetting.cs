@@ -7,7 +7,7 @@ using _Game.Scripts.Utilities;
 
 namespace _Game.Scripts.UI
 {
-    public class PopupSettings : PopupUI
+    public class PopupSetting : PopupUI
     {
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button mainMenuButton;

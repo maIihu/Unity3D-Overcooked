@@ -91,13 +91,11 @@ namespace Counter
             KitchenObject instance;
             if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
             {
-                // ── Offline: Instantiate trực tiếp ──
                 var go = Instantiate(prefab, transform.position, Quaternion.identity);
                 instance = go.GetComponent<KitchenObject>();
             }
             else
             {
-                // ── Online: Spawn qua Fusion ──
                 if (!HasStateAuthority) return null;
                 var networkObject = Runner.Spawn(prefab, transform.position, Quaternion.identity);
                 if (networkObject == null)
@@ -127,13 +125,11 @@ namespace Counter
             KitchenObject instance;
             if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.IsOffline)
             {
-                // ── Offline: Instantiate trực tiếp ──
                 var go = Instantiate(prefab, transform.position, Quaternion.identity);
                 instance = go.GetComponent<KitchenObject>();
             }
             else
             {
-                // ── Online: Spawn qua Fusion ──
                 if (!HasStateAuthority) return null;
                 var networkObject = Runner.Spawn(prefab, transform.position, Quaternion.identity);
                 instance = networkObject.GetComponent<KitchenObject>();

@@ -8,7 +8,7 @@ using GameCore;
 
 namespace _Game.Scripts.UI
 {
-    public class LoadingScreenUI : ScreenUI
+    public class LoadingScreen : ScreenUI
     {
         [Header("UI References")]
         [SerializeField] private Slider progressBar;

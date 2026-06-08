@@ -16,7 +16,6 @@ namespace Counter
         [Networked] private float WashingProgress { get; set; }
         [Networked] private NetworkBool IsWashing { get; set; }
 
-        // ── Offline local state ──
         private bool _isOffline;
         private float _offlineWashingProgress;
         private bool _offlineIsWashing;
@@ -118,7 +117,6 @@ namespace Counter
                 }
                 else
                 {
-                    // If player has a dirty plate and sink has one? Just ignore for simplicity
                 }
             }
         }

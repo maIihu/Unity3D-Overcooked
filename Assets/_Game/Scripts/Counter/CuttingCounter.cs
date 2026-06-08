@@ -9,16 +9,15 @@ namespace Counter
 {
     public class CuttingCounter : BaseCounter
     {
-        [SerializeField] private float cuttingTime = 3f;
+        [SerializeField] private CuttingCounterConfigSO config;
         [SerializeField] private ProgressBarUI progressBarUI;
 
+        private float cuttingTime => config != null ? config.cuttingTime : 3f;
         public event Action OnCutComplete;
 
-        // Networked timer: được sync từ Host sang Client, tránh desync
         [Networked] private float CuttingProgress { get; set; }
         [Networked] private NetworkBool IsCutting { get; set; }
 
-        // ── Offline local state ──
         private bool _isOffline;
         private float _offlineCuttingProgress;
         private bool _offlineIsCutting;
@@ -43,7 +42,6 @@ namespace Counter
 
         public override void FixedUpdateNetwork()
         {
-            // Chỉ Host (StateAuthority) cập nhật timer để đảm bảo tính xác thực
             if (!HasStateAuthority) return;
             if (!IsCutting) return;
 
@@ -65,12 +63,39 @@ namespace Counter
             }
         }
 
+        private float _chopSoundTimer = 0f;
+        private const float CHOP_SOUND_INTERVAL = 0.3f;
+
         public override void Render()
         {
             if (!_isOffline)
             {
                 UpdateVisualProgress((float)CuttingProgress, (bool)IsCutting);
+
+                if (IsCutting)
+                {
+                    _chopSoundTimer += Time.deltaTime;
+                    if (_chopSoundTimer >= CHOP_SOUND_INTERVAL)
+                    {
+                        _chopSoundTimer = 0f;
+                        PlayChopSound();
+                    }
+                }
+                else
+                {
+                    _chopSoundTimer = 0f;
+                }
             }
+        }
+
+        private void PlayChopSound()
+        {
+            _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                new _Game.Scripts.DesignPattern.Observer.Message(
+                    _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnChop,
+                    new object[] { transform.position }
+                )
+            );
         }
 
         private void UpdateVisualProgress(float progress, bool isCuttingNow)
@@ -90,13 +115,25 @@ namespace Counter
             }
         }
 
-        // ── Offline Path ──
         private void Update()
         {
             if (!_isOffline) return;
 
-            // Cập nhật Visual cho Offline vì Render() không được gọi khi mất Fusion
             UpdateVisualProgress(_offlineCuttingProgress, _offlineIsCutting);
+
+            if (_offlineIsCutting)
+            {
+                _chopSoundTimer += Time.deltaTime;
+                if (_chopSoundTimer >= CHOP_SOUND_INTERVAL)
+                {
+                    _chopSoundTimer = 0f;
+                    PlayChopSound();
+                }
+            }
+            else
+            {
+                _chopSoundTimer = 0f;
+            }
 
             if (!_offlineIsCutting) return;
 
@@ -129,7 +166,6 @@ namespace Counter
 
             if (HasKitchenObject())
             {
-                // Không cho nhặt khi đang cắt
                 if ((_isOffline && _offlineIsCutting) || (!_isOffline && IsCutting)) return;
 
                 GetKitchenObject().SetKitchenObjectParent(player);

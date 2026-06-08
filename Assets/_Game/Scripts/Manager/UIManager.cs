@@ -29,9 +29,59 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
 
     public void InitUI()
     {
+        LoadUIFromResources();
         InitializeUI();
         ShowScreen<_Game.Scripts.UI.MainMenuScreen>();
         CleanDuplicateEventSystems();
+    }
+
+    public void LoadUIFromResources()
+    {
+        if (listScreen == null) listScreen = new List<ScreenUI>();
+        else listScreen.Clear();
+
+        if (listPopup == null) listPopup = new List<PopupUI>();
+        else listPopup.Clear();
+
+        if (canvas == null)
+        {
+            Debug.LogError("[UIManager] Canvas is null! Cannot instantiate UI screens or popups.");
+            return;
+        }
+
+        // Load Screens
+        var screenPrefabs = Resources.LoadAll<ScreenUI>("UI/Screens");
+        if (screenPrefabs == null || screenPrefabs.Length == 0)
+            screenPrefabs = Resources.LoadAll<ScreenUI>("UI/Screen");
+        if (screenPrefabs == null || screenPrefabs.Length == 0)
+            screenPrefabs = Resources.LoadAll<ScreenUI>("Screens");
+        if (screenPrefabs == null || screenPrefabs.Length == 0)
+            screenPrefabs = Resources.LoadAll<ScreenUI>("");
+
+        foreach (var prefab in screenPrefabs)
+        {
+            if (prefab == null) continue;
+            var instance = Instantiate(prefab, canvas.transform);
+            instance.name = prefab.name;
+            listScreen.Add(instance);
+        }
+
+        // Load Popups
+        var popupPrefabs = Resources.LoadAll<PopupUI>("UI/Popups");
+        if (popupPrefabs == null || popupPrefabs.Length == 0)
+            popupPrefabs = Resources.LoadAll<PopupUI>("UI/Popup");
+        if (popupPrefabs == null || popupPrefabs.Length == 0)
+            popupPrefabs = Resources.LoadAll<PopupUI>("Popups");
+        if (popupPrefabs == null || popupPrefabs.Length == 0)
+            popupPrefabs = Resources.LoadAll<PopupUI>("");
+
+        foreach (var prefab in popupPrefabs)
+        {
+            if (prefab == null) continue;
+            var instance = Instantiate(prefab, canvas.transform);
+            instance.name = prefab.name;
+            listPopup.Add(instance);
+        }
     }
 
     private void OnEnable()
@@ -44,6 +94,7 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnTimerTick, this);
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnGameStateChanged, this);
         MessageManager.Instance.AddSubscriber(ProjectMessageType.OnToggleSettings, this);
+        MessageManager.Instance.AddSubscriber(ProjectMessageType.OnShowScreen, this);
         UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -57,6 +108,7 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnTimerTick, this);
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnGameStateChanged, this);
         MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnToggleSettings, this);
+        MessageManager.Instance.RemoveSubscriber(ProjectMessageType.OnShowScreen, this);
         UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
@@ -133,6 +185,19 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
         {
             return popup as T;
         }
+
+        // Dynamically instantiate PopupDisconnect if not present in prefabs resources
+        if (typeof(T) == typeof(_Game.Scripts.UI.PopupDisconnect))
+        {
+            GameObject go = new GameObject("PopupDisconnect", typeof(RectTransform));
+            go.transform.SetParent(canvas.transform, false);
+            var newPopup = go.AddComponent<_Game.Scripts.UI.PopupDisconnect>();
+            newPopup.Initialize(this);
+            _popupCache[typeof(T)] = newPopup;
+            listPopup.Add(newPopup);
+            return newPopup as T;
+        }
+
         return null;
     }
 
@@ -153,15 +218,15 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
     public void ToggleSettings()
     {
         if (GameManager.Instance == null) return;
-        var settingsPopup = GetPopup<_Game.Scripts.UI.PopupSettings>();
+        var settingsPopup = GetPopup<_Game.Scripts.UI.PopupSetting>();
         if (settingsPopup != null && settingsPopup.isShowing)
         {
-            HidePopup<_Game.Scripts.UI.PopupSettings>();
+            HidePopup<_Game.Scripts.UI.PopupSetting>();
             GameManager.Instance.CurrentGameState = EGameState.Play;
         }
         else
         {
-            ShowPopup<_Game.Scripts.UI.PopupSettings>();
+            ShowPopup<_Game.Scripts.UI.PopupSetting>();
             GameManager.Instance.CurrentGameState = EGameState.Pause;
         }
     }
@@ -198,11 +263,40 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
                 EGameState state = (EGameState)data[0];
                 if (state == EGameState.Play)
                 {
-                    HidePopup<_Game.Scripts.UI.PopupSettings>();
+                    HidePopup<_Game.Scripts.UI.PopupSetting>();
                 }
                 else if (state == EGameState.Pause)
                 {
-                    ShowPopup<_Game.Scripts.UI.PopupSettings>();
+                    ShowPopup<_Game.Scripts.UI.PopupSetting>();
+                }
+                break;
+            case ProjectMessageType.OnShowScreen:
+                if (data != null && data.Length > 0 && data[0] is Type screenType)
+                {
+                    if (screenType == typeof(LoadingScreen) && data.Length > 2)
+                    {
+                        string sceneName = (string)data[1];
+                        Action onComplete = (Action)data[2];
+                        var loadingScreen = GetScreen<LoadingScreen>();
+                        if (loadingScreen != null)
+                        {
+                            ShowScreen<LoadingScreen>();
+                            loadingScreen.TriggerLoad(sceneName, onComplete);
+                        }
+                        else
+                        {
+                            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+                        }
+                    }
+                    else
+                    {
+                        if (screenType == typeof(GameplayScreen)) ShowScreen<GameplayScreen>();
+                        else if (screenType == typeof(GameOverScreen)) ShowScreen<GameOverScreen>();
+                        else if (screenType == typeof(MainMenuScreen)) ShowScreen<MainMenuScreen>();
+                        else if (screenType == typeof(LoadingScreen)) ShowScreen<LoadingScreen>();
+                        else if (screenType == typeof(MultiplayerLobbyScreen)) ShowScreen<MultiplayerLobbyScreen>();
+                        else if (screenType == typeof(RoomWaitingScreen)) ShowScreen<RoomWaitingScreen>();
+                    }
                 }
                 break;
         }

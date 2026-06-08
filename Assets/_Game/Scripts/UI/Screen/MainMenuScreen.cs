@@ -47,10 +47,10 @@ namespace _Game.Scripts.UI
             // Show loading screen immediately with fake progress
             if (uiManager != null)
             {
-                var loadingScreen = uiManager.GetScreen<LoadingScreenUI>();
+                var loadingScreen = uiManager.GetScreen<LoadingScreen>();
                 if (loadingScreen != null)
                 {
-                    uiManager.ShowScreen<LoadingScreenUI>();
+                    uiManager.ShowScreen<LoadingScreen>();
                     loadingScreen.StartFakeProgress();
                 }
             }

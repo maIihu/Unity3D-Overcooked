@@ -4,23 +4,19 @@ using UnityEngine;
 
 namespace GameCore
 {
-    /// <summary>
-    /// Game timer. Supports both Online (Fusion FixedUpdateNetwork) and Offline (Update) modes.
-    /// </summary>
+
     public class GameTimerController : NetworkBehaviour
     {
-        [SerializeField] private float gameDuration = 180f; // 3 minutes default
+        [SerializeField] private float gameDuration = 180f; 
 
         [Networked] public float CurrentTime { get; set; }
         [Networked] public NetworkBool IsTimerRunning { get; set; }
         private bool _hasFiredGameOver = false;
 
-        // ── Offline state ──
         private bool _isOffline;
         private float _offlineCurrentTime;
         private bool _offlineIsRunning;
 
-        // ── Optimization: chỉ gửi UI message khi seconds thay đổi ──
         private int _lastRenderedSeconds = -1;
 
         public override void Spawned()
@@ -36,9 +32,6 @@ namespace GameCore
             }
         }
 
-        /// <summary>
-        /// Gọi khi offline mode — khởi tạo timer local.
-        /// </summary>
         public void StartOfflineTimer()
         {
             _isOffline = true;
@@ -70,7 +63,6 @@ namespace GameCore
 
         public override void Render()
         {
-            // Chỉ gửi UI message khi giá trị seconds thay đổi (1 lần/giây thay vì 60 lần/giây)
             int currentSeconds = Mathf.FloorToInt(CurrentTime);
             if (currentSeconds != _lastRenderedSeconds)
             {
@@ -78,7 +70,6 @@ namespace GameCore
                 MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnTimerTick, new object[] { CurrentTime }));
             }
             
-            // If timer stopped and reached 0, broadcast GameOver (only once per client/host)
             if (!IsTimerRunning && CurrentTime <= 0.01f && !_hasFiredGameOver)
             {
                 _hasFiredGameOver = true;
@@ -103,7 +94,6 @@ namespace GameCore
                 Debug.Log("[GameTimerController] Offline timer finished!");
             }
 
-            // UI update — chỉ khi seconds thay đổi
             int currentSeconds = Mathf.FloorToInt(_offlineCurrentTime);
             if (currentSeconds != _lastRenderedSeconds)
             {
@@ -111,7 +101,6 @@ namespace GameCore
                 MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnTimerTick, new object[] { _offlineCurrentTime }));
             }
 
-            // Game Over
             if (!_offlineIsRunning && _offlineCurrentTime <= 0.01f && !_hasFiredGameOver)
             {
                 _hasFiredGameOver = true;

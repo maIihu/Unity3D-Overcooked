@@ -51,6 +51,10 @@ namespace _Game.Scripts.Gameplay
         private CuttingCounter _currentCuttingCounter;
         private bool _isCutting;
 
+        // Footstep sound state
+        private float _footstepTimer = 0f;
+        private const float FOOTSTEP_INTERVAL = 0.35f;
+
         // ─── Unity Lifecycle ─────────────────────────────────────
 
         private void Start()
@@ -158,11 +162,25 @@ namespace _Game.Scripts.Gameplay
                     Time.fixedDeltaTime * rotateSpeed
                 );
                 transform.rotation = _currentRotation;
+
+                // Trigger footstep sound
+                _footstepTimer += Time.fixedDeltaTime;
+                if (_footstepTimer >= FOOTSTEP_INTERVAL)
+                {
+                    _footstepTimer = 0f;
+                    _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                        new _Game.Scripts.DesignPattern.Observer.Message(
+                            _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnFootstep,
+                            new object[] { transform.position }
+                        )
+                    );
+                }
             }
             else
             {
                 // Đứng yên: triệt tiêu velocity ngang, giữ velocity.y
                 _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);
+                _footstepTimer = 0f;
             }
         }
 

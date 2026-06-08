@@ -1,6 +1,6 @@
 using System;
 using UnityEngine.SceneManagement;
-
+using _Game.Scripts.UI;
 namespace GameCore
 {
     public static class Loader
@@ -33,7 +33,7 @@ namespace GameCore
                     // For host to switch scene, use Runner
                     if (Network.FusionNetworkRunner.Instance.Runner.IsServer)
                     {
-                        Network.FusionNetworkRunner.Instance.Runner.LoadScene(Fusion.SceneRef.FromIndex((int)targetScene));
+                        await Network.FusionNetworkRunner.Instance.Runner.LoadScene(Fusion.SceneRef.FromIndex((int)targetScene));
                         OnComplete?.Invoke();
                         OnComplete = null;
                     }
@@ -49,10 +49,10 @@ namespace GameCore
         {
             if (UIManager.Instance != null)
             {
-                var loadingUI = UIManager.Instance.GetScreen<_Game.Scripts.UI.LoadingScreenUI>();
+                var loadingUI = UIManager.Instance.GetScreen<LoadingScreen>();
                 if (loadingUI != null)
                 {
-                    UIManager.Instance.ShowScreen<_Game.Scripts.UI.LoadingScreenUI>();
+                    UIManager.Instance.ShowScreen<LoadingScreen>();
                     loadingUI.TriggerLoad(TargetScene.ToString(), OnComplete);
                 }
                 else

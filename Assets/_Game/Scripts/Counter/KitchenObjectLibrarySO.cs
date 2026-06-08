@@ -5,11 +5,6 @@ using UnityEngine;
 
 namespace Counter
 {
-    /// <summary>
-    /// ScriptableObject mapping EFoodType to KitchenObject prefabs.
-    /// Used by Level Designer (no pool) to Instantiate food objects directly.
-    /// Create via: Assets > Create > Game > Kitchen Object Library
-    /// </summary>
     [CreateAssetMenu(menuName = "Game/Kitchen Object Library", fileName = "KitchenObjectLibrarySO")]
     public class KitchenObjectLibrarySO : ScriptableObject
     {
@@ -39,7 +34,6 @@ namespace Counter
             }
         }
 
-        /// <summary>Returns the prefab for the given EFoodType, or null if not found.</summary>
         public KitchenObject GetPrefab(KitchenType kitchenType)
         {
             if (_lookup == null) BuildLookup();

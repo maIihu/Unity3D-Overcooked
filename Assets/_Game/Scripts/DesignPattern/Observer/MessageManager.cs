@@ -20,7 +20,14 @@ namespace _Game.Scripts.DesignPattern.Observer
         OnStartSingleplayer,
         OnSetMultiplayerMode,
         OnResetPlayMode,
-        OnSetupCamera
+        OnSetupCamera,
+        OnShowScreen,
+        OnChop,
+        OnPickupObject,
+        OnDropObject,
+        OnFootstep,
+        OnStoveSizzle,
+        OnStoveWarning
 	}
     public class Message
     {
@@ -52,17 +59,6 @@ namespace _Game.Scripts.DesignPattern.Observer
     
     
         private Dictionary<ProjectMessageType, List<IMessageHandle>> _subscribers = new Dictionary<ProjectMessageType, List<IMessageHandle>>();
-		/*public static MessageManager Instance { get { return instance; } }
-    void Start()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-            Destroy(gameObject);
-    }*/
 
 		private void Awake()
 		{

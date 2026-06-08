@@ -13,21 +13,20 @@ namespace Counter
     public class StoveCounter : BaseCounter
     {
         [SerializeField] private Transform potPoint;
+        [SerializeField] private StoveCounterConfigSO config;
 
-        [SerializeField] private float fryingTimerMax = 4f;
-        [SerializeField] private float burningTimerMax = 5f;
+        private float fryingTimerMax => config != null ? config.fryingTimerMax : 4f;
+        private float burningTimerMax => config != null ? config.burningTimerMax : 5f;
 
         [SerializeField] private Sprite completeSprite;
         [SerializeField] private Sprite warningSprite;
 
         [SerializeField] private Image imageUI;
 
-        // --- Networked state (Host tính, sync sang Client) ---
         [Networked] private float FryingTimer { get; set; }
         [Networked] private float BurningTimer { get; set; }
         [Networked] private StoveState NetworkStoveState { get; set; }
 
-        // --- Local visual state (không cần sync) ---
         private StoveState _lastRenderedState;
         private bool _isCompleteUIShown;
         private Tween _imageFadeTween;
@@ -36,7 +35,6 @@ namespace Counter
         // -------------------------------------------------------
         #region Fusion Lifecycle
 
-        // ── Offline local state (dùng khi không có Fusion Runner) ──
         private bool _isOffline;
         private float _offlineFryingTimer;
         private float _offlineBurningTimer;
@@ -62,10 +60,6 @@ namespace Counter
             _lastRenderedState = StoveState.Idle;
         }
 
-        /// <summary>
-        /// Timer logic chạy trên Host theo Fusion fixed tick.
-        /// Dùng Runner.DeltaTime thay vì Time.deltaTime để đảm bảo sync.
-        /// </summary>
         public override void FixedUpdateNetwork()
         {
             if (!HasStateAuthority) return;
@@ -116,14 +110,10 @@ namespace Counter
             }
         }
 
-        /// <summary>
-        /// Render() chạy mỗi frame trên tất cả client — dùng để cập nhật UI và VFX.
-        /// </summary>
         public override void Render()
         {
             PotObject pot = _kitchenObject as PotObject;
 
-            // Cập nhật progress bar của nồi
             if (pot != null)
             {
                 switch (NetworkStoveState)
@@ -145,21 +135,17 @@ namespace Counter
                 pot.UpdateEffects();
             }
 
-            // Cập nhật UI khi state thay đổi
             if (NetworkStoveState != _lastRenderedState)
             {
                 _lastRenderedState = NetworkStoveState;
                 OnStoveStateChangedVisual(NetworkStoveState);
             }
 
-            // Hiệu ứng warning khi sắp cháy
             if (NetworkStoveState == StoveState.Fried && pot != null)
             {
                 HandleFriedUI();
             }
         }
-
-        // ── Offline cooking logic (Update thay vì FixedUpdateNetwork) ──
 
         private void Update()
         {
@@ -210,7 +196,6 @@ namespace Counter
                     break;
             }
 
-            // Visual updates (offline)
             OfflineRender(pot);
         }
 
@@ -252,6 +237,14 @@ namespace Counter
 
             if (burnProgress >= 0.5f)
             {
+                // Start warning sound
+                _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                    new _Game.Scripts.DesignPattern.Observer.Message(
+                        _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStoveWarning,
+                        new object[] { GetInstanceID().ToString(), true, transform.position }
+                    )
+                );
+
                 if (imageUI.sprite != warningSprite || !imageUI.enabled)
                 {
                     _imageFadeTween?.Kill();
@@ -265,6 +258,14 @@ namespace Counter
             }
             else
             {
+                // Stop warning sound
+                _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                    new _Game.Scripts.DesignPattern.Observer.Message(
+                        _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStoveWarning,
+                        new object[] { GetInstanceID().ToString(), false, transform.position }
+                    )
+                );
+
                 if (!_isCompleteUIShown)
                 {
                     _isCompleteUIShown = true;
@@ -285,6 +286,21 @@ namespace Counter
         private void OnDestroy()
         {
             _imageFadeTween?.Kill();
+            if (_Game.Scripts.DesignPattern.Observer.MessageManager.Instance != null)
+            {
+                _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                    new _Game.Scripts.DesignPattern.Observer.Message(
+                        _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStoveSizzle,
+                        new object[] { GetInstanceID().ToString(), false, transform.position }
+                    )
+                );
+                _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                    new _Game.Scripts.DesignPattern.Observer.Message(
+                        _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStoveWarning,
+                        new object[] { GetInstanceID().ToString(), false, transform.position }
+                    )
+                );
+            }
         }
 
         #endregion
@@ -454,6 +470,26 @@ namespace Counter
 
         private void OnStoveStateChangedVisual(StoveState state)
         {
+            // Trigger sizzle sound
+            bool isSizzle = (state == StoveState.Frying || state == StoveState.Fried);
+            _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                new _Game.Scripts.DesignPattern.Observer.Message(
+                    _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStoveSizzle,
+                    new object[] { GetInstanceID().ToString(), isSizzle, transform.position }
+                )
+            );
+
+            // If not Fried, warning must stop
+            if (state != StoveState.Fried)
+            {
+                _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                    new _Game.Scripts.DesignPattern.Observer.Message(
+                        _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStoveWarning,
+                        new object[] { GetInstanceID().ToString(), false, transform.position }
+                    )
+                );
+            }
+
             if (imageUI == null) return;
 
             if (state != StoveState.Fried)
@@ -472,6 +508,14 @@ namespace Counter
 
             if (burnProgress >= 0.5f)
             {
+                // Start warning sound
+                _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                    new _Game.Scripts.DesignPattern.Observer.Message(
+                        _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStoveWarning,
+                        new object[] { GetInstanceID().ToString(), true, transform.position }
+                    )
+                );
+
                 if (imageUI.sprite != warningSprite || !imageUI.enabled)
                 {
                     _imageFadeTween?.Kill();
@@ -487,6 +531,14 @@ namespace Counter
             }
             else
             {
+                // Stop warning sound
+                _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                    new _Game.Scripts.DesignPattern.Observer.Message(
+                        _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStoveWarning,
+                        new object[] { GetInstanceID().ToString(), false, transform.position }
+                    )
+                );
+
                 if (!_isCompleteUIShown)
                 {
                     _isCompleteUIShown = true;

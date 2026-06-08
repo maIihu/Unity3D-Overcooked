@@ -4,6 +4,7 @@ using DesignPattern;
 using _Game.Scripts.DesignPattern.Observer;
 using _Game.Scripts.UI;
 using _Game.Scripts.Utilities;
+using System;
 
 namespace GameCore
 {
@@ -47,20 +48,13 @@ namespace GameCore
             Debug.Log("[GameModeController] Starting Singleplayer mode (Offline — no Fusion).");
             CurrentMode = PlayMode.Singleplayer;
 
-            // Hiển thị Loading Screen → load GameScene trực tiếp (không qua Fusion)
-            var loadingScreen = UIManager.Instance?.GetScreen<LoadingScreenUI>();
-            if (loadingScreen != null)
-            {
-                UIManager.Instance.ShowScreen<LoadingScreenUI>();
-                loadingScreen.TriggerLoad(GAMEPLAY_SCENE_NAME, OnSingleplayerSceneLoaded);
-            }
-            else
-            {
-                // Fallback nếu không có LoadingScreen
-                SceneManager.LoadScene(GAMEPLAY_SCENE_NAME);
-                // Gọi sau 1 frame để scene kịp load
-                StartCoroutine(DelayedOnSingleplayerSceneLoaded());
-            }
+            // Gửi message qua Observer để UIManager tự mở Loading Screen và load cảnh
+            MessageManager.Instance.SendMessage(
+                new Message(
+                    ProjectMessageType.OnShowScreen, 
+                    new object[] { typeof(LoadingScreen), GAMEPLAY_SCENE_NAME, (Action)OnSingleplayerSceneLoaded }
+                )
+            );
         }
 
         private void OnSingleplayerSceneLoaded()

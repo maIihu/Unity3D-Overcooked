@@ -15,7 +15,6 @@ namespace GameCore
         private readonly List<PlatesCounter> _platesCounters = new List<PlatesCounter>();
         private GameObject _currentLevelInstance;
 
-        // Cached DeliveryController instance — set khi offline spawn
         private DeliveryController _deliveryControllerInstance;
         
         public async System.Threading.Tasks.Task LoadLevelAsync(string levelName)
@@ -35,7 +34,6 @@ namespace GameCore
                 return;
             }
 
-            // Instantiate prefab to retain environment props
             _currentLevelInstance = Instantiate(prefab, counterParent);
             _currentLevelInstance.name = "Level_" + levelName;
 
@@ -57,7 +55,7 @@ namespace GameCore
             {
                 if (templateCounter == null) continue;
                 SpawnCounter(templateCounter);
-                Destroy(templateCounter.gameObject); // Remove non-networked template counter from environment
+                Destroy(templateCounter.gameObject); 
             }
 
             Debug.Log($"[LevelController] Loaded level environment & counters: {levelName} ({prefabData.baseCounters.Count} counters)");
@@ -67,15 +65,13 @@ namespace GameCore
         {
             if (GameManager.Instance != null && GameManager.Instance.IsOffline)
             {
-                // ── Offline: Destroy bình thường ──
                 foreach (var counter in _spawnedCounters)
                 {
-                    if (counter != null) Destroy(counter.gameObject);
+                    if (counter != null) PoolManager.Instance.Release(counter);
                 }
             }
             else
             {
-                // ── Online: Despawn qua Fusion Runner ──
                 if (GameCore.Network.FusionNetworkRunner.Instance != null && 
                     GameCore.Network.FusionNetworkRunner.Instance.Runner != null &&
                     GameCore.Network.FusionNetworkRunner.Instance.Runner.IsServer)
@@ -117,10 +113,6 @@ namespace GameCore
             }
             return null;
         }
-
-        /// <summary>
-        /// Trả về DeliveryController instance đã spawn (dùng cho offline mode).
-        /// </summary>
         public DeliveryController GetDeliveryControllerInstance() => _deliveryControllerInstance;
 
         public void RegisterSpawnedCounter(BaseCounter counter)
@@ -153,20 +145,17 @@ namespace GameCore
 
             if (isOffline)
             {
-                // ── Offline: Instantiate trực tiếp — ZERO Fusion overhead ──
-                var go = Instantiate(prefab, templateCounter.transform.position, templateCounter.transform.rotation);
-                counter = go.GetComponent<BaseCounter>();
-                counter.Init(); // Gọi Init() vì Spawned() sẽ không được gọi khi không có Fusion
+                counter = PoolManager.Instance.Counter.Get(prefab, templateCounter.transform.position, templateCounter.transform.rotation);
+                counter.Init();
                 RegisterSpawnedCounter(counter);
             }
             else
             {
-                // ── Online: Spawn qua Fusion Runner ──
                 if (GameCore.Network.FusionNetworkRunner.Instance == null || 
                     GameCore.Network.FusionNetworkRunner.Instance.Runner == null ||
                     !GameCore.Network.FusionNetworkRunner.Instance.Runner.IsServer)
                 {
-                    return; // Only Host spawns networked counters
+                    return;
                 }
 
                 var netObj = GameCore.Network.FusionNetworkRunner.Instance.Runner.Spawn(
@@ -177,7 +166,6 @@ namespace GameCore
                 counter = netObj.GetComponent<BaseCounter>();
             }
 
-            // Copy configuration
             if (counter is ContainerCounter container && templateCounter is ContainerCounter templateContainer)
             {
                 container.SetContainer(templateContainer.ContainerEFoodType);
@@ -187,13 +175,11 @@ namespace GameCore
                 stove.SetStoveData(templateStove.KitchenType);
             }
 
-            // Track DeliveryController instance cho offline resolve
             if (counter is DeliveryCounter dc)
             {
                 _deliveryControllerInstance = dc.GetComponent<DeliveryController>();
             }
 
-            // Spawn pre-placed KitchenObject if any
             SpawnPreplacedKitchenObject(templateCounter, counter, isOffline);
         }
 
@@ -214,9 +200,7 @@ namespace GameCore
 
             if (isOffline)
             {
-                // ── Offline: Instantiate KitchenObject ──
-                var kitchenGO = Instantiate(kPrefab, clearCounter.GetKitchenObjectToTransform().position, Quaternion.identity);
-                var ko = kitchenGO.GetComponent<KitchenObject>();
+                var ko = PoolManager.Instance.Kitchen.Get(kPrefab, clearCounter.GetKitchenObjectToTransform().position, Quaternion.identity);
                 if (ko != null)
                 {
                     ko.SetKitchenObjectParent(clearCounter);
@@ -224,7 +208,6 @@ namespace GameCore
             }
             else
             {
-                // ── Online: Spawn qua Fusion ──
                 var kNetObj = GameCore.Network.FusionNetworkRunner.Instance.Runner.Spawn(
                     kPrefab, clearCounter.GetKitchenObjectToTransform().position, Quaternion.identity);
                 KitchenObject kitchenGO = kNetObj.GetComponent<KitchenObject>();

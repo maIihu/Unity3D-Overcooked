@@ -11,9 +11,6 @@ using Fusion;
 
 namespace GameCore
 {
-    /// <summary>
-    /// Wrapper that pairs a recipe with a unique runtime ID for tracking.
-    /// </summary>
     public class ActiveRecipe
     {
         private static int _nextId;
@@ -41,10 +38,6 @@ namespace GameCore
         public bool Equals(NetworkRecipe other) => Id == other.Id;
     }
 
-    /// <summary>
-    /// Manages recipe spawning, delivery validation, and scoring.
-    /// Supports both Online (Fusion) and Offline (Single Mode) paths.
-    /// </summary>
     public class DeliveryController : NetworkBehaviour
     {
         [Header("Recipe Config")]
@@ -64,17 +57,14 @@ namespace GameCore
         private readonly List<ActiveRecipe> _activeRecipes = new List<ActiveRecipe>();
         private float _spawnTimer = 0f;
 
-        // ── Offline state ──
         private bool _isOffline;
         private float _offlineSpawnTimer;
         private int _offlineScore;
 
         private void Start()
         {
-            // Tự động gán reference cho GameManager, tránh dùng FindObjectOfType
             if (GameManager.Instance != null)
             {
-                // Nếu đang online, ưu tiên DeliveryController nằm ngoài DontDestroyOnLoad (tức là được spawn trong scene)
                 if (gameObject.scene.name != "DontDestroyOnLoad" || GameManager.Instance.DeliveryController == null)
                 {
                     GameManager.Instance.DeliveryController = this;
@@ -110,16 +100,12 @@ namespace GameCore
         public override void Spawned()
         {
             _activeRecipes.Clear();
-            _spawnTimer = initialSpawnDelay; // Spawn first recipe after initial delay
-            
-            // Đảm bảo reference được gán lại khi mạng khởi tạo đối tượng
+            _spawnTimer = initialSpawnDelay; 
             if (GameManager.Instance != null && gameObject.scene.name != "DontDestroyOnLoad")
             {
                 GameManager.Instance.DeliveryController = this;
             }
         }
-
-        // ── Online path (Fusion) ─────────────────────────────────
 
         public override void FixedUpdateNetwork()
         {
@@ -127,7 +113,6 @@ namespace GameCore
             if (!IsSpawning) return;
             if (GameManager.Instance != null && GameManager.Instance.CurrentGameState != EGameState.Play) return;
             
-            // Handle spawning
             if (NetworkedRecipes.Count < maxActiveRecipes && menuRecipeList != null && menuRecipeList.Count > 0)
             {
                 _spawnTimer -= Runner.DeltaTime;
@@ -142,7 +127,6 @@ namespace GameCore
                 }
             }
 
-            // Handle expiration
             for (int i = NetworkedRecipes.Count - 1; i >= 0; i--)
             {
                 var netRecipe = NetworkedRecipes[i];
@@ -171,9 +155,6 @@ namespace GameCore
 
         public override void Render()
         {
-            // Sync NetworkedRecipes to local _activeRecipes for UI
-            
-            // 1. Check for removed recipes
             for (int i = _activeRecipes.Count - 1; i >= 0; i--)
             {
                 bool found = false;
@@ -192,7 +173,6 @@ namespace GameCore
                 }
             }
 
-            // 2. Check for newly spawned recipes
             foreach (var netR in NetworkedRecipes)
             {
                 bool found = false;
@@ -216,8 +196,6 @@ namespace GameCore
                 }
             }
         }
-
-        // ── Offline path (Single Mode — no Runner) ──────────────
 
         private void Update()
         {
@@ -257,10 +235,6 @@ namespace GameCore
 
         // ── Delivery (shared logic) ─────────────────────────────
 
-        /// <summary>
-        /// Called by DeliveryCounter when a plate is delivered.
-        /// Checks ingredients against active orders.
-        /// </summary>
         public void DeliverPlate(PlateObject plate)
         {
             if (_isOffline)
@@ -269,7 +243,6 @@ namespace GameCore
                 return;
             }
 
-            // Online path
             if (!HasStateAuthority) return;
 
             List<EFoodType> plateIngredients = plate.GetIngredientList();
@@ -287,7 +260,6 @@ namespace GameCore
 
                 if (plateIngredients.Count == required.Count && !required.Except(plateIngredients).Any())
                 {
-                    // Success!
                     NetworkedRecipes.Remove(netRecipe);
                 
                     float age = (Runner.Tick - netRecipe.SpawnTick) * Runner.DeltaTime;
@@ -305,7 +277,6 @@ namespace GameCore
                 }
             }
 
-            // No match — reject
             if (NetworkedRecipes.Count > 0)
             {
                 var first = NetworkedRecipes[0];
@@ -327,10 +298,9 @@ namespace GameCore
 
                 if (plateIngredients.Count == required.Count && !required.Except(plateIngredients).Any())
                 {
-                    // Success!
                     _activeRecipes.RemoveAt(i);
 
-                    int scoreAdded = 20; // Base score (offline không track spawn time)
+                    int scoreAdded = 20; 
                     _offlineScore += scoreAdded;
 
                     MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnRecipeSuccess, new object[] { recipe, scoreAdded }));
@@ -341,7 +311,6 @@ namespace GameCore
                 }
             }
 
-            // No match — reject first recipe
             if (_activeRecipes.Count > 0)
             {
                 var first = _activeRecipes[0];

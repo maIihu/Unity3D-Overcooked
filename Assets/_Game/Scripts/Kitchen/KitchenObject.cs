@@ -142,6 +142,18 @@ namespace Kitchen
                 bool hasNetParent = kitchenObjectParent.GetNetworkObject() != null;
                 if (_cachedNetworkTransform != null) _cachedNetworkTransform.enabled = !hasNetParent;
                 if (_cachedNetworkRigidbody != null) _cachedNetworkRigidbody.enabled = !hasNetParent;
+
+                // Send pickup or drop message
+                if (_Game.Scripts.DesignPattern.Observer.MessageManager.Instance != null)
+                {
+                    var msgType = (kitchenObjectParent is _Game.Scripts.Gameplay.IPlayer)
+                        ? _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnPickupObject
+                        : _Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnDropObject;
+
+                    _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(
+                        new _Game.Scripts.DesignPattern.Observer.Message(msgType, new object[] { transform.position })
+                    );
+                }
             }
             else
             {
