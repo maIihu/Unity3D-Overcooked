@@ -15,13 +15,21 @@ namespace GameSound
     {
         [Header("Audio References")]
         [SerializeField] private AudioClipRefesSO audioClipRefesSO;
+        [SerializeField] private MusicSO musicSO;
         [SerializeField] private float defaultVolume = 1f;
 
         private Dictionary<string, AudioSource> _activeLoops = new Dictionary<string, AudioSource>();
+        private AudioSource bgmSource;
 
         protected void Awake()
         {
             Initialize(this);
+
+            // Khởi tạo AudioSource chuyên dụng cho Background Music (2D Sound)
+            bgmSource = gameObject.AddComponent<AudioSource>();
+            bgmSource.loop = true;
+            bgmSource.spatialBlend = 0f; 
+            bgmSource.volume = defaultVolume;
         }
 
         private void OnEnable()
@@ -114,6 +122,29 @@ namespace GameSound
                     }
                     break;
             }
+        }
+
+        public void PlayMenuMusic()
+        {
+            if (musicSO == null || musicSO.menuMusic == null) return;
+            PlayMusic(musicSO.menuMusic);
+        }
+
+        public void PlayIngameMusic()
+        {
+            if (musicSO == null || musicSO.ingameMusic == null) return;
+            PlayMusic(musicSO.ingameMusic);
+        }
+
+        private void PlayMusic(AudioClip clip)
+        {
+            if (bgmSource == null) return;
+
+            // Không phát lại từ đầu nếu đang phát đúng bài này
+            if (bgmSource.clip == clip && bgmSource.isPlaying) return;
+
+            bgmSource.clip = clip;
+            bgmSource.Play();
         }
 
         private void PlayRandomClipAtPoint(AudioClip[] clips, Vector3 position, float volumeMultiplier = 1f)
