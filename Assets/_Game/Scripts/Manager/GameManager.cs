@@ -120,6 +120,10 @@ namespace GameCore
                     }
                     break;
                 case ProjectMessageType.OnRecipeSuccess:
+                    if (_deliveryCounter == null && levelController != null)
+                    {
+                        _deliveryCounter = levelController.GetDeliveryCounter();
+                    }
                     if (message.Data.Length > 1 && _deliveryCounter != null && UIManager.Instance != null && UIManager.Instance.floatingScoreManager != null)
                     {
                         int scoreAdded = (int)message.Data[1];

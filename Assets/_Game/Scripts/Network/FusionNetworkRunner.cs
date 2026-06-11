@@ -348,7 +348,7 @@ namespace GameCore.Network
         
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
         {
-            if (_userInitiatedLeave)
+            if (_userInitiatedLeave || shutdownReason == ShutdownReason.Ok)
             {
                 _userInitiatedLeave = false;
                 return;

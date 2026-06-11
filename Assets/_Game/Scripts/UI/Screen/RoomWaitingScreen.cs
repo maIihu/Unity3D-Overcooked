@@ -114,8 +114,8 @@ namespace _Game.Scripts.UI
             if (runner.IsServer)
             {
                 Debug.Log("[RoomWaitingScreen] All players ready. Host is loading GameScene...");
-                // Load GameScene (index 1) qua mạng
-                runner.LoadScene(SceneRef.FromIndex(1), UnityEngine.SceneManagement.LoadSceneMode.Single);
+                int sceneIndex = UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath("Assets/_Game/Scenes/GameScene.unity");
+                runner.LoadScene(SceneRef.FromIndex(sceneIndex), UnityEngine.SceneManagement.LoadSceneMode.Single);
             }
         }
 

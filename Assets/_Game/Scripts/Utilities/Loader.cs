@@ -33,7 +33,8 @@ namespace GameCore
                     // For host to switch scene, use Runner
                     if (Network.FusionNetworkRunner.Instance.Runner.IsServer)
                     {
-                        await Network.FusionNetworkRunner.Instance.Runner.LoadScene(Fusion.SceneRef.FromIndex((int)targetScene));
+                        int sceneIndex = UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath($"Assets/_Game/Scenes/{targetScene}.unity");
+                        await Network.FusionNetworkRunner.Instance.Runner.LoadScene(Fusion.SceneRef.FromIndex(sceneIndex));
                         OnComplete?.Invoke();
                         OnComplete = null;
                     }

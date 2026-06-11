@@ -164,6 +164,7 @@ namespace GameCore
                     templateCounter.transform.rotation
                 );
                 counter = netObj.GetComponent<BaseCounter>();
+                counter.Init();
             }
 
             if (counter is ContainerCounter container && templateCounter is ContainerCounter templateContainer)
