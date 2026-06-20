@@ -25,7 +25,6 @@ namespace GameSound
         {
             Initialize(this);
 
-            // Khởi tạo AudioSource chuyên dụng cho Background Music (2D Sound)
             bgmSource = gameObject.AddComponent<AudioSource>();
             bgmSource.loop = true;
             bgmSource.spatialBlend = 0f; 
@@ -140,7 +139,6 @@ namespace GameSound
         {
             if (bgmSource == null) return;
 
-            // Không phát lại từ đầu nếu đang phát đúng bài này
             if (bgmSource.clip == clip && bgmSource.isPlaying) return;
 
             bgmSource.clip = clip;
@@ -190,7 +188,7 @@ namespace GameSound
                 AudioSource source = go.AddComponent<AudioSource>();
                 source.clip = clip;
                 source.loop = true;
-                source.spatialBlend = 1f; // 3D sound
+                source.spatialBlend = 1f; 
                 source.volume = defaultVolume;
                 source.Play();
 

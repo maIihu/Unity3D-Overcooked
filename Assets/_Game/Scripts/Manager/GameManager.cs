@@ -69,9 +69,10 @@ namespace GameCore
 
         public void InitGame()
         {
-            QualitySettings.vSyncCount = 0; // Tắt VSync — tránh override targetFrameRate
+            QualitySettings.vSyncCount = 0; 
             Application.targetFrameRate = 60;
             Application.runInBackground = true; 
+            //Screen.SetResolution(1280, 720, FullScreenMode.Windowed);
         }
 
         private void OnEnable()

@@ -22,7 +22,7 @@ namespace Counter
 
         public override void Spawned()
         {
-            //Init();
+            Init();
             if (GameCore.GameManager.Instance != null && GameCore.GameManager.Instance.LevelController != null)
             {
                 GameCore.GameManager.Instance.LevelController.RegisterSpawnedCounter(this);

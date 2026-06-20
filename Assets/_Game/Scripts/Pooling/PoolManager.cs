@@ -7,10 +7,7 @@ using Kitchen;
 
 namespace Pooling
 {
-    /// <summary>
-    /// Centralized Hub for all object pooling.
-    /// Manages specialized pools (KitchenObjectPool, CounterPool) and handles generic GameObjects.
-    /// </summary>
+
     public class PoolManager : Singleton<PoolManager>
     {
         [Header("Specialized Pools")]
@@ -38,7 +35,6 @@ namespace Pooling
         {
             Initialize(this);
             
-            // Prewarm generic pools
             if (genericPrewarmPools != null)
             {
                 foreach (var config in genericPrewarmPools)
@@ -89,14 +85,11 @@ namespace Pooling
         #endregion
 
         #region Unified Release
-        /// <summary>
-        /// Centralized release method. Routes the object back to its correct pool.
-        /// </summary>
+
         public void Release(GameObject instance)
         {
             if (instance == null) return;
 
-            // 1. Try specialized pools first (more efficient)
             if (instance.TryGetComponent<KitchenObject>(out var k))
             {
                 if (kitchen != null) kitchen.Release(k);
@@ -111,7 +104,6 @@ namespace Pooling
                 return;
             }
 
-            // 2. Fallback to generic pools
             if (_instanceToPoolMap.TryGetValue(instance, out var pool))
             {
                 pool.Release(instance);

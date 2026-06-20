@@ -114,7 +114,7 @@ namespace _Game.Scripts.UI
             if (runner.IsServer)
             {
                 Debug.Log("[RoomWaitingScreen] All players ready. Host is loading GameScene...");
-                int sceneIndex = UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath("Assets/_Game/Scenes/GameScene.unity");
+                int sceneIndex = GameCore.Loader.GetSceneIndex("GameScene");
                 runner.LoadScene(SceneRef.FromIndex(sceneIndex), UnityEngine.SceneManagement.LoadSceneMode.Single);
             }
         }
@@ -217,12 +217,10 @@ namespace _Game.Scripts.UI
             var runner = FusionNetworkRunner.Instance.Runner;
             bool isHost = runner.IsServer;
 
-            // Cập nhật hiển thị nút Start Game (chỉ Host thấy)
             if (startGameButton != null)
             {
                 startGameButton.gameObject.SetActive(isHost);
 
-                // Chỉ cho phép Host nhấn Start Game khi tất cả người chơi đã Ready
                 bool allReady = true;
                 int playerCount = 0;
                 foreach (var playerRef in runner.ActivePlayers)

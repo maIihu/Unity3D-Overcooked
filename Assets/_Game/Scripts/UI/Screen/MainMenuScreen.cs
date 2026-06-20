@@ -105,7 +105,6 @@ namespace _Game.Scripts.UI
                 }
             }
 
-            // Trigger singleplayer start (Fusion will load GameScene)
             _Game.Scripts.DesignPattern.Observer.MessageManager.Instance.SendMessage(new _Game.Scripts.DesignPattern.Observer.Message(_Game.Scripts.DesignPattern.Observer.ProjectMessageType.OnStartSingleplayer));
         }
 

@@ -24,40 +24,30 @@ namespace _Game.Scripts.Gameplay
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private Renderer bodyRend;
 
-        // ── Animator hash cache (static → chỉ tính 1 lần cho tất cả instances) ──
         private static readonly int s_MovingValue = Animator.StringToHash("MovingValue");
         private static readonly int s_IsChopping  = Animator.StringToHash("IsChopping");
         private static readonly int s_HasObject   = Animator.StringToHash("HasObject");
         private static readonly int s_IsPicked    = Animator.StringToHash("IsPicked");
 
-        // ── Local-only state ─────────────────────────────────────────────────────
         private Vector2    _moveInput;
         private Vector3    _lastInteractDir;
         private BaseCounter _selectedCounter;
         private KitchenObject _kitchenObject;
 
-        // Canonical rotation — dùng làm source cho Slerp, KHÔNG đọc _rb.rotation
-        // (đọc _rb.rotation trong FixedUpdateNetwork có thể trả về giá trị interpolated → feedback loop giật)
         [Networked] private Quaternion _currentRotation { get; set; }
 
-        // Cached material (tránh clone Material[] array mỗi lần UpdateVisualColor)
         private Material _bodyMaterial;
 
-        // ── Cutting state ─────────────────────────────────────────────────────────
         private CuttingCounter _currentCuttingCounter;
         private bool           _isCutting;
 
-        // Footstep sound state
         private float _footstepTimer = 0f;
         private const float FOOTSTEP_INTERVAL = 0.35f;
 
-        // -------------------------------------------------------
         #region Networked Properties
 
-        // Sync animation sang remote clients
         [Networked] public Vector2 NetworkMoveInput { get; set; }
 
-        // Sync hướng nhìn cuối sang remote clients (dùng cho rotation)
         [Networked] public Vector3 NetworkTargetForward { get; set; }
 
         [Networked]
@@ -67,24 +57,22 @@ namespace _Game.Scripts.Gameplay
         [Networked] public NetworkBool NetworkIsChopping      { get; set; }
         [Networked] public NetworkBool NetworkIsHoldingObject { get; set; }
 
-        // Toggle để trigger OnChangedRender — remote client sẽ thấy animation IsPicked
         [Networked]
         [OnChangedRender(nameof(OnPickedChanged))]
         public NetworkBool NetworkIsPicked { get; set; }
 
         #endregion
 
-        // -------------------------------------------------------
         #region Color System
 
         private static readonly Color[] s_PlayerColors = new Color[]
         {
-            Color.red,
-            Color.blue,
-            Color.green,
-            Color.yellow,
-            new Color(0.5f, 0f, 0.5f), // Purple
-            new Color(1f, 0.5f, 0f),   // Orange
+            new Color(204f/255f, 50f/255f, 22f/255f),
+            new Color(38f/255f, 147f/255f, 204f/255f),
+            new Color(34f/255f, 196f/255f, 66f/255f),
+            new Color(215f/255f, 209f/255f, 49f/255f),
+            new Color(0.5f, 0f, 0.5f), 
+            new Color(1f, 0.5f, 0f),   
         };
 
         public static Color GetColorByEnum(EPlayerColor color)
@@ -98,7 +86,6 @@ namespace _Game.Scripts.Gameplay
         {
             if (_bodyMaterial == null) return;
             _bodyMaterial.color = GetColorByEnum(color);
-            // Không cần set lại bodyRend.materials → tránh clone array + GC pressure
         }
 
         private void OnColorChanged()
@@ -108,7 +95,6 @@ namespace _Game.Scripts.Gameplay
 
         private void OnPickedChanged()
         {
-            // Chạy trên tất cả client (kể cả remote) nhờ OnChangedRender
             animator.SetTrigger(s_IsPicked);
         }
 
@@ -121,8 +107,6 @@ namespace _Game.Scripts.Gameplay
         {
             Runner.SetIsSimulated(Object, true);
 
-            // Snap xuống sàn ngay khi spawn
-            // Chỉ thực hiện trên local player — remote player dùng vị trí sync từ network
             if ((HasInputAuthority || HasStateAuthority) && _rb != null)
             {
                 int groundMask = ~(1 << gameObject.layer);
@@ -134,13 +118,11 @@ namespace _Game.Scripts.Gameplay
                 }
             }
 
-            // Khởi tạo canonical rotation từ transform (đã được set ở spawn point)
             _currentRotation = transform.rotation;
 
             NetworkTargetForward = transform.forward;
             _lastInteractDir     = transform.forward;
 
-            // Cache material instance (đã được clone sẵn bởi Unity lần đầu dùng bodyRend.materials)
             if (bodyRend != null && bodyRend.materials.Length > 1)
                 _bodyMaterial = bodyRend.materials[1];
 
@@ -149,13 +131,11 @@ namespace _Game.Scripts.Gameplay
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
-            // Unsubscribe event để tránh NullReferenceException khi despawn trong lúc đang cắt
             StopCutting();
         }
 
         public override void FixedUpdateNetwork()
         {
-            // Remote spectators (không có input, không có state authority) → bỏ qua
             if (!HasStateAuthority && !HasInputAuthority) return;
 
             if (GameManager.Instance != null && GameManager.Instance.CurrentGameState != EGameState.Play)
@@ -174,12 +154,10 @@ namespace _Game.Scripts.Gameplay
 
             if (GetInput(out NetworkInputData inputData))
             {
-                // ClampMagnitude để tránh client gửi giá trị > 1 (cheating/diagonal speed boost)
                 _moveInput = Vector2.ClampMagnitude(
                     new Vector2(inputData.MoveX, inputData.MoveY), 1f
                 );
 
-                // CHỈ Host sync NetworkMoveInput → dùng cho remote client render animation
                 if (HasStateAuthority)
                     NetworkMoveInput = _moveInput;
 
@@ -188,12 +166,7 @@ namespace _Game.Scripts.Gameplay
                 if (_moveInput != Vector2.zero && _isCutting)
                     StopCutting();
             }
-            // Khi GetInput() trả false (resimulation tick chưa xác nhận),
-            // KHÔNG reset _moveInput → Player giữ nguyên hướng di chuyển cuối cùng,
-            // tránh micro-stop gây giật cục.
 
-            // Di chuyển: cả Host (HasStateAuthority) và Client (HasInputAuthority) đều chạy
-            // → Client có client-side prediction, Host có authoritative simulation
             Move();
 
             if (_isCutting && _currentCuttingCounter != null)
@@ -206,8 +179,6 @@ namespace _Game.Scripts.Gameplay
             UpdateAnimation();
         }
 
-        // Render() KHÔNG override ở đây.
-        // NetworkRigidbody3D tự động lo việc nội suy mượt mà cho Rigidbody.
 
         #endregion
 
@@ -218,7 +189,6 @@ namespace _Game.Scripts.Gameplay
         {
             if (_rb == null) return;
 
-            // Đảm bảo client có quyền điều khiển thì vật lý phải chạy (không bị Kinematic đè)
             if (HasInputAuthority && _rb.isKinematic)
             {
                 _rb.isKinematic = false;
@@ -228,9 +198,8 @@ namespace _Game.Scripts.Gameplay
 
             if (moveDir != Vector3.zero)
             {
-                if (_rb.IsSleeping()) _rb.WakeUp(); // Đánh thức Rigidbody để tránh Server bị trễ nhịp do Physics ngủ đông
+                if (_rb.IsSleeping()) _rb.WakeUp(); 
 
-                // Set velocity ngang, GIỮ NGUYÊN velocity.y để gravity hoạt động bình thường
                 _rb.velocity = new Vector3(
                     moveDir.x * moveSpeed,
                     _rb.velocity.y,
@@ -242,12 +211,8 @@ namespace _Game.Scripts.Gameplay
                 if (HasStateAuthority)
                     NetworkTargetForward = _lastInteractDir;
 
-                // Dùng _currentRotation làm source (KHÔNG dùng _rb.rotation — có thể bị interpolated)
-                // Kỹ thuật này học từ PlayerLocal.cs tránh feedback loop giật với Rigidbody interpolation
                 Quaternion targetRot = Quaternion.LookRotation(_lastInteractDir);
 
-                // Khôi phục Slerp mượt mà. Vì _currentRotation nay đã là [Networked],
-                // nó sẽ được Rollback và Resimulate cực kỳ chính xác! Không còn bị lỗi giật xoay người nhanh!
                 _currentRotation = Quaternion.Slerp(
                     _currentRotation,
                     targetRot,
@@ -255,7 +220,6 @@ namespace _Game.Scripts.Gameplay
                 );
                 _rb.MoveRotation(_currentRotation);
 
-                // Trigger footstep sound (only local player should trigger sound)
                 if (HasInputAuthority || (Runner.IsServer && !Object.HasInputAuthority))
                 {
                     _footstepTimer += Runner.DeltaTime;
@@ -273,7 +237,6 @@ namespace _Game.Scripts.Gameplay
             }
             else
             {
-                // Đứng yên: triệt tiêu velocity ngang, giữ velocity.y (gravity tiếp tục)
                 _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);
                 _footstepTimer = 0f;
             }
@@ -281,8 +244,6 @@ namespace _Game.Scripts.Gameplay
 
         private void UpdateAnimation()
         {
-            // Local player dùng _moveInput trực tiếp (đã cập nhật ở FixedUpdateNetwork)
-            // Remote player dùng NetworkMoveInput được sync từ Host
             Vector2 inputToUse = (HasStateAuthority || HasInputAuthority)
                 ? _moveInput
                 : NetworkMoveInput;
@@ -348,7 +309,6 @@ namespace _Game.Scripts.Gameplay
                         {
                             kitchenObject.SetKitchenObjectParent(this);
                             NetworkIsHoldingObject = true;
-                            // Toggle NetworkIsPicked → OnPickedChanged sẽ fire trên tất cả clients
                             NetworkIsPicked = !NetworkIsPicked;
                         }
                         return;
@@ -361,7 +321,6 @@ namespace _Game.Scripts.Gameplay
 
         private void HandlePickupAnimation(BaseCounter baseCounter)
         {
-            // Toggle NetworkIsPicked để trigger OnChangedRender trên tất cả clients
             bool shouldTrigger = (!HasKitchenObject() && baseCounter is ContainerCounter) ||
                                  (HasKitchenObject()  && baseCounter is ClearCounter);
             if (shouldTrigger)
@@ -377,7 +336,6 @@ namespace _Game.Scripts.Gameplay
 
         #endregion
 
-        // -------------------------------------------------------
         #region Cutting
 
         private void StartCutting(CuttingCounter counter)

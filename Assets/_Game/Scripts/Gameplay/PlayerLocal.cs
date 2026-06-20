@@ -6,14 +6,9 @@ using GameCore;
 
 namespace _Game.Scripts.Gameplay
 {
-    /// <summary>
-    /// Player dành riêng cho Single Mode — thuần MonoBehaviour, ZERO Fusion overhead.
-    /// Đọc input trực tiếp từ Old Input System, di chuyển qua Rigidbody.velocity,
-    /// xử lý tất cả gameplay logic cục bộ mà không cần Runner hay NetworkObject.
-    /// </summary>
+
     public class PlayerLocal : MonoBehaviour, IPlayer
     {
-        // ── Animator Hash Cache (tránh string lookup mỗi frame) ──
         private static readonly int s_MovingValue = Animator.StringToHash("MovingValue");
         private static readonly int s_IsChopping  = Animator.StringToHash("IsChopping");
         private static readonly int s_HasObject   = Animator.StringToHash("HasObject");
@@ -33,39 +28,31 @@ namespace _Game.Scripts.Gameplay
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private Renderer bodyRend;
 
-        // ─── Local State ────────────────────────────────────────
         private Vector2 _moveInput;
         private Vector3 _lastInteractDir;
         private BaseCounter _selectedCounter;
         private KitchenObject _kitchenObject;
 
-        // Rotation: giữ canonical value để tránh đọc transform.rotation bị
-        // internal interpolation gây feedback loop giật
+
         private Quaternion _currentRotation;
 
-        // Input buttons (tích lũy ở Update, tiêu thụ ở FixedUpdate)
         private bool _interactPressed;
         private bool _alternatePressed;
 
-        // Cutting state
         private CuttingCounter _currentCuttingCounter;
         private bool _isCutting;
 
-        // Footstep sound state
         private float _footstepTimer = 0f;
         private const float FOOTSTEP_INTERVAL = 0.35f;
 
-        // ─── Unity Lifecycle ─────────────────────────────────────
-
         private void Start()
         {
-            // Set default green color for Single Mode
             if (bodyRend != null)
             {
                 Material[] mats = bodyRend.materials;
                 if (mats.Length > 1 && mats[1] != null)
                 {
-                    mats[1].color = Color.green;
+                    mats[1].color = new Color(34f/255f, 196f/255f, 66f/255f);
                     bodyRend.materials = mats;
                 }
             }
@@ -73,7 +60,6 @@ namespace _Game.Scripts.Gameplay
             _currentRotation = transform.rotation;
             _lastInteractDir = transform.forward;
 
-            // Snap xuống sàn ngay khi spawn để tránh rơi vô tận
             SnapToGround();
         }
 
@@ -88,14 +74,12 @@ namespace _Game.Scripts.Gameplay
                 return;
             }
 
-            // Đọc movement input (normalized để tránh diagonal speed boost)
             float x = Input.GetAxisRaw("Horizontal");
             float z = Input.GetAxisRaw("Vertical");
             float mag = Mathf.Sqrt(x * x + z * z);
             if (mag > 0f) { x /= mag; z /= mag; }
             _moveInput = new Vector2(x, z);
 
-            // Tích lũy one-frame button presses (GetKeyDown chỉ dùng được trong Update)
             if (Input.GetKeyDown(KeyCode.Space)) _interactPressed = true;
             if (Input.GetKeyDown(KeyCode.R))     _alternatePressed = true;
 
@@ -121,20 +105,16 @@ namespace _Game.Scripts.Gameplay
             Move();
             HandleInteractions();
 
-            // Cutting tick
             if (_isCutting && _currentCuttingCounter != null)
                 _currentCuttingCounter.InteractAlternate(this);
 
-            // Dừng cắt nếu di chuyển
             if (_moveInput != Vector2.zero && _isCutting)
                 StopCutting();
 
-            // Reset one-frame buttons sau khi đã xử lý
             _interactPressed  = false;
             _alternatePressed = false;
         }
 
-        // ─── Movement ────────────────────────────────────────────
 
         private void Move()
         {
@@ -144,7 +124,6 @@ namespace _Game.Scripts.Gameplay
 
             if (moveDir != Vector3.zero)
             {
-                // Set velocity ngang, giữ velocity.y để gravity hoạt động
                 _rb.velocity = new Vector3(
                     moveDir.x * moveSpeed,
                     _rb.velocity.y,
@@ -153,8 +132,6 @@ namespace _Game.Scripts.Gameplay
 
                 _lastInteractDir = moveDir.normalized;
 
-                // Xoay mượt — dùng _currentRotation (canonical) làm source,
-                // KHÔNG dùng transform.rotation để tránh feedback loop với Rigidbody.Interpolate
                 Quaternion targetRot = Quaternion.LookRotation(_lastInteractDir);
                 _currentRotation = Quaternion.Slerp(
                     _currentRotation,
@@ -163,7 +140,6 @@ namespace _Game.Scripts.Gameplay
                 );
                 transform.rotation = _currentRotation;
 
-                // Trigger footstep sound
                 _footstepTimer += Time.fixedDeltaTime;
                 if (_footstepTimer >= FOOTSTEP_INTERVAL)
                 {
@@ -178,7 +154,6 @@ namespace _Game.Scripts.Gameplay
             }
             else
             {
-                // Đứng yên: triệt tiêu velocity ngang, giữ velocity.y
                 _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);
                 _footstepTimer = 0f;
             }
@@ -227,7 +202,6 @@ namespace _Game.Scripts.Gameplay
                     if (_selectedCounter != baseCounter)
                         SetSelectedCounter(baseCounter);
 
-                    // Single Mode: không cần HasStateAuthority — local player luôn có authority
                     if (_interactPressed)
                     {
                         if ((!HasKitchenObject() && _selectedCounter is ContainerCounter) ||

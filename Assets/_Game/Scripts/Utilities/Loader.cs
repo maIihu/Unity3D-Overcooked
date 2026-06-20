@@ -15,6 +15,19 @@ namespace GameCore
         public static Scene TargetScene { get; private set; }
         public static Action OnComplete { get; private set; }
 
+        public static int GetSceneIndex(string sceneName)
+        {
+            for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
+            {
+                string path = SceneUtility.GetScenePathByBuildIndex(i);
+                if (path.Contains(sceneName))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         public static async void Load(Scene targetScene, Action onComplete = null)
         {
             Loader.TargetScene = targetScene;
@@ -33,7 +46,7 @@ namespace GameCore
                     // For host to switch scene, use Runner
                     if (Network.FusionNetworkRunner.Instance.Runner.IsServer)
                     {
-                        int sceneIndex = UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath($"Assets/_Game/Scenes/{targetScene}.unity");
+                        int sceneIndex = GetSceneIndex(targetScene.ToString());
                         await Network.FusionNetworkRunner.Instance.Runner.LoadScene(Fusion.SceneRef.FromIndex(sceneIndex));
                         OnComplete?.Invoke();
                         OnComplete = null;

@@ -39,6 +39,7 @@ namespace _Game.Scripts.UI
         private void OnMainMenuClicked()
         {
             MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnExitGame));
+            MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnResetPlayMode));
             Hide();
             Loader.Load(Loader.Scene.MainMenuScene, () => UIManager.Instance.ShowScreen<MainMenuScreen>());
         }

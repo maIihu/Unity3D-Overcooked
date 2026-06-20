@@ -51,10 +51,8 @@ namespace _Game.Scripts.UI
         {
             base.Active();
             
-            // Đăng ký nhận sự kiện cập nhật danh sách phòng
             FusionNetworkRunner.OnSessionListChanged += RefreshSessionList;
 
-            // Kết nối vào sảnh để lấy danh sách phòng
             if (FusionNetworkRunner.Instance != null)
             {
                 Debug.Log("[MultiplayerLobbyScreen] Connecting to lobby...");
@@ -100,6 +98,14 @@ namespace _Game.Scripts.UI
                     HideLoadingOverlay();
                     Debug.LogWarning("[MultiplayerLobbyScreen] Failed to create room.");
                 }
+                else
+                {
+                    HideLoadingOverlay();
+                    if (uiManager != null)
+                    {
+                        uiManager.ShowScreen<RoomWaitingScreen>();
+                    }
+                }
             }
         }
 
@@ -114,6 +120,14 @@ namespace _Game.Scripts.UI
                 {
                     HideLoadingOverlay();
                     Debug.LogWarning($"[MultiplayerLobbyScreen] Failed to join room {roomName}.");
+                }
+                else
+                {
+                    HideLoadingOverlay();
+                    if (uiManager != null)
+                    {
+                        uiManager.ShowScreen<RoomWaitingScreen>();
+                    }
                 }
             }
         }

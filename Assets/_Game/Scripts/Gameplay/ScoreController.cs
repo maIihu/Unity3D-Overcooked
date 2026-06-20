@@ -19,7 +19,6 @@ namespace GameCore
             MessageManager.Instance.AddSubscriber(ProjectMessageType.OnRecipeSuccess, this);
             MessageManager.Instance.AddSubscriber(ProjectMessageType.OnRejectRecipe, this);
 
-            // Trigger visual update for clients joining mid-game
             OnScoreChangedCallback();
         }
 
@@ -40,7 +39,6 @@ namespace GameCore
                     CurrentScore += scoreAdded;
                     break;
                 case ProjectMessageType.OnRejectRecipe:
-                    // No penalty for wrong/late delivery as requested
                     break;
             }
         }

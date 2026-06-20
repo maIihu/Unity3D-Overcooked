@@ -20,19 +20,15 @@ namespace GameCore.Network
         public NetworkRunner Runner => _runner;
         private static FusionNetworkRunner _instance;
         public static FusionNetworkRunner Instance => _instance;
-
-        // Cache runner GameObject để tránh FindObjectsOfType tốn kém
-        private GameObject      _runnerGo;
+        private GameObject _runnerGo;
         private NetworkInputHandler _inputHandler;
 
-        // Guard chống race condition khi bấm Start/Join nhiều lần liên tiếp
         private bool _isStarting;
         private bool _userInitiatedLeave = false;
 
-        // ── Scene name constants (tránh magic string, dễ đổi sau) ────────────────
-        private const string SCENE_GAME      = "GameScene";
+        private const string SCENE_GAME = "GameScene";
         private const string SCENE_MAIN_MENU = "MainMenuScene";
-        private const string SCENE_LOBBY     = "LobbyScene";
+        private const string SCENE_LOBBY = "LobbyScene";
 
         private void Awake()
         {
@@ -45,8 +41,6 @@ namespace GameCore.Network
             DontDestroyOnLoad(gameObject);
         }
 
-        // ── Session Management ───────────────────────────────────────────────────
-
         public async Task<bool> StartGameSession(GameMode mode, string sessionName)
         {
             while (_isStarting)
@@ -58,16 +52,20 @@ namespace GameCore.Network
             _userInitiatedLeave = false;
             try
             {
-                await ShutdownExistingRunner();
+                // Don't shutdown if we are reusing the Lobby Runner, to ensure we stay on the same Region
+                if (_runner == null || _runnerGo == null || mode == GameMode.Single)
+                {
+                    await ShutdownExistingRunner();
 
-                _runnerGo = new GameObject("FusionNetworkRunner_Instance");
-                DontDestroyOnLoad(_runnerGo);
+                    _runnerGo = new GameObject("FusionNetworkRunner_Instance");
+                    DontDestroyOnLoad(_runnerGo);
 
-                _runner = _runnerGo.AddComponent<NetworkRunner>();
-                var physics = _runnerGo.AddComponent<Fusion.Addons.Physics.RunnerSimulatePhysics3D>();
-                physics.ClientPhysicsSimulation = Fusion.Addons.Physics.ClientPhysicsSimulation.SimulateForward;
-                _runner.ProvideInput = true;
-                _runner.AddCallbacks(this);
+                    _runner = _runnerGo.AddComponent<NetworkRunner>();
+                    var physics = _runnerGo.AddComponent<Fusion.Addons.Physics.RunnerSimulatePhysics3D>();
+                    physics.ClientPhysicsSimulation = Fusion.Addons.Physics.ClientPhysicsSimulation.SimulateForward;
+                    _runner.ProvideInput = true;
+                    _runner.AddCallbacks(this);
+                }
 
                 _inputHandler = _runnerGo.GetComponent<NetworkInputHandler>();
                 if (_inputHandler == null)
@@ -77,20 +75,29 @@ namespace GameCore.Network
                 }
                 _runner.AddCallbacks(_inputHandler);
 
-                // Singleplayer → GameScene, Multiplayer → MainMenuScene
                 int sceneIndex = (mode == GameMode.Single)
-                    ? UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath("Assets/_Game/Scenes/GameScene.unity")
-                    : UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath("Assets/_Game/Scenes/MainMenuScene.unity");
+                    ? GameCore.Loader.GetSceneIndex("GameScene")
+                    : GameCore.Loader.GetSceneIndex("MainMenuScene");
 
-                var sceneManager = _runnerGo.AddComponent<NetworkSceneManagerDefault>();
-
-                var result = await _runner.StartGame(new StartGameArgs()
+                var sceneManager = _runnerGo.GetComponent<NetworkSceneManagerDefault>();
+                if (sceneManager == null)
                 {
-                    GameMode     = mode,
+                    sceneManager = _runnerGo.AddComponent<NetworkSceneManagerDefault>();
+                }
+
+                var args = new StartGameArgs()
+                {
+                    GameMode = mode,
                     SessionName  = sessionName,
-                    Scene        = SceneRef.FromIndex(sceneIndex),
                     SceneManager = sceneManager,
-                });
+                };
+
+                if (mode == GameMode.Host || mode == GameMode.Server || mode == GameMode.Single)
+                {
+                    args.Scene = SceneRef.FromIndex(sceneIndex);
+                }
+
+                var result = await _runner.StartGame(args);
 
                 if (result.Ok)
                 {
@@ -163,8 +170,6 @@ namespace GameCore.Network
             }
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────────
-
         private async Task ShutdownExistingRunner()
         {
             if (_runner == null) return;
@@ -172,17 +177,16 @@ namespace GameCore.Network
             Debug.Log("[FusionNetworkRunner] Shutting down active runner.");
             var oldRunner = _runner;
             _runner = null;
+            GameCore.Network.LobbyPlayerRegistry.Clear();
             await oldRunner.Shutdown();
 
             if (_runnerGo != null)
             {
-                Destroy(_runnerGo);   // Dùng Destroy thay DestroyImmediate (an toàn hơn trong runtime)
+                Destroy(_runnerGo);  
                 _runnerGo = null;
             }
             await Task.Delay(300);
         }
-
-        // ── Network Callbacks ────────────────────────────────────────────────────
 
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
@@ -229,27 +233,19 @@ namespace GameCore.Network
             StartCoroutine(GameSceneLoadedCoroutine(runner));
         }
 
-        /// <summary>
-        /// Flow: Load level (counters/env) → chờ vài nhịp → spawn Player → chờ physics → complete loading.
-        /// </summary>
         private IEnumerator GameSceneLoadedCoroutine(NetworkRunner runner)
         {
-            // 1. Gửi OnLoadLevel — counters + environment được spawn
             MessageManager.Instance.SendMessage(new Message(ProjectMessageType.OnLoadLevel));
 
-            // 2. Chờ vài nhịp để counters/environment spawn xong
             yield return new WaitForSeconds(1f);
 
-            // 3. Spawn players SAU KHI level đã sẵn sàng
             if (runner != null && runner.IsServer)
             {
                 SpawnGameplayPlayersFromLobby(runner);
             }
 
-            // 4. Chờ physics settle — tránh player bị nhảy
             yield return new WaitForSeconds(0.5f);
 
-            // 5. Complete loading screen rồi show GameplayScreen
             var loadingScreen = UIManager.Instance?.GetScreen<LoadingScreen>();
             if (loadingScreen != null && loadingScreen.gameObject.activeSelf)
             {
@@ -260,7 +256,6 @@ namespace GameCore.Network
             }
             else
             {
-                // Không có loading screen (ví dụ: multiplayer) → show trực tiếp
                 UIManager.Instance?.ShowScreen<GameplayScreen>();
             }
         }
@@ -283,18 +278,17 @@ namespace GameCore.Network
 
         private void SpawnGameplayPlayersFromLobby(NetworkRunner runner)
         {
-            // Dùng LobbyPlayerRegistry thay vì FindObjectsOfType (O(1) vs O(n))
-            var lobbyPlayers = LobbyPlayerRegistry.All;
-
-            // Gom màu sắc trước khi despawn LobbyPlayer
+            var lobbyPlayers = GameCore.Network.LobbyPlayerRegistry.All;
             var playerColors = new Dictionary<PlayerRef, EPlayerColor>();
-            foreach (var lp in lobbyPlayers)
+            
+            foreach (var p in lobbyPlayers)
             {
-                if (lp.Object != null && lp.Object.IsValid)
-                    playerColors[lp.Object.InputAuthority] = lp.PlayerColor;
+                if (p != null)
+                {
+                    playerColors[p.PlayerRef] = p.Color;
+                }
             }
 
-            // Spawn gameplay player cho từng người chơi
             foreach (var playerRef in runner.ActivePlayers)
             {
                 Vector3 spawnPosition = new Vector3((playerRef.PlayerId % 4) * 2f, 1, 0);
@@ -323,26 +317,8 @@ namespace GameCore.Network
                 runner.SetPlayerObject(playerRef, playerObject);
                 Debug.Log($"[FusionNetworkRunner] Spawned gameplay player {playerRef.PlayerId} with color {selectedColor}");
             }
-
-            // Dọn dẹp LobbyPlayer sau một khoảng delay nhỏ (500ms) để tránh lỗi 
-            // "spawned and despawned in the same tick" trên Client.
-            var toRemove = new System.Collections.Generic.List<LobbyPlayer>(lobbyPlayers);
-            _ = DespawnLobbyPlayersDelayed(runner, toRemove);
         }
 
-        private async System.Threading.Tasks.Task DespawnLobbyPlayersDelayed(NetworkRunner runner, System.Collections.Generic.List<LobbyPlayer> toRemove)
-        {
-            await System.Threading.Tasks.Task.Delay(500);
-            if (runner == null || !runner.IsRunning) return;
-            
-            foreach (var lp in toRemove)
-            {
-                if (lp != null && lp.Object != null && lp.Object.IsValid)
-                    runner.Despawn(lp.Object);
-            }
-        }
-
-        // --- Empty INetworkRunnerCallbacks implementation ---
         public void OnInput(NetworkRunner runner, NetworkInput input) { }
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
         

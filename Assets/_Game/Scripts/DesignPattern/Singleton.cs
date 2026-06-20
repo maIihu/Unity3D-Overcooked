@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DesignPattern
 {
@@ -58,6 +58,7 @@ namespace DesignPattern
                 {
                     //there is already an instance:
                     Destroy(gameObject);
+                    return;
                 }
             }
             _instance = instance;

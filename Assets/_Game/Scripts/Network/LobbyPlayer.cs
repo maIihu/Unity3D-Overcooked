@@ -20,18 +20,19 @@ namespace GameCore.Network
 
         public override void Spawned()
         {
-            // Đăng ký vào registry để FusionNetworkRunner có thể truy cập mà không cần FindObjectsOfType
-            LobbyPlayerRegistry.Register(this);
-
             if (Object.HasInputAuthority)
             {
                 Debug.Log($"[LobbyPlayer] Spawned for local player {Object.InputAuthority}");
             }
         }
 
+        public override void Render()
+        {
+            LobbyPlayerRegistry.UpdatePlayer(Object.InputAuthority, PlayerColor);
+        }
+
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
-            LobbyPlayerRegistry.Unregister(this);
         }
 
         public void ToggleReady()

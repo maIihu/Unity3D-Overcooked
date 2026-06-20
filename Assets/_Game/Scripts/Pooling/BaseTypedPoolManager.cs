@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace Pooling
 {
-    /// <summary>
-    /// Base class for typed pool managers (e.g. KitchenObjectPool, CounterPool).
-    /// Handles the core pooling logic.
-    /// </summary>
-    /// <typeparam name="T">The base component type to pool.</typeparam>
     public abstract class BaseTypedPoolManager<T> : MonoBehaviour 
         where T : Component 
     {
@@ -22,10 +17,7 @@ namespace Pooling
             
             Prewarm();
         }
-
-        /// <summary>
-        /// Implement this to prewarm pools based on your Inspector configurations.
-        /// </summary>
+  
         protected abstract void Prewarm();
 
         protected ObjectPooler<T> GetOrCreatePool(T prefab, int defaultCapacity = 10, int maxSize = 50)

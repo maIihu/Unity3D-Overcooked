@@ -13,7 +13,6 @@ namespace Kitchen
         [SerializeField] private Rigidbody rb;
         [SerializeField] private Collider col;
 
-        // Cached components — tránh GetComponent mỗi lần SetKitchenObjectParentLocal
         private NetworkTransform _cachedNetworkTransform;
         private MonoBehaviour _cachedNetworkRigidbody;
 
@@ -89,11 +88,9 @@ namespace Kitchen
             }
             else
             {
-                // If it is currently held by a non-networked parent (like PlayerLocal), DO NOT drop it.
-                // Otherwise, a networked player dropped it, so we apply the drop locally.
+
                 if (KitchenObjectParent != null && KitchenObjectParent.GetNetworkObject() == null)
                 {
-                    // Retain the local parent (PlayerLocal)
                 }
                 else
                 {

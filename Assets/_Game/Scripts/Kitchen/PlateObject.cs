@@ -32,7 +32,6 @@ namespace Kitchen
             if (dirtyVisual != null) dirtyVisual.SetActive(_isOffline ? _offlineIsDirtyState : (bool)IsDirtyState);
         }
 
-        // ── Offline local state ──
         private bool _offlineIsDirtyState;
 
         private void Start()

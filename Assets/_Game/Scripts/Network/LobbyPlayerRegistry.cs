@@ -2,23 +2,34 @@ using System.Collections.Generic;
 
 namespace GameCore.Network
 {
-    /// <summary>
-    /// Static registry cho LobbyPlayer — tránh dùng FindObjectsOfType mỗi lần cần danh sách.
-    /// LobbyPlayer tự Register/Unregister trong Spawned/Despawned.
-    /// </summary>
     public static class LobbyPlayerRegistry
     {
-        private static readonly List<LobbyPlayer> _all = new();
-
-        /// <summary>Danh sách tất cả LobbyPlayer đang active trong scene.</summary>
-        public static IReadOnlyList<LobbyPlayer> All => _all;
-
-        public static void Register(LobbyPlayer lp)
+        public class PlayerData
         {
-            if (!_all.Contains(lp))
-                _all.Add(lp);
+            public Fusion.PlayerRef PlayerRef;
+            public EPlayerColor Color;
         }
 
-        public static void Unregister(LobbyPlayer lp) => _all.Remove(lp);
+        private static readonly List<PlayerData> _all = new();
+
+        public static IReadOnlyList<PlayerData> All => _all;
+
+        public static void UpdatePlayer(Fusion.PlayerRef playerRef, EPlayerColor color)
+        {
+            var data = _all.Find(x => x.PlayerRef == playerRef);
+            if (data == null)
+            {
+                data = new PlayerData { PlayerRef = playerRef };
+                _all.Add(data);
+            }
+            data.Color = color;
+        }
+
+        public static void RemovePlayer(Fusion.PlayerRef playerRef)
+        {
+            _all.RemoveAll(x => x.PlayerRef == playerRef);
+        }
+
+        public static void Clear() => _all.Clear();
     }
 }

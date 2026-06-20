@@ -29,7 +29,7 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
 
     public void InitUI()
     {
-        LoadUIFromResources();
+        //LoadUIFromResources();
         InitializeUI();
         ShowScreen<_Game.Scripts.UI.MainMenuScreen>();
         CleanDuplicateEventSystems();
@@ -37,11 +37,37 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
 
     public void LoadUIFromResources()
     {
-        if (listScreen == null) listScreen = new List<ScreenUI>();
-        else listScreen.Clear();
+        if (listScreen != null)
+        {
+            foreach (var screen in listScreen)
+            {
+                if (screen != null && screen.gameObject != null)
+                {
+                    Destroy(screen.gameObject);
+                }
+            }
+            listScreen.Clear();
+        }
+        else
+        {
+            listScreen = new List<ScreenUI>();
+        }
 
-        if (listPopup == null) listPopup = new List<PopupUI>();
-        else listPopup.Clear();
+        if (listPopup != null)
+        {
+            foreach (var popup in listPopup)
+            {
+                if (popup != null && popup.gameObject != null)
+                {
+                    Destroy(popup.gameObject);
+                }
+            }
+            listPopup.Clear();
+        }
+        else
+        {
+            listPopup = new List<PopupUI>();
+        }
 
         if (canvas == null)
         {
@@ -186,7 +212,6 @@ public class UIManager : Singleton<UIManager>, IMessageHandle
             return popup as T;
         }
 
-        // Dynamically instantiate PopupDisconnect if not present in prefabs resources
         if (typeof(T) == typeof(_Game.Scripts.UI.PopupDisconnect))
         {
             GameObject go = new GameObject("PopupDisconnect", typeof(RectTransform));

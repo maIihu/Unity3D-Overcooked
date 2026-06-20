@@ -8,7 +8,6 @@ namespace _Game.Scripts.Gameplay
 {
     public class NetworkInputHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
-        // Tích lũy GetKeyDown ở Update level (GetKeyDown chỉ reliable trong Update, không phải FixedUpdate)
         private byte _pendingButtons;
         private float _lastX;
         private float _lastY;
@@ -29,22 +28,18 @@ namespace _Game.Scripts.Gameplay
             float x = _lastX;
             float y = _lastY;
 
-            // Normalize để tránh diagonal speed boost (8-direction → cùng tốc độ)
             float mag = Mathf.Sqrt(x * x + y * y);
             if (mag > 0f) { x /= mag; y /= mag; }
 
-            // RoundToInt: -1, 0, hoặc 1 → phù hợp sbyte, không mất thông tin với digital input
             data.MoveX = (sbyte)Mathf.RoundToInt(x);
             data.MoveY = (sbyte)Mathf.RoundToInt(y);
             data.Buttons = _pendingButtons;
 
-            // Reset sau khi đã gửi để tránh fire nhiều lần cùng 1 input
             _pendingButtons = 0;
 
             input.Set(data);
         }
 
-        // --- Empty callbacks ---
         public void OnPlayerJoined(NetworkRunner r, PlayerRef p) { }
         public void OnPlayerLeft(NetworkRunner r, PlayerRef p) { }
         public void OnInputMissing(NetworkRunner r, PlayerRef p, NetworkInput i) { }
